@@ -1,17 +1,10 @@
-# SPDX-FileCopyrightText: © 2020-2021 tecosaur <tec@tecosaur.com>
-# SPDX-License-Identifier: MIT
 #+title: Doom Emacs Configuration
 #+subtitle: The Methods, Management, and Menagerie@@latex:\\@@ of Madness@@latex: --- in meticulous detail@@
 #+author: tecosaur
-#+date: @@html:<!--@@{{{git-rev}}}@@html:-->@@@@latex:\\\Large\bfseries@@ {{{modification-time(%Y-%m-%d, t)}}} @@latex:\\\normalsize\mdseries@@{{{modification-time(%H:%M, t)}}} @@latex:\acr{\lowercase{@@{{{timezone}}}@@latex:}}\iffalse@@, {{{git-rev}}}@@latex:\fi@@
-#+macro: timezone (eval (substring (shell-command-to-string "date +%Z") 0 -1))
-#+macro: git-rev (eval (format "@@html:<a href=\"https://github.com/tecosaur/emacs-config/commit/%1$s\" style=\"text-decoration: none\"><code style=\"padding: 0; color: var(--text-light); font-size: inherit; opacity: 0.7\">%1$s</code></a>@@@@latex:\\href{https://github.com/tecosaur/emacs-config/commit/%1$s}{\\normalsize\\texttt{%1$s}}@@" (substring (shell-command-to-string "git rev-parse --short HEAD") 0 -1)))
-#+html_head: <link rel='shortcut icon' type='image/png' href='https://www.gnu.org/software/emacs/favicon.png'>
 #+property: header-args:emacs-lisp :tangle yes :comments link
 #+property: header-args:elisp :exports code
 #+property: header-args:shell :tangle "setup.sh"
 #+property: header-args :tangle no :results silent :eval no-export
-#+embed: LICENCE :description MIT licence file
 #+options: coverpage:yes
 #+startup: fold
 
@@ -326,13 +319,27 @@ for more info).
 #+begin_src shell :exports none :comments no :tangle-mode (identity #o755)
 #!/usr/bin/env bash
 #+end_src
+** CUSTOM:Auto-compile
+#+begin_src emacs-lisp :tangle packages.el
+(package! auto-compile)
+#+end_src
+#+begin_src emacs-lisp :tangle yes
+(setq load-prefer-newer t)
+(package-initialize)
+(require 'auto-compile)
+(auto-compile-on-load-mode)
+(auto-compile-on-save-mode)
+
+(setq auto-compile-display-buffer nil)
+(setq auto-compile-mode-line-counter t)
+#+end_src
 
 ** Personal Information
 
 It's useful to have some basic personal information
 #+begin_src emacs-lisp
-(setq user-full-name "TEC"
-      user-mail-address "tec@tecosaur.com")
+(setq user-full-name "Josua Palmstedt"
+      user-mail-address "palmstedt@posteo.de")
 #+end_src
 Apparently this is used by ~GPG~, and all sorts of other things.
 
@@ -341,11 +348,10 @@ Speaking of ~GPG~, I want to use =~/.authinfo.gpg= instead of the default in
 make a difference, and I don't want to accidentally purge this file (I have done
 src_shell{rm -rf~/.emac.d~ before}. I also want to cache as much as possible, as
 my home machine is pretty safe, and my laptop is shutdown a lot.
-#+begin_src emacs-lisp
-(setq auth-sources '("~/.authinfo.gpg")
-      auth-source-cache-expiry nil) ; default is 7200 (2h)
-#+end_src
-
+# #+begin_src emacs-lisp
+# (setq auth-sources '("~/.authinfo.gpg")
+#       auth-source-cache-expiry nil) ; default is 7200 (2h)
+# #+end_src
 ** Better defaults
 *** Simple settings
 
@@ -367,10 +373,16 @@ the following:
       ;; scroll-preserve-screen-position 'always     ; Don't have `point' jump around
       scroll-margin 2)                            ; It's nice to maintain a little margin
 
+(setq-default inhibit-startup-screen t)
+(setq inhibit-splash-screen t)
+(setq inhibit-startup-message t)
+(setq initial-scratch-message "")
+(setq initial-major-mode 'fundamental-mode)
+
 (display-time-mode 1)                             ; Enable time in the mode-line
 
-(unless (string-match-p "^Power N/A" (battery))   ; On laptops...
-  (display-battery-mode 1))                       ; it's nice to know how much power you have
+;;(unless (string-match-p "Power N/A" (battery))   ; On laptops...
+(display-battery-mode 1)                       ; it's nice to know how much power you have
 
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 #+end_src
@@ -532,8 +544,8 @@ I reckon enabling half the modules Doom provides should do it.
 
 #+name: doom-completion
 #+begin_src emacs-lisp
-(company                     ; the ultimate code completion backend
- +childframe)                ; ... when your children are better than you
+company                     ; the ultimate code completion backend
+;; +childframe)                ; ... when your children are better than you
 ;;helm                       ; the *other* search engine for love and life
 ;;ido                        ; the other *other* search engine...
 ;; (ivy                      ; a search engine for love and life
@@ -591,7 +603,9 @@ snippets                     ; my elves. They type so I don't have to
 
 #+name: doom-emacs
 #+begin_src emacs-lisp
-(dired +icons)               ; making dired pretty [functional]
+(dired
+ +icons
+ +dirvish)               ; making dired pretty [functional]
 electric                     ; smarter, keyword-based electric-indent
 (ibuffer +icons)             ; interactive buffer management
 undo                         ; persistent, smarter undo for your inevitable mistakes
@@ -615,9 +629,9 @@ grammar                      ; tasing grammar mistake every you make
 
 #+name: doom-tools
 #+begin_src emacs-lisp
-ansible                      ; a crucible for infrastructure as code
+;;ansible                      ; a crucible for infrastructure as code
 ;;debugger                   ; FIXME stepping through code, to help you add bugs
-;;direnv                     ; be direct about your environment
+direnv                     ; be direct about your environment
 docker                       ; port everything to containers
 ;;editorconfig               ; let someone else argue about tabs vs spaces
 ;;ein                        ; tame Jupyter notebooks with emacs
@@ -626,8 +640,9 @@ docker                       ; port everything to containers
 (lookup                      ; helps you navigate your code and documentation
  +dictionary                 ; dictionary/thesaurus is nice
  +docsets)                   ; ...or in Dash docsets locally
-lsp                          ; Language Server Protocol
-;;macos                      ; MacOS-specific commands
+(lsp                          ; Language Server Protocol
+ +peek)
+ ;;macos                      ; MacOS-specific commands
 (magit                       ; a git porcelain for Emacs
  +forge)                     ; interface with git forges
 make                         ; run make tasks from Emacs
@@ -681,9 +696,9 @@ ess                          ; emacs speaks statistics
 ;;hy                         ; readability of scheme w/ speed of python
 ;;idris                      ;
 json                         ; At least it ain't XML
-;;(java +lsp)                ; the poster child for carpal tunnel syndrome
-(javascript +lsp)            ; all(hope(abandon(ye(who(enter(here))))))
-(julia +lsp)                 ; Python, R, and MATLAB in a blender
+;;(java +meghanada)          ; the poster child for carpal tunnel syndrome
+;;(javascript +lsp)            ; all(hope(abandon(ye(who(enter(here))))))
+;;(julia +lsp)                 ; Python, R, and MATLAB in a blender
 ;;kotlin                     ; a better, slicker Java(Script)
 (latex                       ; writing papers in Emacs has never been so fun
  +latexmk                    ; what else would you use?
@@ -704,20 +719,24 @@ markdown                     ; writing docs for people to ignore
  +jupyter                    ; ipython/jupyter support for babel
  +pandoc                     ; export-with-pandoc support
  +gnuplot                    ; who doesn't like pretty pictures
- ;;+pomodoro                 ; be fruitful with the tomato technique
+ +pomodoro                 ; be fruitful with the tomato technique
  +present                    ; using org-mode for presentations
  +roam2)                     ; wander around notes
 ;;php                        ; perl's insecure younger brother
 ;;plantuml                   ; diagrams for confusing people more
 ;;purescript                 ; javascript, but functional
-(python +lsp +pyright)       ; beautiful is better than ugly
+(python
+ +lsp
+ +poetry
+ +pyright
+ +pyenv)       ; beautiful is better than ugly
 ;;qt                         ; the 'cutest' gui framework ever
 ;;racket                     ; a DSL for DSLs
 ;;raku                       ; the artist formerly known as perl6
 ;;rest                       ; Emacs as a REST client
 ;;rst                        ; ReST in peace
 ;;(ruby +rails)              ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-(rust +lsp)                  ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+;;(rust +lsp)                  ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
 ;;scala                      ; java, but good
 scheme                       ; a fully conniving family of lisps
 sh                           ; she sells {ba,z,fi}sh shells on the C xor
@@ -757,7 +776,7 @@ I couldn't resist the Email and Feed modules.
 ;;calendar                   ; A dated approach to timetabling
 ;;emms                       ; Multimedia in Emacs is music to my ears
 everywhere                   ; *leave* Emacs!? You must be joking.
-irc                          ; how neckbeards socialize
+;;irc                          ; how neckbeards socialize
 (rss +org)                   ; emacs as an RSS reader
 ;;twitter                    ; twitter client https://twitter.com/vnought
 #+end_src
@@ -827,6 +846,17 @@ if the system doesn't have any of those fonts.
 
 This way whenever fonts are missing, after Doom's UI has initialised, a warning
 listing the missing fonts should appear for at least half a second.
+
+
+CUSTOM:
+Rebind the keybindings for changing the font size.
+
+#+begin_src emacs-lisp
+(map! :n "C-="    #'doom/reset-font-size
+      ;; Buffer-local font resizing
+      :n "C-+"    #'text-scale-increase
+      :n "C--"    #'text-scale-decrease)
+#+end_src
 
 **** Theme and modeline
 
@@ -1121,254 +1151,252 @@ I'd like to have just the buffer name, then if applicable the project folder
 
 For example when I open my config file it the window will be titled =config.org ●
 doom= then as soon as I make a change it will become =config.org ◉ doom=.
+# *** Splash screen
+# Emacs can render an image as the splash screen, and [[https://github.com/MarioRicalde][@MarioRicalde]] came up with a
+# cracker! He's also provided me with a nice Emacs-style /E/. I was using the
+# blackhole image, but as I've stripped down the splash screen I've switched to
+# just using the /E/.
 
-*** Splash screen
+# #+attr_latex: :width 0.2\linewidth
+# #+attr_html: :style width:20% :alt Fancy Emacs "E"
+# [[file:misc/splash-images/emacs-e.svg]]
 
-Emacs can render an image as the splash screen, and [[https://github.com/MarioRicalde][@MarioRicalde]] came up with a
-cracker! He's also provided me with a nice Emacs-style /E/. I was using the
-blackhole image, but as I've stripped down the splash screen I've switched to
-just using the /E/.
+# Now we just make it theme-appropriate, and resize with the frame.
 
-#+attr_latex: :width 0.2\linewidth
-#+attr_html: :style width:20% :alt Fancy Emacs "E"
-[[file:misc/splash-images/emacs-e.svg]]
+# #+begin_src emacs-lisp
+# (defvar fancy-splash-image-template
+#   (expand-file-name "misc/splash-images/emacs-e-template.svg" doom-private-dir)
+#   "Default template svg used for the splash image, with substitutions from ")
 
-Now we just make it theme-appropriate, and resize with the frame.
+# (defvar fancy-splash-sizes
+#   `((:height 300 :min-height 50 :padding (0 . 2))
+#     (:height 250 :min-height 42 :padding (2 . 4))
+#     (:height 200 :min-height 35 :padding (3 . 3))
+#     (:height 150 :min-height 28 :padding (3 . 3))
+#     (:height 100 :min-height 20 :padding (2 . 2))
+#     (:height 75  :min-height 15 :padding (2 . 1))
+#     (:height 50  :min-height 10 :padding (1 . 0))
+#     (:height 1   :min-height 0  :padding (0 . 0)))
+#   "list of plists with the following properties
+#   :height the height of the image
+#   :min-height minimum `frame-height' for image
+#   :padding `+doom-dashboard-banner-padding' (top . bottom) to apply
+#   :template non-default template file
+#   :file file to use instead of template")
 
-#+begin_src emacs-lisp
-(defvar fancy-splash-image-template
-  (expand-file-name "misc/splash-images/emacs-e-template.svg" doom-private-dir)
-  "Default template svg used for the splash image, with substitutions from ")
+# (defvar fancy-splash-template-colours
+#   '(("$colour1" . keywords) ("$colour2" . type) ("$colour3" . base5) ("$colour4" . base8))
+#   "list of colour-replacement alists of the form (\"$placeholder\" . 'theme-colour) which applied the template")
 
-(defvar fancy-splash-sizes
-  `((:height 300 :min-height 50 :padding (0 . 2))
-    (:height 250 :min-height 42 :padding (2 . 4))
-    (:height 200 :min-height 35 :padding (3 . 3))
-    (:height 150 :min-height 28 :padding (3 . 3))
-    (:height 100 :min-height 20 :padding (2 . 2))
-    (:height 75  :min-height 15 :padding (2 . 1))
-    (:height 50  :min-height 10 :padding (1 . 0))
-    (:height 1   :min-height 0  :padding (0 . 0)))
-  "list of plists with the following properties
-  :height the height of the image
-  :min-height minimum `frame-height' for image
-  :padding `+doom-dashboard-banner-padding' (top . bottom) to apply
-  :template non-default template file
-  :file file to use instead of template")
+# (unless (file-exists-p (expand-file-name "theme-splashes" doom-cache-dir))
+#   (make-directory (expand-file-name "theme-splashes" doom-cache-dir) t))
 
-(defvar fancy-splash-template-colours
-  '(("$colour1" . keywords) ("$colour2" . type) ("$colour3" . base5) ("$colour4" . base8))
-  "list of colour-replacement alists of the form (\"$placeholder\" . 'theme-colour) which applied the template")
+# (defun fancy-splash-filename (theme-name height)
+#   (expand-file-name (concat (file-name-as-directory "theme-splashes")
+#                             theme-name
+#                             "-" (number-to-string height) ".svg")
+#                     doom-cache-dir))
 
-(unless (file-exists-p (expand-file-name "theme-splashes" doom-cache-dir))
-  (make-directory (expand-file-name "theme-splashes" doom-cache-dir) t))
+# (defun fancy-splash-clear-cache ()
+#   "Delete all cached fancy splash images"
+#   (interactive)
+#   (delete-directory (expand-file-name "theme-splashes" doom-cache-dir) t)
+#   (message "Cache cleared!"))
 
-(defun fancy-splash-filename (theme-name height)
-  (expand-file-name (concat (file-name-as-directory "theme-splashes")
-                            theme-name
-                            "-" (number-to-string height) ".svg")
-                    doom-cache-dir))
+# (defun fancy-splash-generate-image (template height)
+#   "Read TEMPLATE and create an image if HEIGHT with colour substitutions as
+#    described by `fancy-splash-template-colours' for the current theme"
+#   (with-temp-buffer
+#     (insert-file-contents template)
+#     (re-search-forward "$height" nil t)
+#     (replace-match (number-to-string height) nil nil)
+#     (dolist (substitution fancy-splash-template-colours)
+#       (goto-char (point-min))
+#       (while (re-search-forward (car substitution) nil t)
+#         (replace-match (doom-color (cdr substitution)) nil nil)))
+#     (write-region nil nil
+#                   (fancy-splash-filename (symbol-name doom-theme) height) nil nil)))
 
-(defun fancy-splash-clear-cache ()
-  "Delete all cached fancy splash images"
-  (interactive)
-  (delete-directory (expand-file-name "theme-splashes" doom-cache-dir) t)
-  (message "Cache cleared!"))
+# (defun fancy-splash-generate-images ()
+#   "Perform `fancy-splash-generate-image' in bulk"
+#   (dolist (size fancy-splash-sizes)
+#     (unless (plist-get size :file)
+#       (fancy-splash-generate-image (or (plist-get size :template)
+#                                        fancy-splash-image-template)
+#                                    (plist-get size :height)))))
 
-(defun fancy-splash-generate-image (template height)
-  "Read TEMPLATE and create an image if HEIGHT with colour substitutions as
-   described by `fancy-splash-template-colours' for the current theme"
-  (with-temp-buffer
-    (insert-file-contents template)
-    (re-search-forward "$height" nil t)
-    (replace-match (number-to-string height) nil nil)
-    (dolist (substitution fancy-splash-template-colours)
-      (goto-char (point-min))
-      (while (re-search-forward (car substitution) nil t)
-        (replace-match (doom-color (cdr substitution)) nil nil)))
-    (write-region nil nil
-                  (fancy-splash-filename (symbol-name doom-theme) height) nil nil)))
+# (defun ensure-theme-splash-images-exist (&optional height)
+#   (unless (file-exists-p (fancy-splash-filename
+#                           (symbol-name doom-theme)
+#                           (or height
+#                               (plist-get (car fancy-splash-sizes) :height))))
+#     (fancy-splash-generate-images)))
 
-(defun fancy-splash-generate-images ()
-  "Perform `fancy-splash-generate-image' in bulk"
-  (dolist (size fancy-splash-sizes)
-    (unless (plist-get size :file)
-      (fancy-splash-generate-image (or (plist-get size :template)
-                                       fancy-splash-image-template)
-                                   (plist-get size :height)))))
+# (defun get-appropriate-splash ()
+#   (let ((height (frame-height)))
+#     (cl-some (lambda (size) (when (>= height (plist-get size :min-height)) size))
+#              fancy-splash-sizes)))
 
-(defun ensure-theme-splash-images-exist (&optional height)
-  (unless (file-exists-p (fancy-splash-filename
-                          (symbol-name doom-theme)
-                          (or height
-                              (plist-get (car fancy-splash-sizes) :height))))
-    (fancy-splash-generate-images)))
+# (setq fancy-splash-last-size nil)
+# (setq fancy-splash-last-theme nil)
+# (defun set-appropriate-splash (&rest _)
+#   (let ((appropriate-image (get-appropriate-splash)))
+#     (unless (and (equal appropriate-image fancy-splash-last-size)
+#                  (equal doom-theme fancy-splash-last-theme)))
+#     (unless (plist-get appropriate-image :file)
+#       (ensure-theme-splash-images-exist (plist-get appropriate-image :height)))
+#     (setq fancy-splash-image
+#           (or (plist-get appropriate-image :file)
+#               (fancy-splash-filename (symbol-name doom-theme) (plist-get appropriate-image :height))))
+#     (setq +doom-dashboard-banner-padding (plist-get appropriate-image :padding))
+#     (setq fancy-splash-last-size appropriate-image)
+#     (setq fancy-splash-last-theme doom-theme)
+#     (+doom-dashboard-reload)))
 
-(defun get-appropriate-splash ()
-  (let ((height (frame-height)))
-    (cl-some (lambda (size) (when (>= height (plist-get size :min-height)) size))
-             fancy-splash-sizes)))
+# (add-hook 'window-size-change-functions #'set-appropriate-splash)
+# (add-hook 'doom-load-theme-hook #'set-appropriate-splash)
+# #+end_src
 
-(setq fancy-splash-last-size nil)
-(setq fancy-splash-last-theme nil)
-(defun set-appropriate-splash (&rest _)
-  (let ((appropriate-image (get-appropriate-splash)))
-    (unless (and (equal appropriate-image fancy-splash-last-size)
-                 (equal doom-theme fancy-splash-last-theme)))
-    (unless (plist-get appropriate-image :file)
-      (ensure-theme-splash-images-exist (plist-get appropriate-image :height)))
-    (setq fancy-splash-image
-          (or (plist-get appropriate-image :file)
-              (fancy-splash-filename (symbol-name doom-theme) (plist-get appropriate-image :height))))
-    (setq +doom-dashboard-banner-padding (plist-get appropriate-image :padding))
-    (setq fancy-splash-last-size appropriate-image)
-    (setq fancy-splash-last-theme doom-theme)
-    (+doom-dashboard-reload)))
+# Now the only thing missing is a an extra interesting line, whether that be some
+# corporate BS, an developer excuse, or a fun (useless) fact.
 
-(add-hook 'window-size-change-functions #'set-appropriate-splash)
-(add-hook 'doom-load-theme-hook #'set-appropriate-splash)
-#+end_src
+# The following is rather long, but it essentially
+# + fetches a phrase from an API
+# + inserts it into the dashboard (asynchronously)
+# + moves ~point~ to the phrase
+# + re-uses the last phrase for requests within a few seconds of it being fetched
 
-Now the only thing missing is a an extra interesting line, whether that be some
-corporate BS, an developer excuse, or a fun (useless) fact.
+# #+begin_src emacs-lisp
+# (defvar splash-phrase-source-folder
+#   (expand-file-name "misc/splash-phrases" doom-private-dir)
+#   "A folder of text files with a fun phrase on each line.")
 
-The following is rather long, but it essentially
-+ fetches a phrase from an API
-+ inserts it into the dashboard (asynchronously)
-+ moves ~point~ to the phrase
-+ re-uses the last phrase for requests within a few seconds of it being fetched
+# (defvar splash-phrase-sources
+#   (let* ((files (directory-files splash-phrase-source-folder nil "\\.txt\\'"))
+#          (sets (delete-dups (mapcar
+#                              (lambda (file)
+#                                (replace-regexp-in-string "\\(?:-[0-9]+-\\w+\\)?\\.txt" "" file))
+#                              files))))
+#     (mapcar (lambda (sset)
+#               (cons sset
+#                     (delq nil (mapcar
+#                                (lambda (file)
+#                                  (when (string-match-p (regexp-quote sset) file)
+#                                    file))
+#                                files))))
+#             sets))
+#   "A list of cons giving the phrase set name, and a list of files which contain phrase components.")
 
-#+begin_src emacs-lisp
-(defvar splash-phrase-source-folder
-  (expand-file-name "misc/splash-phrases" doom-private-dir)
-  "A folder of text files with a fun phrase on each line.")
+# (defvar splash-phrase-set
+#   (nth (random (length splash-phrase-sources)) (mapcar #'car splash-phrase-sources))
+#   "The default phrase set. See `splash-phrase-sources'.")
 
-(defvar splash-phrase-sources
-  (let* ((files (directory-files splash-phrase-source-folder nil "\\.txt\\'"))
-         (sets (delete-dups (mapcar
-                             (lambda (file)
-                               (replace-regexp-in-string "\\(?:-[0-9]+-\\w+\\)?\\.txt" "" file))
-                             files))))
-    (mapcar (lambda (sset)
-              (cons sset
-                    (delq nil (mapcar
-                               (lambda (file)
-                                 (when (string-match-p (regexp-quote sset) file)
-                                   file))
-                               files))))
-            sets))
-  "A list of cons giving the phrase set name, and a list of files which contain phrase components.")
+# (defun splase-phrase-set-random-set ()
+#   "Set a new random splash phrase set."
+#   (interactive)
+#   (setq splash-phrase-set
+#         (nth (random (1- (length splash-phrase-sources)))
+#              (cl-set-difference (mapcar #'car splash-phrase-sources) (list splash-phrase-set))))
+#   (+doom-dashboard-reload t))
 
-(defvar splash-phrase-set
-  (nth (random (length splash-phrase-sources)) (mapcar #'car splash-phrase-sources))
-  "The default phrase set. See `splash-phrase-sources'.")
+# (defvar splase-phrase--cache nil)
 
-(defun splase-phrase-set-random-set ()
-  "Set a new random splash phrase set."
-  (interactive)
-  (setq splash-phrase-set
-        (nth (random (1- (length splash-phrase-sources)))
-             (cl-set-difference (mapcar #'car splash-phrase-sources) (list splash-phrase-set))))
-  (+doom-dashboard-reload t))
+# (defun splash-phrase-get-from-file (file)
+#   "Fetch a random line from FILE."
+#   (let ((lines (or (cdr (assoc file splase-phrase--cache))
+#                    (cdar (push (cons file
+#                                      (with-temp-buffer
+#                                        (insert-file-contents (expand-file-name file splash-phrase-source-folder))
+#                                        (split-string (string-trim (buffer-string)) "\n")))
+#                                splase-phrase--cache)))))
+#     (nth (random (length lines)) lines)))
 
-(defvar splase-phrase--cache nil)
+# (defun splash-phrase (&optional set)
+#   "Construct a splash phrase from SET. See `splash-phrase-sources'."
+#   (mapconcat
+#    #'splash-phrase-get-from-file
+#    (cdr (assoc (or set splash-phrase-set) splash-phrase-sources))
+#    " "))
 
-(defun splash-phrase-get-from-file (file)
-  "Fetch a random line from FILE."
-  (let ((lines (or (cdr (assoc file splase-phrase--cache))
-                   (cdar (push (cons file
-                                     (with-temp-buffer
-                                       (insert-file-contents (expand-file-name file splash-phrase-source-folder))
-                                       (split-string (string-trim (buffer-string)) "\n")))
-                               splase-phrase--cache)))))
-    (nth (random (length lines)) lines)))
+# (defun doom-dashboard-phrase ()
+#   "Get a splash phrase, flow it over multiple lines as needed, and make fontify it."
+#   (mapconcat
+#    (lambda (line)
+#      (+doom-dashboard--center
+#       +doom-dashboard--width
+#       (with-temp-buffer
+#         (insert-text-button
+#          line
+#          'action
+#          (lambda (_) (+doom-dashboard-reload t))
+#          'face 'doom-dashboard-menu-title
+#          'mouse-face 'doom-dashboard-menu-title
+#          'help-echo "Random phrase"
+#          'follow-link t)
+#         (buffer-string))))
+#    (split-string
+#     (with-temp-buffer
+#       (insert (splash-phrase))
+#       (setq fill-column (min 70 (/ (* 2 (window-width)) 3)))
+#       (fill-region (point-min) (point-max))
+#       (buffer-string))
+#     "\n")
+#    "\n"))
 
-(defun splash-phrase (&optional set)
-  "Construct a splash phrase from SET. See `splash-phrase-sources'."
-  (mapconcat
-   #'splash-phrase-get-from-file
-   (cdr (assoc (or set splash-phrase-set) splash-phrase-sources))
-   " "))
+# (defadvice! doom-dashboard-widget-loaded-with-phrase ()
+#   :override #'doom-dashboard-widget-loaded
+#   (setq line-spacing 0.2)
+#   (insert
+#    "\n\n"
+#    (propertize
+#     (+doom-dashboard--center
+#      +doom-dashboard--width
+#      (doom-display-benchmark-h 'return))
+#     'face 'doom-dashboard-loaded)
+#    "\n"
+#    (doom-dashboard-phrase)
+#    "\n"))
+# #+end_src
 
-(defun doom-dashboard-phrase ()
-  "Get a splash phrase, flow it over multiple lines as needed, and make fontify it."
-  (mapconcat
-   (lambda (line)
-     (+doom-dashboard--center
-      +doom-dashboard--width
-      (with-temp-buffer
-        (insert-text-button
-         line
-         'action
-         (lambda (_) (+doom-dashboard-reload t))
-         'face 'doom-dashboard-menu-title
-         'mouse-face 'doom-dashboard-menu-title
-         'help-echo "Random phrase"
-         'follow-link t)
-        (buffer-string))))
-   (split-string
-    (with-temp-buffer
-      (insert (splash-phrase))
-      (setq fill-column (min 70 (/ (* 2 (window-width)) 3)))
-      (fill-region (point-min) (point-max))
-      (buffer-string))
-    "\n")
-   "\n"))
+# Lastly, the doom dashboard "useful commands" are no longer useful to me.
+# So, we'll disable them and then for a particularly /clean/ look disable
+# the modeline and ~hl-line-mode~, then also hide the cursor.
 
-(defadvice! doom-dashboard-widget-loaded-with-phrase ()
-  :override #'doom-dashboard-widget-loaded
-  (setq line-spacing 0.2)
-  (insert
-   "\n\n"
-   (propertize
-    (+doom-dashboard--center
-     +doom-dashboard--width
-     (doom-display-benchmark-h 'return))
-    'face 'doom-dashboard-loaded)
-   "\n"
-   (doom-dashboard-phrase)
-   "\n"))
-#+end_src
+# #+begin_src emacs-lisp
+# (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
+# (add-hook! '+doom-dashboard-mode-hook (hide-mode-line-mode 1) (hl-line-mode -1))
+# (setq-hook! '+doom-dashboard-mode-hook evil-normal-state-cursor (list nil))
+# #+end_src
 
-Lastly, the doom dashboard "useful commands" are no longer useful to me.
-So, we'll disable them and then for a particularly /clean/ look disable
-the modeline and ~hl-line-mode~, then also hide the cursor.
+# At the end, we have a minimal but rather nice splash screen.
 
-#+begin_src emacs-lisp
-(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
-(add-hook! '+doom-dashboard-mode-hook (hide-mode-line-mode 1) (hl-line-mode -1))
-(setq-hook! '+doom-dashboard-mode-hook evil-normal-state-cursor (list nil))
-#+end_src
+# #+attr_html: :class invertible :alt The splash screen, just loaded.
+# [[https://tecosaur.com/lfs/emacs-config/screenshots/splash-screen.png]]
 
-At the end, we have a minimal but rather nice splash screen.
+# I haven't forgotten about the ASCII banner though! Once again we're going for
+# something simple.
 
-#+attr_html: :class invertible :alt The splash screen, just loaded.
-[[https://tecosaur.com/lfs/emacs-config/screenshots/splash-screen.png]]
+# #+begin_src emacs-lisp
+# (defun doom-dashboard-draw-ascii-emacs-banner-fn ()
+#   (let* ((banner
+#           '(",---.,-.-.,---.,---.,---."
+#             "|---'| | |,---||    `---."
+#             "`---'` ' '`---^`---'`---'"))
+#          (longest-line (apply #'max (mapcar #'length banner))))
+#     (put-text-property
+#      (point)
+#      (dolist (line banner (point))
+#        (insert (+doom-dashboard--center
+#                 +doom-dashboard--width
+#                 (concat
+#                  line (make-string (max 0 (- longest-line (length line)))
+#                                    32)))
+#                "\n"))
+#      'face 'doom-dashboard-banner)))
 
-I haven't forgotten about the ASCII banner though! Once again we're going for
-something simple.
-
-#+begin_src emacs-lisp
-(defun doom-dashboard-draw-ascii-emacs-banner-fn ()
-  (let* ((banner
-          '(",---.,-.-.,---.,---.,---."
-            "|---'| | |,---||    `---."
-            "`---'` ' '`---^`---'`---'"))
-         (longest-line (apply #'max (mapcar #'length banner))))
-    (put-text-property
-     (point)
-     (dolist (line banner (point))
-       (insert (+doom-dashboard--center
-                +doom-dashboard--width
-                (concat
-                 line (make-string (max 0 (- longest-line (length line)))
-                                   32)))
-               "\n"))
-     'face 'doom-dashboard-banner)))
-
-(unless (display-graphic-p) ; for some reason this messes up the graphical splash screen atm
-  (setq +doom-dashboard-ascii-banner-fn #'doom-dashboard-draw-ascii-emacs-banner-fn))
-#+end_src
+# (unless (display-graphic-p) ; for some reason this messes up the graphical splash screen atm
+#   (setq +doom-dashboard-ascii-banner-fn #'doom-dashboard-draw-ascii-emacs-banner-fn))
+# #+end_src
 
 *** Systemd daemon
 
@@ -1747,15 +1775,15 @@ have the following.
 The /very large files/ mode loads large files in chunks, allowing one to open
 ridiculously large files.
 #+begin_src emacs-lisp :tangle packages.el
-(package! vlf :recipe (:host github :repo "m00natic/vlfi" :files ("*.el"))
-  :pin "cc02f2533782d6b9b628cec7e2dcf25b2d05a27c" :disable t)
+;;(package! vlf)
+(package! vlf :recipe (:host github :repo "m00natic/vlfi" :files ("*.el")))
 #+end_src
 
-To make VLF available without delaying startup, we'll just load it in quiet moments.
-#+begin_src emacs-lisp
-(use-package! vlf-setup
-  :defer-incrementally vlf-tune vlf-base vlf-write vlf-search vlf-occur vlf-follow vlf-ediff vlf)
-#+end_src
+# To make VLF available without delaying startup, we'll just load it in quiet moments.
+# #+begin_src emacs-lisp
+# (use-package! vlf-setup
+#   :defer-incrementally vlf-base vlf-write vlf-search vlf-occur vlf-follow vlf-ediff vlf)
+# #+end_src
 
 *** Eros
 
@@ -1794,9 +1822,9 @@ contributes a typing delay. I'm not sure it's much, but it is an extra
 ~pre-command-hook~ that I don't benefit from, so...
 It seems that there's a dedicated package for this, so instead of just disabling
 the mode on startup, let's prevent installation of the package.
-#+begin_src emacs-lisp :tangle packages.el
-(package! evil-escape :disable t)
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! evil-escape :disable t)
+# #+end_src
 
 *** Consult
 
@@ -1971,8 +1999,8 @@ It's nice to have completions almost all the time, in my opinion. Key strokes
 are just waiting to be saved!
 #+begin_src emacs-lisp
 (after! company
-  (setq company-idle-delay 0.5
-        company-minimum-prefix-length 2)
+  (setq company-idle-delay 0
+        company-minimum-prefix-length 1)
   (setq company-show-numbers t)
   (add-hook 'evil-normal-state-entry-hook #'company-abort)) ;; make aborting less annoying.
 #+end_src
@@ -2087,7 +2115,8 @@ prompt recognition.
 #+begin_src emacs-lisp
 (after! tramp
   (setenv "SHELL" "/bin/bash")
-  (setq tramp-shell-prompt-pattern "\\(?:^\\|\\)[^]#$%>\n]*#?[]#$%>] *\\(\\[[0-9;]*[a-zA-Z] *\\)*")) ;; default + 
+  (setq tramp-shell-prompt-pattern "\\(?:^\\|
+\\)[^]#$%>\n]*#?[]#$%>] *\\(\\[[0-9;]*[a-zA-Z] *\\)*")) ;; default + 
 #+end_src
 
 **** Troubleshooting
@@ -3259,7 +3288,7 @@ something through Emacs?
 (use-package! calibredb
   :commands calibredb
   :config
-  (setq calibredb-root-dir "~/Desktop/TEC/Other/Ebooks"
+  (setq calibredb-root-dir "~/Documents/books"
         calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
   (map! :map calibredb-show-mode-map
         :ne "?" #'calibredb-entry-dispatch
@@ -3526,300 +3555,6 @@ panel.
       (switch-to-buffer "*Calculator*")
       (select-window main-window))))
 #+end_src
-
-** IRC
-
-=circe= is a client for IRC in Emacs (hey, isn't that a nice project
-name+acronym), and a greek enchantress who turned humans into animals.
-
-Let's use the former to chat to +recluses+ discerning individuals online.
-
-[[xkcd:1782]]
-
-Before we start seeing and sending messages, we need to authenticate with our
-IRC servers. The circe manual provided a snippet for putting some of the auth
-details in =.authinfo.gpg= --- but I think we should go further than that: have
-the entire server info in our authinfo.
-
-First, a reasonable format by which we can specify:
-+ server
-+ port
-+ SASL username
-+ SASL password
-+ channels to join
-
-We can have these stored like so
-#+begin_src authinfo
-machine chat.freenode.net login USERNAME password PASSWORD port PORT for irc channels emacs,org-mode
-#+end_src
-
-The ~for irc~ bit is used so we can uniquely identify all IRC auth info. By
-omitting the =#= in channel names we can have a list of channels comma-separated
-(no space!) which the secrets API will return as a single string.
-
-#+name: irc-authinfo-reader
-#+begin_src emacs-lisp :tangle no
-(defun auth-server-pass (server)
-  (if-let ((secret (plist-get (car (auth-source-search :host server)) :secret)))
-      (if (functionp secret)
-          (funcall secret) secret)
-    (error "Could not fetch password for host %s" server)))
-
-(defun register-irc-auths ()
-  (require 'circe)
-  (require 'dash)
-  (let ((accounts (-filter (lambda (a) (string= "irc" (plist-get a :for)))
-                           (auth-source-search :require '(:for) :max 10))))
-    (appendq! circe-network-options
-              (mapcar (lambda (entry)
-                        (let* ((host (plist-get entry :host))
-                               (label (or (plist-get entry :label) host))
-                               (_ports (mapcar #'string-to-number
-                                               (s-split "," (plist-get entry :port))))
-                               (port (if (= 1 (length _ports)) (car _ports) _ports))
-                               (user (plist-get entry :user))
-                               (nick (or (plist-get entry :nick) user))
-                               (channels (mapcar (lambda (c) (concat "#" c))
-                                                 (s-split "," (plist-get entry :channels)))))
-                          `(,label
-                            :host ,host :port ,port :nick ,nick
-                            :sasl-username ,user :sasl-password auth-server-pass
-                            :channels ,channels)))
-                      accounts))))
-#+end_src
-
-We'll just call src_elisp{(register-irc-auths)} on a hook when we start Circe
-up.
-
-Now we're ready to go, let's actually wire-up Circe, with one or two
-configuration tweaks.
-#+begin_src emacs-lisp :noweb no-export
-(after! circe
-  (setq-default circe-use-tls t)
-  (setq circe-notifications-alert-icon "/usr/share/icons/breeze/actions/24/network-connect.svg"
-        lui-logging-directory "~/.emacs.d/.local/etc/irc"
-        lui-logging-file-format "{buffer}/%Y/%m-%d.txt"
-        circe-format-self-say "{nick:+13s} ┃ {body}")
-
-  (custom-set-faces!
-    '(circe-my-message-face :weight unspecified))
-
-  (enable-lui-logging-globally)
-  (enable-circe-display-images)
-
-  <<org-emph-to-irc>>
-
-  <<circe-emojis>>
-  <<circe-emoji-alists>>
-
-  (defun named-circe-prompt ()
-    (lui-set-prompt
-     (concat (propertize (format "%13s > " (circe-nick))
-                         'face 'circe-prompt-face)
-             "")))
-  (add-hook 'circe-chat-mode-hook #'named-circe-prompt)
-
-  (appendq! all-the-icons-mode-icon-alist
-            '((circe-channel-mode all-the-icons-material "message" :face all-the-icons-lblue)
-              (circe-server-mode all-the-icons-material "chat_bubble_outline" :face all-the-icons-purple))))
-
-<<irc-authinfo-reader>>
-
-(add-transient-hook! #'=irc (register-irc-auths))
-#+end_src
-
-*** Org-style emphasis
-
-Let's do our *bold*, /italic/, and _underline_ in org-syntax, using IRC control characters.
-#+name: org-emph-to-irc
-#+begin_src emacs-lisp
-(defun lui-org-to-irc ()
-  "Examine a buffer with simple org-mode formatting, and converts the empasis:
-,*bold*, /italic/, and _underline_ to IRC semi-standard escape codes.
-=code= is converted to inverse (highlighted) text."
-  (goto-char (point-min))
-  (while (re-search-forward "\\_<\\(?1:[*/_=]\\)\\(?2:[^[:space:]]\\(?:.*?[^[:space:]]\\)?\\)\\1\\_>" nil t)
-    (replace-match
-     (concat (pcase (match-string 1)
-               ("*" "")
-               ("/" "")
-               ("_" "")
-               ("=" ""))
-             (match-string 2)
-             "") nil nil)))
-
-(add-hook 'lui-pre-input-hook #'lui-org-to-irc)
-#+end_src
-
-*** Emojis
-
-Let's setup Circe to use some emojis
-#+name: circe-emojis
-#+begin_src emacs-lisp :tangle no
-(defun lui-ascii-to-emoji ()
-  (goto-char (point-min))
-  (while (re-search-forward "\\( \\)?::?\\([^[:space:]:]+\\):\\( \\)?" nil t)
-    (replace-match
-     (concat
-      (match-string 1)
-      (or (cdr (assoc (match-string 2) lui-emojis-alist))
-          (concat ":" (match-string 2) ":"))
-      (match-string 3))
-     nil nil)))
-
-(defun lui-emoticon-to-emoji ()
-  (dolist (emoticon lui-emoticons-alist)
-    (goto-char (point-min))
-    (while (re-search-forward (concat " " (car emoticon) "\\( \\)?") nil t)
-      (replace-match (concat " "
-                             (cdr (assoc (cdr emoticon) lui-emojis-alist))
-                             (match-string 1))))))
-
-(define-minor-mode lui-emojify
-  "Replace :emojis: and ;) emoticons with unicode emoji chars."
-  :global t
-  :init-value t
-  (if lui-emojify
-      (add-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)
-    (remove-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)))
-#+end_src
-
-Now, some actual emojis to use.
-#+name: circe-emoji-alists
-#+begin_src emacs-lisp :tangle no
-(defvar lui-emojis-alist
-  '(("grinning"                      . "😀")
-    ("smiley"                        . "😃")
-    ("smile"                         . "😄")
-    ("grin"                          . "😁")
-    ("laughing"                      . "😆")
-    ("sweat_smile"                   . "😅")
-    ("joy"                           . "😂")
-    ("rofl"                          . "🤣")
-    ("relaxed"                       . "☺️")
-    ("blush"                         . "😊")
-    ("innocent"                      . "😇")
-    ("slight_smile"                  . "🙂")
-    ("upside_down"                   . "🙃")
-    ("wink"                          . "😉")
-    ("relieved"                      . "😌")
-    ("heart_eyes"                    . "😍")
-    ("yum"                           . "😋")
-    ("stuck_out_tongue"              . "😛")
-    ("stuck_out_tongue_closed_eyes"  . "😝")
-    ("stuck_out_tongue_wink"         . "😜")
-    ("zanzy"                         . "🤪")
-    ("raised_eyebrow"                . "🤨")
-    ("monocle"                       . "🧐")
-    ("nerd"                          . "🤓")
-    ("cool"                          . "😎")
-    ("star_struck"                   . "🤩")
-    ("party"                         . "🥳")
-    ("smirk"                         . "😏")
-    ("unamused"                      . "😒")
-    ("disapointed"                   . "😞")
-    ("pensive"                       . "😔")
-    ("worried"                       . "😟")
-    ("confused"                      . "😕")
-    ("slight_frown"                  . "🙁")
-    ("frown"                         . "☹️")
-    ("persevere"                     . "😣")
-    ("confounded"                    . "😖")
-    ("tired"                         . "😫")
-    ("weary"                         . "😩")
-    ("pleading"                      . "🥺")
-    ("tear"                          . "😢")
-    ("cry"                           . "😢")
-    ("sob"                           . "😭")
-    ("triumph"                       . "😤")
-    ("angry"                         . "😠")
-    ("rage"                          . "😡")
-    ("exploding_head"                . "🤯")
-    ("flushed"                       . "😳")
-    ("hot"                           . "🥵")
-    ("cold"                          . "🥶")
-    ("scream"                        . "😱")
-    ("fearful"                       . "😨")
-    ("disapointed"                   . "😰")
-    ("relieved"                      . "😥")
-    ("sweat"                         . "😓")
-    ("thinking"                      . "🤔")
-    ("shush"                         . "🤫")
-    ("liar"                          . "🤥")
-    ("blank_face"                    . "😶")
-    ("neutral"                       . "😐")
-    ("expressionless"                . "😑")
-    ("grimace"                       . "😬")
-    ("rolling_eyes"                  . "🙄")
-    ("hushed"                        . "😯")
-    ("frowning"                      . "😦")
-    ("anguished"                     . "😧")
-    ("wow"                           . "😮")
-    ("astonished"                    . "😲")
-    ("sleeping"                      . "😴")
-    ("drooling"                      . "🤤")
-    ("sleepy"                        . "😪")
-    ("dizzy"                         . "😵")
-    ("zipper_mouth"                  . "🤐")
-    ("woozy"                         . "🥴")
-    ("sick"                          . "🤢")
-    ("vomiting"                      . "🤮")
-    ("sneeze"                        . "🤧")
-    ("mask"                          . "😷")
-    ("bandaged_head"                 . "🤕")
-    ("money_face"                    . "🤑")
-    ("cowboy"                        . "🤠")
-    ("imp"                           . "😈")
-    ("ghost"                         . "👻")
-    ("alien"                         . "👽")
-    ("robot"                         . "🤖")
-    ("clap"                          . "👏")
-    ("thumpup"                       . "👍")
-    ("+1"                            . "👍")
-    ("thumbdown"                     . "👎")
-    ("-1"                            . "👎")
-    ("ok"                            . "👌")
-    ("pinch"                         . "🤏")
-    ("left"                          . "👈")
-    ("right"                         . "👉")
-    ("down"                          . "👇")
-    ("wave"                          . "👋")
-    ("pray"                          . "🙏")
-    ("eyes"                          . "👀")
-    ("brain"                         . "🧠")
-    ("facepalm"                      . "🤦")
-    ("tada"                          . "🎉")
-    ("fire"                          . "🔥")
-    ("flying_money"                  . "💸")
-    ("lighbulb"                      . "💡")
-    ("heart"                         . "❤️")
-    ("sparkling_heart"               . "💖")
-    ("heartbreak"                    . "💔")
-    ("100"                           . "💯")))
-
-(defvar lui-emoticons-alist
-  '((":)"   . "slight_smile")
-    (";)"   . "wink")
-    (":D"   . "smile")
-    ("=D"   . "grin")
-    ("xD"   . "laughing")
-    (";("   . "joy")
-    (":P"   . "stuck_out_tongue")
-    (";D"   . "stuck_out_tongue_wink")
-    ("xP"   . "stuck_out_tongue_closed_eyes")
-    (":("   . "slight_frown")
-    (";("   . "cry")
-    (";'("  . "sob")
-    (">:("  . "angry")
-    (">>:(" . "rage")
-    (":o"   . "wow")
-    (":O"   . "astonished")
-    (":/"   . "confused")
-    (":-/"  . "thinking")
-    (":|"   . "neutral")
-    (":-|"  . "expressionless")))
-#+end_src
-
 ** Newsfeed
 
 RSS feeds are still a thing. Why not make use of them with =elfeed=.
@@ -4123,1052 +3858,1036 @@ if [ ! -d "$DIC_FOLDER" ]; then
 fi
 #+end_src
 
-** Mail
-
-[[xkcd:1467]]
-
-*** Fetching
-
-The contenders for this seem to be:
-+ [[https://www.offlineimap.org/][OfflineIMAP]] ([[https://wiki.archlinux.org/index.php/OfflineIMAP][ArchWiki page]])
-+ [[http://isync.sourceforge.net/mbsync.html][isync/mbsync]] ([[https://wiki.archlinux.org/index.php/isync][ArchWiki page]])
-
-From perusing r/emacs the prevailing opinion seems to be that
-+ isync is faster
-+ isync works more reliably
-So let's use that.
-
-The config was straightforward, and is located at [[file:~/.mbsyncrc][~/.mbsyncrc]].
-I'm currently successfully connecting to: Gmail, office365mail, and dovecot.
-I'm also shoving passwords in my [[file:~/.authinfo.gpg][authinfo.gpg]] and fetching them using ~PassCmd~:
-#+begin_src shell :tangle no :eval no
-gpg2 -q --for-your-eyes-only --no-tty -d ~/.authinfo.gpg | awk '/machine IMAP_SERCER login EMAIL_ADDR/ {print $NF}'
-#+end_src
-
-We can run ~mbsync -a~ in a systemd service file or something, but we can do
-better than that. [[https://github.com/vsemyonoff/easymail#usage][vsemyonoff/easymail]] seems like the sort of thing we want, but
-is written for =notmuch= unfortunately. We can still use it for inspiration though.
-Using [[https://gitlab.com/shackra/goimapnotify][goimapnotify]] we should be able to sync just after new
-mail. Unfortunately this means /yet another/ config file :(
-
-We install with
-#+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "goimapnotify"))) "setup.sh" "no")
-go get -u gitlab.com/shackra/goimapnotify
-ln -s ~/.local/share/go/bin/goimapnotify ~/.local/bin/
-#+end_src
-
-Here's the general plan:
-1. Use ~goimapnotify~ to monitor mailboxes
-   This needs it's own set of configs, and =systemd= services, which is a pain. We
-   remove this pain by writing a python script (found below) to setup these
-   config files, and systemd services by parsing the  [[file:~/.mbsyncrc][~/.mbsyncrc]] file.
-2. On new mail, call ~mbsync --pull --new ACCOUNT:BOX~
-   We try to be as specific as possible, so ~mbsync~ returns as soon as possible,
-   and we can /get those emails as soon as possible/.
-3. Try to call ~mu index --lazy-fetch~.
-   This fails if mu4e is already open (due to a write lock on the database), so
-   in that case we just ~touch~ a tmp file (=/tmp/mu_reindex_now=).
-4. Separately, we set up Emacs to check for the existance of
-   =/tmp/mu_reindex_now= once a second while mu4e is
-   running, and (after deleting the file) call ~mu4e-update-index~.
-
-Let's start off by handling the elisp side of things
-
-**** Rebuild mail index while using mu4e
-
-#+begin_src emacs-lisp
-(after! mu4e
-  (defvar mu4e-reindex-request-file "/tmp/mu_reindex_now"
-    "Location of the reindex request, signaled by existance")
-  (defvar mu4e-reindex-request-min-seperation 5.0
-    "Don't refresh again until this many second have elapsed.
-Prevents a series of redisplays from being called (when set to an appropriate value)")
-
-  (defvar mu4e-reindex-request--file-watcher nil)
-  (defvar mu4e-reindex-request--file-just-deleted nil)
-  (defvar mu4e-reindex-request--last-time 0)
-
-  (defun mu4e-reindex-request--add-watcher ()
-    (setq mu4e-reindex-request--file-just-deleted nil)
-    (setq mu4e-reindex-request--file-watcher
-          (file-notify-add-watch mu4e-reindex-request-file
-                                 '(change)
-                                 #'mu4e-file-reindex-request)))
-
-  (defadvice! mu4e-stop-watching-for-reindex-request ()
-    :after #'mu4e~proc-kill
-    (if mu4e-reindex-request--file-watcher
-        (file-notify-rm-watch mu4e-reindex-request--file-watcher)))
-
-  (defadvice! mu4e-watch-for-reindex-request ()
-    :after #'mu4e~proc-start
-    (mu4e-stop-watching-for-reindex-request)
-    (when (file-exists-p mu4e-reindex-request-file)
-      (delete-file mu4e-reindex-request-file))
-    (mu4e-reindex-request--add-watcher))
-
-  (defun mu4e-file-reindex-request (event)
-    "Act based on the existance of `mu4e-reindex-request-file'"
-    (if mu4e-reindex-request--file-just-deleted
-        (mu4e-reindex-request--add-watcher)
-      (when (equal (nth 1 event) 'created)
-        (delete-file mu4e-reindex-request-file)
-        (setq mu4e-reindex-request--file-just-deleted t)
-        (mu4e-reindex-maybe t))))
-
-  (defun mu4e-reindex-maybe (&optional new-request)
-    "Run `mu4e~proc-index' if it's been more than
-`mu4e-reindex-request-min-seperation'seconds since the last request,"
-    (let ((time-since-last-request (- (float-time)
-                                      mu4e-reindex-request--last-time)))
-      (when new-request
-        (setq mu4e-reindex-request--last-time (float-time)))
-      (if (> time-since-last-request mu4e-reindex-request-min-seperation)
-          (mu4e~proc-index nil t)
-        (when new-request
-          (run-at-time (* 1.1 mu4e-reindex-request-min-seperation) nil
-                       #'mu4e-reindex-maybe))))))
-#+end_src
-
-**** Config transcoding & service management
-
-As long as the =mbsyncrc= file exists, this is as easy as running
-#+begin_src shell :tangle (if (and (executable-find "mu") (not (file-exists-p "~/.config/imapnotify"))) "setup.sh" "no")
-~/.config/doom/misc/mbsync-imapnotify.py
-#+end_src
-
-When run without flags this will perform the following actions
-+ Read, and parse [[file:~/.mbsyncrc][~/.mbsyncrc]], specifically recognising the following properties
-  - ~IMAPAccount~
-  - ~Host~
-  - ~Port~
-  - ~User~
-  - ~Password~
-  - ~PassCmd~
-  - ~Patterns~
-+ Call ~mbsync --list ACCOUNT~, and filter results according to ~Patterns~
-+ Construct a imapnotify config for each account, with the following hooks
-  - onNewMail :: src_shell{mbsync --pull ACCOUNT:MAILBOX}
-  - onNewMailPost :: src_shell{if mu index --lazy-check; then test -f /tmp/mu_reindex_now && rm /tmp/mu_reindex_now; else touch /tmp/mu_reindex_now; fi}
-+ Compare accounts list to previous accounts, enable/disable the relevant
-  systemd services, called with the ~--now~ flag (start/stop services as well)
-
-This script also supports the following flags
-+ ~--status~ to get the status of the relevant systemd services supports =active=,
-  =failing=, and =disabled=
-+ ~--enable~ to enable all relevant systemd services
-+ ~--disable~ to disable all relevant systemd services
-#+begin_src python :tangle misc/mbsync-imapnotify.py :shebang "#!/usr/bin/env python3"
-from pathlib import Path
-import json
-import re
-import shutil
-import subprocess
-import sys
-import fnmatch
-
-mbsyncFile = Path("~/.mbsyncrc").expanduser()
-
-imapnotifyConfigFolder = Path("~/.config/imapnotify/").expanduser()
-imapnotifyConfigFolder.mkdir(exist_ok=True)
-imapnotifyConfigFilename = "notify.conf"
-
-imapnotifyDefault = {
-    "host": "",
-    "port": 993,
-    "tls": True,
-    "tlsOptions": {"rejectUnauthorized": True},
-    "onNewMail": "",
-    "onNewMailPost": "if mu index --lazy-check; then test -f /tmp/mu_reindex_now && rm /tmp/mu_reindex_now; else touch /tmp/mu_reindex_now; fi",
-}
-
-
-def stripQuotes(string):
-    if string[0] == '"' and string[-1] == '"':
-        return string[1:-1].replace('\\"', '"')
-
-
-mbsyncInotifyMapping = {
-    "Host": (str, "host"),
-    "Port": (int, "port"),
-    "User": (str, "username"),
-    "Password": (str, "password"),
-    "PassCmd": (stripQuotes, "passwordCmd"),
-    "Patterns": (str, "_patterns"),
-}
-
-oldAccounts = [d.name for d in imapnotifyConfigFolder.iterdir() if d.is_dir()]
-
-currentAccount = ""
-currentAccountData = {}
-
-successfulAdditions = []
-
-
-def processLine(line):
-    newAcc = re.match(r"^IMAPAccount ([^#]+)", line)
-
-    linecontent = re.sub(r"(^|[^\\])#.*", "", line).split(" ", 1)
-    if len(linecontent) != 2:
-        return
-
-    parameter, value = linecontent
-
-    if parameter == "IMAPAccount":
-        if currentAccountNumber > 0:
-            finaliseAccount()
-        newAccount(value)
-    elif parameter in mbsyncInotifyMapping.keys():
-        parser, key = mbsyncInotifyMapping[parameter]
-        currentAccountData[key] = parser(value)
-    elif parameter == "Channel":
-        currentAccountData["onNewMail"] = f"mbsync --pull --new {value}:'%s'"
-
-
-def newAccount(name):
-    global currentAccountNumber
-    global currentAccount
-    global currentAccountData
-    currentAccountNumber += 1
-    currentAccount = name
-    currentAccountData = {}
-    print(f"\n\033[1;32m{currentAccountNumber}\033[0;32m - {name}\033[0;37m")
-
-
-def accountToFoldername(name):
-    return re.sub(r"[^A-Za-z0-9]", "", name)
-
-
-def finaliseAccount():
-    if currentAccountNumber == 0:
-        return
-
-    global currentAccountData
-    try:
-        currentAccountData["boxes"] = getMailBoxes(currentAccount)
-    except subprocess.CalledProcessError as e:
-        print(
-            f"\033[1;31mError:\033[0;31m failed to fetch mailboxes (skipping): "
-            + f"`{' '.join(e.cmd)}' returned code {e.returncode}\033[0;37m"
-        )
-        return
-    except subprocess.TimeoutExpired as e:
-        print(
-            f"\033[1;31mError:\033[0;31m failed to fetch mailboxes (skipping): "
-            + f"`{' '.join(e.cmd)}' timed out after {e.timeout:.2f} seconds\033[0;37m"
-        )
-        return
-
-    if "_patterns" in currentAccountData:
-        currentAccountData["boxes"] = applyPatternFilter(
-            currentAccountData["_patterns"], currentAccountData["boxes"]
-        )
-
-    # strip not-to-be-exported data
-    currentAccountData = {
-        k: currentAccountData[k] for k in currentAccountData if k[0] != "_"
-    }
-
-    parametersSet = currentAccountData.keys()
-    currentAccountData = {**imapnotifyDefault, **currentAccountData}
-    for key, val in currentAccountData.items():
-        valColor = "\033[0;33m" if key in parametersSet else "\033[0;37m"
-        print(f"  \033[1;37m{key:<13} {valColor}{val}\033[0;37m")
-
-    if (
-            len(currentAccountData["boxes"]) > 15
-            and "@gmail.com" in currentAccountData["username"]
-    ):
-        print(
-            "  \033[1;31mWarning:\033[0;31m Gmail raises an error when more than"
-            + "\033[1;31m15\033[0;31m simultanious connections are attempted."
-            + "\n           You are attempting to monitor "
-            + f"\033[1;31m{len(currentAccountData['boxes'])}\033[0;31m mailboxes.\033[0;37m"
-        )
-
-    configFile = (
-        imapnotifyConfigFolder
-        / accountToFoldername(currentAccount)
-        / imapnotifyConfigFilename
-    )
-    configFile.parent.mkdir(exist_ok=True)
-
-    json.dump(currentAccountData, open(configFile, "w"), indent=2)
-    print(f" \033[0;35mConfig generated and saved to {configFile}\033[0;37m")
-
-    global successfulAdditions
-    successfulAdditions.append(accountToFoldername(currentAccount))
-
-
-def getMailBoxes(account):
-    boxes = subprocess.run(
-        ["mbsync", "--list", account], check=True, stdout=subprocess.PIPE, timeout=10.0
-    )
-    return boxes.stdout.decode("utf-8").strip().split("\n")
-
-
-def applyPatternFilter(pattern, mailboxes):
-    patternRegexs = getPatternRegexes(pattern)
-    return [m for m in mailboxes if testPatternRegexs(patternRegexs, m)]
-
-
-def getPatternRegexes(pattern):
-    def addGlob(b):
-        blobs.append(b.replace('\\"', '"'))
-        return ""
-
-    blobs = []
-    pattern = re.sub(r' ?"([^"]+)"', lambda m: addGlob(m.groups()[0]), pattern)
-    blobs.extend(pattern.split(" "))
-    blobs = [
-        (-1, fnmatch.translate(b[1::])) if b[0] == "!" else (1, fnmatch.translate(b))
-        for b in blobs
-    ]
-    return blobs
-
-
-def testPatternRegexs(regexCond, case):
-    for factor, regex in regexCond:
-        if factor * bool(re.match(regex, case)) < 0:
-            return False
-    return True
-
-
-def processSystemdServices():
-    keptAccounts = [acc for acc in successfulAdditions if acc in oldAccounts]
-    freshAccounts = [acc for acc in successfulAdditions if acc not in oldAccounts]
-    staleAccounts = [acc for acc in oldAccounts if acc not in successfulAdditions]
-
-    if keptAccounts:
-        print(f"\033[1;34m{len(keptAccounts)}\033[0;34m kept accounts:\033[0;37m")
-        restartAccountSystemdServices(keptAccounts)
-
-    if freshAccounts:
-        print(f"\033[1;32m{len(freshAccounts)}\033[0;32m new accounts:\033[0;37m")
-        enableAccountSystemdServices(freshAccounts)
-    else:
-        print(f"\033[0;32mNo new accounts.\033[0;37m")
-
-    notActuallyEnabledAccounts = [
-        acc for acc in successfulAdditions if not getAccountServiceState(acc)["enabled"]
-    ]
-    if notActuallyEnabledAccounts:
-        print(
-            f"\033[1;32m{len(notActuallyEnabledAccounts)}\033[0;32m accounts need re-enabling:\033[0;37m"
-        )
-        enableAccountSystemdServices(notActuallyEnabledAccounts)
-
-    if staleAccounts:
-        print(f"\033[1;33m{len(staleAccounts)}\033[0;33m removed accounts:\033[0;37m")
-        disableAccountSystemdServices(staleAccounts)
-    else:
-        print(f"\033[0;33mNo removed accounts.\033[0;37m")
-
-
-def enableAccountSystemdServices(accounts):
-    for account in accounts:
-        print(f" \033[0;32m - \033[1;37m{account:<18}", end="\033[0;37m", flush=True)
-        if setSystemdServiceState(
-                "enable", f"goimapnotify@{accountToFoldername(account)}.service"
-        ):
-            print("\033[1;32m enabled")
-
-
-def disableAccountSystemdServices(accounts):
-    for account in accounts:
-        print(f" \033[0;33m - \033[1;37m{account:<18}", end="\033[0;37m", flush=True)
-        if setSystemdServiceState(
-                "disable", f"goimapnotify@{accountToFoldername(account)}.service"
-        ):
-            print("\033[1;33m disabled")
-
-
-def restartAccountSystemdServices(accounts):
-    for account in accounts:
-        print(f" \033[0;34m - \033[1;37m{account:<18}", end="\033[0;37m", flush=True)
-        if setSystemdServiceState(
-                "restart", f"goimapnotify@{accountToFoldername(account)}.service"
-        ):
-            print("\033[1;34m restarted")
-
-
-def setSystemdServiceState(state, service):
-    try:
-        enabler = subprocess.run(
-            ["systemctl", "--user", state, service, "--now"],
-            check=True,
-            stderr=subprocess.DEVNULL,
-            timeout=5.0,
-        )
-        return True
-    except subprocess.CalledProcessError as e:
-        print(
-            f" \033[1;31mfailed\033[0;31m to {state}, `{' '.join(e.cmd)}'"
-            + f"returned code {e.returncode}\033[0;37m"
-        )
-    except subprocess.TimeoutExpired as e:
-        print(f" \033[1;31mtimed out after {e.timeout:.2f} seconds\033[0;37m")
-        return False
-
-
-def getAccountServiceState(account):
-    return {
-        state: bool(
-            1
-            - subprocess.run(
-                [
-                    "systemctl",
-                    "--user",
-                    f"is-{state}",
-                    "--quiet",
-                    f"goimapnotify@{accountToFoldername(account)}.service",
-                ],
-                stderr=subprocess.DEVNULL,
-            ).returncode
-        )
-        for state in ("enabled", "active", "failing")
-    }
-
-
-def getAccountServiceStates(accounts):
-    for account in accounts:
-        enabled, active, failing = getAccountServiceState(account).values()
-        print(f"  - \033[1;37m{account:<18}\033[0;37m ", end="", flush=True)
-        if not enabled:
-            print("\033[1;33mdisabled\033[0;37m")
-        elif active:
-            print("\033[1;32mactive\033[0;37m")
-        elif failing:
-            print("\033[1;31mfailing\033[0;37m")
-        else:
-            print("\033[1;35min an unrecognised state\033[0;37m")
-
-
-if len(sys.argv) > 1:
-    if sys.argv[1]   in ["-e", "--enable"]:
-        enableAccountSystemdServices(oldAccounts)
-        exit()
-    elif sys.argv[1] in ["-d", "--disable"]:
-        disableAccountSystemdServices(oldAccounts)
-        exit()
-    elif sys.argv[1] in ["-r", "--restart"]:
-        restartAccountSystemdServices(oldAccounts)
-        exit()
-    elif sys.argv[1] in ["-s", "--status"]:
-        getAccountServiceStates(oldAccounts)
-        exit()
-    elif sys.argv[1] in ["-h", "--help"]:
-        print("""\033[1;37mMbsync to IMAP Notify config generator.\033[0;37m
-
-Usage: mbsync-imapnotify [options]
-
-Options:
-    -e, --enable       enable all services
-    -d, --disable      disable all services
-    -r, --restart      restart all services
-    -s, --status       fetch the status for all services
-    -h, --help         show this help
-""", end='')
-        exit()
-    else:
-        print(f"\033[0;31mFlag {sys.argv[1]} not recognised, try --help\033[0;37m")
-        exit()
-
-
-mbsyncData = open(mbsyncFile, "r").read()
-
-currentAccountNumber = 0
-
-totalAccounts = len(re.findall(r"^IMAPAccount", mbsyncData, re.M))
-
-
-def main():
-    print("\033[1;34m:: MbSync to Go IMAP notify config file creator ::\033[0;37m")
-
-    shutil.rmtree(imapnotifyConfigFolder)
-    imapnotifyConfigFolder.mkdir(exist_ok=False)
-    print("\033[1;30mImap Notify config dir purged\033[0;37m")
-
-    print(f"Identified \033[1;32m{totalAccounts}\033[0;32m accounts.\033[0;37m")
-
-    for line in mbsyncData.split("\n"):
-        processLine(line)
-
-    finaliseAccount()
-
-    print(
-        f"\nConfig files generated for \033[1;36m{len(successfulAdditions)}\033[0;36m"
-        + f" out of \033[1;36m{totalAccounts}\033[0;37m accounts.\n"
-    )
-
-    processSystemdServices()
-
-
-if __name__ == "__main__":
-    main()
-#+end_src
-
-**** Systemd
-
-We then have a service file to run ~goimapnotify~ on all of these generated config files.
-We'll use a template service file so we can enable a unit per-account.
-#+begin_src systemd :tangle ~/.config/systemd/user/goimapnotify@.service
-[Unit]
-Description=IMAP notifier using IDLE, golang version.
-ConditionPathExists=%h/.config/imapnotify/%I/notify.conf
-After=network.target
-
-[Service]
-ExecStart=%h/.local/bin/goimapnotify -conf %h/.config/imapnotify/%I/notify.conf
-Restart=always
-RestartSec=30
-
-[Install]
-WantedBy=default.target
-#+end_src
-
-Enabling the service is actually taken care of by that python script.
-
-From one or two small tests, this can bring the delay down to as low as five
-seconds, which I'm quite happy with.
-
-This works well for fetching new mail, but we also want to propagate other
-changes (e.g. marking mail as read), and make sure we're up to date at the
-start, so for that I'll do the 'normal' thing and run ~mbsync -all~ every so often
---- let's say five minutes.
-
-We can accomplish this via a systemd timer, and service file.
-#+begin_src systemd :tangle (if (executable-find "mu") "~/.config/systemd/user/mbsync.timer" "no")
-[Unit]
-Description=call mbsync on all accounts every 5 minutes
-ConditionPathExists=%h/.mbsyncrc
-
-[Timer]
-OnBootSec=5m
-OnUnitInactiveSec=5m
-
-[Install]
-WantedBy=default.target
-#+end_src
-
-#+begin_src systemd :tangle (if (executable-find "mu") "~/.config/systemd/user/mbsync.service" "no")
-[Unit]
-Description=mbsync service, sync all mail
-Documentation=man:mbsync(1)
-ConditionPathExists=%h/.mbsyncrc
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/mbsync -c %h/.mbsyncrc --all
-
-[Install]
-WantedBy=mail.target
-#+end_src
-
-Enabling (and starting) this is as simple as
-#+begin_src shell :tangle (if (or (not (executable-find "mu")) (string= "enabled\n" (shell-command-to-string "systemctl --user is-enabled mbsync.timer"))) "no" "setup.sh")
-systemctl --user enable mbsync.timer --now
-#+end_src
-
-*** Indexing/Searching
-
-This is performed by [[https://www.djcbsoftware.nl/code/mu/][Mu]]. This is a tool for finding emails stored in the [[http://en.wikipedia.org/wiki/Maildir][Maildir]] format.
-According to the homepage, it's main features are
-+ Fast indexing
-+ Good searching
-+ Support for encrypted and signed messages
-+ Rich CLI tooling
-+ accent/case normalisation
-+ strong integration with email clients
-
-Unfortunately ~mu~ is not currently packaged from me. Oh well, I guess I'm
-building it from source then. I needed to install these packages
-+ =gmime-devel=
-+ =xapian-core-devel=
-
-#+name: Install mu from source
-#+begin_src shell :eval no :tangle (if (and (file-directory-p "~/.mail") (not (executable-find "mu"))) "setup.sh" "no")
-cd ~/.local/lib/
-git clone https://github.com/djcb/mu.git
-cd ./mu
-./autogen.sh
-make
-sudo make install
-#+end_src
-
-To check how my version compares to the latest published:
-
-#+begin_src shell :tangle no
-curl --silent "https://api.github.com/repos/djcb/mu/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
-mu --version | head -n 1 | sed 's/.* version //'
-#+end_src
-
-#+results:
-| 1.4.6 |
-| 1.4.6 |
-
-*** Sending
-
-[[https://www.nongnu.org/smtpmail/][SmtpMail]] seems to be the 'default' starting point, but that's not packaged for
-me. [[https://marlam.de/msmtp/][msmtp]] is however, so I'll give that a shot. Reading around a bit (googling
-"msmtp vs sendmail" for example) almost every comparison mentioned seems to
-suggest msmtp to be a better choice. I have seen the following points raised
-+ ~sendmail~ has several vulnerabilities
-+ ~sendmail~ is tedious to configure
-+ ~ssmtp~ is no longer maintained
-+ ~msmtp~ is a maintained alternative to ~ssmtp~
-+ ~msmtp~ is easier to configure
-
-The config file is [[file:~/.config/msmtp/config][~/.config/msmtp/config]].
-
-**** System hackery
-
-Unfortunately, I seem to have run into a [[https://bugs.archlinux.org/task/44994][bug]] present in my packaged version, so
-we'll just install the latest from source.
-
-For full use of the ~auth~ options, I need =GNU SASL=, which isn't packaged for me.
-I don't think I want it, but in case I do, I'll need to do this.
-#+name: Install gsasl from source
-#+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "msmtp"))) "setup.sh" "no")
-export GSASL_VERSION=1.8.1
-cd ~/.local/lib/
-curl "ftp://ftp.gnu.org/gnu/gsasl/libgsasl-$GSASL_VERSION.tar.gz" | tar xz
-curl "ftp://ftp.gnu.org/gnu/gsasl/gsasl-$GSASL_VERSION.tar.gz" | tar xz
-cd "./libgsasl-$GSASL_VERSION"
-./configure
-make
-sudo make install
-cd ..
-cd "./gsasl-$VERSION"
-./configure
-make
-sudo make install
-cd ..
-#+end_src
-
-Now actually compile ~msmtp~.
-#+name: Install msmtp from source
-#+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "msmtp"))) "setup.sh" "no")
-cd ~/.local/lib/
-git clone https://github.com/marlam/msmtp-mirror.git ./msmtp
-cd ./msmtp
-libtoolize --force
-aclocal
-autoheader
-automake --force-missing --add-missing
-autoconf
-# if using GSASL
-# PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --with-libgsasl
-./configure
-make
-sudo make install
-#+end_src
-
-If using =GSASL= (from earlier) we need to make ensure that the dynamic library in
-in the library path. We can do by adding an executable with the same name
-earlier on in my ~$PATH~.
-#+begin_src sh :tangle no :shebang "#!/bin/sh"
-LD_LIBRARY_PATH=/usr/local/lib exec /usr/local/bin/msmtp "$@"
-#+end_src
-
-*** Mu4e
-:PROPERTIES:
-:header-args:emacs-lisp: :tangle no :noweb-ref mu4e-conf
-:END:
-
-Webmail clients are nice and all, but I still don't believe that SPAs in my
-browser can replaced desktop apps ... sorry Gmail. I'm also liking google less
-and less.
-
-Mailspring is a decent desktop client, quite lightweight for electron
-(apparently the backend is in =C=, which probably helps), however I miss Emacs
-stuff.
-
-While =Notmuch= seems very promising, and I've heard good things about it, it
-doesn't seem to make any changes to the emails themselves. All data is stored in
-Notmuch's database. While this is a very interesting model, occasionally I need
-to pull up an email on say my phone, and so not I want the tagging/folders etc.
-to be applied to the mail itself --- not stored in a database.
-
-On the other hand =Mu4e= is also talked about a lot in positive terms, and seems
-to possess a similarly strong feature set --- and modifies the mail itself (I.e.
-information is accessible without the database). =Mu4e= also seems to have a large
-user base, which tends to correlate with better support and attention.
-
-As I installed mu4e from source, I need to add the =/usr/local/= loadpath so Mu4e has a chance of loading
-#+begin_src emacs-lisp :tangle (if (file-directory-p "/usr/local/share/emacs/site-lisp/mu4e") "yes" "no")
-(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
-#+end_src
-
-Alternatively, I may need to add the =/usr/share/= path.
-#+begin_src emacs-lisp :tangle (if (file-directory-p "/usr/share/emacs/site-lisp/mu4e") "yes" "no")
-(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
-#+end_src
-
-Let's also just shove all the Elisp code here in an src_elisp{(after! ...)} block.
-#+begin_src emacs-lisp :noweb no-export :tangle yes :noweb-ref nil
-(after! mu4e
-  <<mu4e-conf>>
-)
-#+end_src
-
-**** Viewing Mail
-
-There seem to be some advantages with using Gnus' article view (such as inline
-images), and judging from [[https://github.com/djcb/mu/pull/1442#issuecomment-591695814][djcb/mu!1442 (comment)]] this seems to be the 'way of
-the future' for mu4e.
-
-There are some all-the-icons font related issues, so we need to redefine the
-fancy chars, and make sure they get the correct width.
-
-To account for the increase width of each flag character, and make perform a
-few more visual tweaks, we'll tweak the headers a bit
-#+begin_src emacs-lisp
-(setq mu4e-headers-fields
-      '((:flags . 6)
-        (:account-stripe . 2)
-        (:from-or-to . 25)
-        (:folder . 10)
-        (:recipnum . 2)
-        (:subject . 80)
-        (:human-date . 8))
-      +mu4e-min-header-frame-width 142
-      mu4e-headers-date-format "%d/%m/%y"
-      mu4e-headers-time-format "⧖ %H:%M"
-      mu4e-headers-results-limit 1000
-      mu4e-index-cleanup t)
-
-(add-to-list 'mu4e-bookmarks
-             '(:name "Yesterday's messages" :query "date:2d..1d" :key ?y) t)
-
-(defvar +mu4e-header--folder-colors nil)
-(appendq! mu4e-header-info-custom
-          '((:folder .
-             (:name "Folder" :shortname "Folder" :help "Lowest level folder" :function
-              (lambda (msg)
-                (+mu4e-colorize-str
-                 (replace-regexp-in-string "\\`.*/" "" (mu4e-message-field msg :maildir))
-                 '+mu4e-header--folder-colors))))))
-#+end_src
-
-We'll also use a nicer alert icon
-#+begin_src emacs-lisp
-(setq mu4e-alert-icon "/usr/share/icons/Papirus/64x64/apps/evolution.svg")
-#+end_src
-
-**** Sending Mail
-
-Let's send emails too.
-#+begin_src emacs-lisp
-(setq sendmail-program "/usr/bin/msmtp"
-      send-mail-function #'smtpmail-send-it
-      message-sendmail-f-is-evil t
-      message-sendmail-extra-arguments '("--read-envelope-from"); , "--read-recipients")
-      message-send-mail-function #'message-send-mail-with-sendmail)
-#+end_src
-
-It's also nice to avoid accidentally sending emails with the wrong account. If
-we can send from the address in the ~To~ field, let's do that. Opening a prompt
-otherwise also seems sensible.
-
-We can register Emacs as a potential email client with a desktop file. We could
-put an =emacsclient ...= entry in the =Exec= field, but I've found this a bit dodgy.
-Instead let's package the =emacslient= behaviour in a little executable
-=~/.local/bin/emacsmail=.
-
-#+begin_src shell :tangle ~/.local/bin/emacsmail :shebang "#!/usr/bin/env sh" :mkdirp yes :tangle-mode (identity #o755) :comments no
-emacsclient -create-frame --alternate-editor='' --no-wait --eval \
-"(progn (x-focus-frame nil) (mu4e-compose-from-mailto \"$1\" t))"
-#+end_src
-
-Now we can just call that in a desktop file.
-
-#+begin_src conf :tangle ~/.local/share/applications/emacsmail.desktop :mkdirp yes
-[Desktop Entry]
-Name=Mu4e
-GenericName=Compose a new message with Mu4e in Emacs
-Comment=Open mu4e compose window
-MimeType=x-scheme-handler/mailto;
-Exec=emacsmail %u
-Icon=emacs
-Type=Application
-Terminal=false
-Categories=Network;Email;
-StartupWMClass=Emacs
-#+end_src
-
-To register this, just call
-#+begin_src shell :tangle (if (or (not (executable-find "mu")) (string= (shell-command-to-string "xdg-mime query default x-scheme-handler/mailto") "emacsmail.desktop\n")) "no" "setup.sh")
-update-desktop-database ~/.local/share/applications
-#+end_src
-
-We also want to define ~mu4e-compose-from-mailto~.
-#+begin_src emacs-lisp
-(defun mu4e-compose-from-mailto (mailto-string &optional quit-frame-after)
-  (require 'mu4e)
-  (unless mu4e~server-props (mu4e t) (sleep-for 0.1))
-  (let* ((mailto (message-parse-mailto-url mailto-string))
-         (to (cdr (assoc "To" mailto)))
-         (subject (or (cdr (assoc "Subject" mailto)) ""))
-         (body (cdr (assoc "Body" mailto)))
-         (headers (-filter (lambda (spec) (not (-contains-p '("To" "Subject" "Body") (car spec)))) mailto)))
-    (when-let ((mu4e-main (get-buffer mu4e-main-buffer-name)))
-      (switch-to-buffer mu4e-main))
-    (mu4e~compose-mail to subject headers)
-    (when body
-      (goto-char (point-min))
-      (if (eq major-mode 'org-msg-edit-mode)
-          (org-msg-goto-body)
-        (mu4e-compose-goto-bottom))
-      (insert body))
-    (goto-char (point-min))
-    (cond ((null to) (search-forward "To: "))
-          ((string= "" subject) (search-forward "Subject: "))
-          (t (if (eq major-mode 'org-msg-edit-mode)
-                 (org-msg-goto-body)
-               (mu4e-compose-goto-bottom))))
-    (font-lock-ensure)
-    (when evil-normal-state-minor-mode
-      (evil-append 1))
-    (when quit-frame-after
-      (add-hook 'kill-buffer-hook
-                `(lambda ()
-                   (when (eq (selected-frame) ,(selected-frame))
-                     (delete-frame)))))))
-#+end_src
-
-It would also be nice to change the name pre-filled in =From:= when drafting.
-#+begin_src emacs-lisp
-(defvar mu4e-from-name "Timothy"
-  "Name used in \"From:\" template.")
-(defadvice! mu4e~draft-from-construct-renamed (orig-fn)
-  "Wrap `mu4e~draft-from-construct-renamed' to change the name."
-  :around #'mu4e~draft-from-construct
-  (let ((user-full-name mu4e-from-name))
-    (funcall orig-fn)))
-#+end_src
-
-We can also use this a signature,
-#+begin_src emacs-lisp
-(setq message-signature mu4e-from-name)
-#+end_src
-
-**** Working with the Org mailing list
-***** Adding =X-Woof= headers
-
-I'm fairly active on the Org mailing list (ML). The Org ML has a linked
-bug/patch tracker, https://updates.orgmode.org/ managed by [[https://github.com/bzg/woof][Woof]]. However, I feel
-like I spend too much time looking up what the appropriate headers are for
-updating the status of bugs and patches. What I need, is some sort of convenient
-tool. Let's write one.
-
-First, a function that asks what I want to do and returns the appropriate =X-Woof=
-header.
-#+begin_src emacs-lisp
-(defun +mu4e-get-woof-header ()
-  (pcase (read-char
-          (format "\
-%s
-  %s Declare %s Applied %s Aborted
-%s
-  %s Confirm %s Fixed
-%s
-  %s Request %s Resolved
-
-%s remove X-Woof header"
-                  (propertize "Patch" 'face 'outline-3)
-                  (propertize "p" 'face '(bold consult-key))
-                  (propertize "a" 'face '(bold consult-key))
-                  (propertize "c" 'face '(bold consult-key))
-                  (propertize "Bug" 'face 'outline-3)
-                  (propertize "b" 'face '(bold consult-key))
-                  (propertize "f" 'face '(bold consult-key))
-                  (propertize "Help" 'face 'outline-3)
-                  (propertize "h" 'face '(bold consult-key))
-                  (propertize "r" 'face '(bold consult-key))
-                  (propertize "x" 'face '(bold error))))
-    (?p "X-Woof-Patch: confirmed")
-    (?a "X-Woof-Patch: applied")
-    (?c "X-Woof-Patch: cancelled")
-    (?b "X-Woof-Bug: confirmed")
-    (?f "X-Woof-Bug: fixed")
-    (?h "X-Woof-Help: confirmed")
-    (?r "X-Woof-Help: cancelled")
-    (?x 'delete)))
-#+end_src
-
-Now we just need a function which will add such a header to a buffer
-#+begin_src emacs-lisp
-(defun +mu4e-insert-woof-header ()
-  "Insert an X-Woof header into the current message."
-  (interactive)
-  (when-let ((header (+mu4e-get-woof-header)))
-    (save-excursion
-      (goto-char (point-min))
-      (search-forward "--text follows this line--")
-      (unless (eq header 'delete)
-        (beginning-of-line)
-        (insert header "\n")
-        (forward-line -1))
-      (when (re-search-backward "^X-Woof-" nil t)
-        (kill-whole-line)))))
-
-(map! :map mu4e-compose-mode-map
-      :localleader
-      :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
-
-(map! :map org-msg-edit-mode-map
-      :after org-msg
-      :localleader
-      :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
-#+end_src
-
-Lovely! That should make adding these headers a breeze.
-
-***** Patch workflow
-
-Testing patches from the ML is currently more hassle than it needs to be. Let's
-change that.
-
-#+begin_src emacs-lisp
-(after! mu4e
-  (defvar +org-ml-target-dir "~/.emacs.d/.local/straight/repos/org-mode/")
-  (defvar +org-ml-max-age 600
-    "Maximum permissible age in seconds.")
-  (defvar +org-ml--cache-timestamp 0)
-  (defvar +org-ml--cache nil)
-
-  (define-minor-mode +org-ml-patchy-mood-mode
-    "Apply patches to Org in bulk."
-    :global t
-    (let ((action (cons "apply patch to org" #'+org-ml-apply-patch)))
-      (if +org-ml-patchy-mood-mode
-          (add-to-list 'mu4e-view-actions action)
-        (setq mu4e-view-actions (delete action mu4e-view-actions)))))
-
-  (defun +org-ml-apply-patch (msg)
-    "Apply the patch in the current message to Org."
-    (interactive)
-    (unless msg (setq msg (mu4e-message-at-point)))
-    (with-current-buffer (get-buffer-create "*Shell: Org apply patches*")
-      (erase-buffer)
-      (let* ((default-directory +org-ml-target-dir)
-             (exit-code (call-process "git" nil t nil "am" (mu4e-message-field msg :path))))
-        (magit-refresh)
-        (when (not (= 0 exit-code))
-          (+popup/buffer)))))
-
-  (defun +org-ml-current-patches ()
-    "Get the currently open patches, as a list of alists.
-Entries of the form (subject . id)."
-    (delq nil
-          (mapcar
-           (lambda (entry)
-             (unless (plist-get entry :fixed)
-               (cons
-                (format "%-8s  %s"
-                        (propertize
-                         (replace-regexp-in-string "T.*" ""
-                                                   (plist-get entry :date))
-                         'face 'font-lock-doc-face)
-                        (propertize
-                         (replace-regexp-in-string "\\[PATCH\\] ?" ""
-                                                   (plist-get entry :summary))
-                         'face 'font-lock-keyword-face))
-                (plist-get entry :id))))
-           (with-current-buffer (url-retrieve-synchronously "https://updates.orgmode.org/data/patches")
-             (goto-char url-http-end-of-headers)
-             (json-parse-buffer :object-type 'plist)))))
-
-  (defun +org-ml-select-patch-thread ()
-    "Find and apply a proposed Org patch."
-    (interactive)
-    (let* ((current-workspace (+workspace-current))
-           (patches (progn
-                      (when (or (not +org-ml--cache)
-                                (> (- (float-time) +org-ml--cache-timestamp)
-                                   +org-ml-max-age))
-                        (setq +org-ml--cache (+org-ml-current-patches)
-                              +org-ml--cache-timestamp (float-time)))
-                      +org-ml--cache))
-           (msg-id (cdr (assoc (completing-read
-                                "Thread: " (mapcar #'car patches))
-                               patches))))
-      (+workspace-switch +mu4e-workspace-name)
-      (mu4e-view-message-with-message-id msg-id)
-      (unless +org-ml-patchy-mood-mode
-        (add-to-list 'mu4e-view-actions
-                     (cons "apply patch to org" #'+org-ml-transient-mu4e-action)))))
-
-  (defun +org-ml-transient-mu4e-action (msg)
-    (setq mu4e-view-actions
-          (delete (cons "apply patch to org" #'+org-ml-transient-mu4e-action)
-                  mu4e-view-actions))
-    (+workspace/other)
-    (magit-status +org-ml-target-dir)
-    (+org-ml-apply-patch msg)))
-#+end_src
-
-***** Mail list archive links
-
-The other thing which it's good to be easily able to do is grab a link to the
-current message on https://list.orgmode.org.
-
-#+begin_src emacs-lisp
-(after! mu4e
-  (defun +mu4e-ml-message-link (msg)
-    "Copy the link to MSG on the mailing list archives."
-    (let* ((list-addr (or (mu4e-message-field msg :mailing-list)
-                          (cdar (mu4e-message-field-raw msg :list-post))
-                          (thread-last (append (mu4e-message-field msg :to)
-                                               (mu4e-message-field msg :cc))
-                            (mapcar #'last)
-                            (mapcar #'cdr)
-                            (mapcar (lambda (addr)
-                                      (when (string-match-p "emacs.*@gnu\\.org$" addr)
-                                        (replace-regexp-in-string "@" "." addr))))
-                            (delq nil)
-                            (car))))
-           (msg-url
-            (cond
-             ((string= "emacs-orgmode.gnu.org" list-addr)
-              (format "https://list.orgmode.org/%s" (mu4e-message-field msg :message-id)))
-             (t (user-error "Mailing list %s not supported" list-addr)))))
-      (message "Link %s copied to clipboard" (gui-select-text msg-url))
-      msg-url))
-
-  (add-to-list 'mu4e-view-actions (cons "link to message ML" #'+mu4e-ml-message-link) t))
-#+end_src
-
-In a similar manner, when clicking on such a link (say when someone uses a link
-to the archive to refer to an earlier email) I'd much rather look at it in mu4e.
-
-#+begin_src emacs-lisp
-(defun +browse-url-orgmode-ml (url &optional _)
-  "Open an orgmode list url using notmuch."
-  (let ((id (and (or (string-match "^https?://orgmode\\.org/list/\\([^/]+\\)" url)
-                     (string-match "^https?://list\\.orgmode\\.org/\\([^/]+\\)" url))
-                 (match-string 1 url))))
-    (mu4e-view-message-with-message-id id)))
-
-(add-to-list 'browse-url-handlers (cons "^https?://orgmode\\.org/list" #'+browse-url-orgmode-ml))
-(add-to-list 'browse-url-handlers (cons "^https?://list\\.orgmode\\.org/" #'+browse-url-orgmode-ml))
-#+end_src
-
-*** Org Msg
-
-Doom does a fantastic stuff with the defaults with this, so we only make a few
-minor tweaks.
-#+begin_src emacs-lisp
-(setq +org-msg-accent-color "#1a5fb4"
-      org-msg-greeting-fmt "\nHi%s,\n\n"
-      org-msg-signature "\n\n#+begin_signature\nAll the best,\\\\\n@@html:<b>@@Timothy@@html:</b>@@\n#+end_signature")
-(map! :map org-msg-edit-mode-map
-      :after org-msg
-      :n "G" #'org-msg-goto-body)
-#+end_src
-
-* Language configuration
+;;** Mail
+;;[[xkcd:1467]]
+;;
+;;*** Fetching
+;;The contenders for this seem to be:
+;;+ [[https://www.offlineimap.org/][OfflineIMAP]] ([[https://wiki.archlinux.org/index.php/OfflineIMAP][ArchWiki page]])
+;;+ [[http://isync.sourceforge.net/mbsync.html][isync/mbsync]] ([[https://wiki.archlinux.org/index.php/isync][ArchWiki page]])
+;;
+;;From perusing r/emacs the prevailing opinion seems to be that
+;;+ isync is faster
+;;+ isync works more reliably
+;;So let's use that.
+;;
+;;The config was straightforward, and is located at [[file:~/.mbsyncrc][~/.mbsyncrc]].
+;;I'm currently successfully connecting to: Gmail, office365mail, and dovecot.
+;;I'm also shoving passwords in my [[file:~/.authinfo.gpg][authinfo.gpg]] and fetching them using ~PassCmd~:
+;;#+begin_src shell :tangle no :eval no
+;;gpg2 -q --for-your-eyes-only --no-tty -d ~/.authinfo.gpg | awk '/machine IMAP_SERCER login EMAIL_ADDR/ {print $NF}'
+;;#+end_src
+;;
+;;We can run ~mbsync -a~ in a systemd service file or something, but we can do
+;;better than that. [[https://github.com/vsemyonoff/easymail#usage][vsemyonoff/easymail]] seems like the sort of thing we want, but
+;;is written for =notmuch= unfortunately. We can still use it for inspiration though.
+;;Using [[https://gitlab.com/shackra/goimapnotify][goimapnotify]] we should be able to sync just after new
+;;mail. Unfortunately this means /yet another/ config file :(
+;;
+;;We install with
+;;#+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "goimapnotify"))) "setup.sh" "no")
+;;go get -u gitlab.com/shackra/goimapnotify
+;;ln -s ~/.local/share/go/bin/goimapnotify ~/.local/bin/
+;;#+end_src
+;;
+;;Here's the general plan:
+;;1. Use ~goimapnotify~ to monitor mailboxes
+;;   This needs it's own set of configs, and =systemd= services, which is a pain. We
+;;   remove this pain by writing a python script (found below) to setup these
+;;   config files, and systemd services by parsing the  [[file:~/.mbsyncrc][~/.mbsyncrc]] file.
+;;2. On new mail, call ~mbsync --pull --new ACCOUNT:BOX~
+;;   We try to be as specific as possible, so ~mbsync~ returns as soon as possible,
+;;   and we can /get those emails as soon as possible/.
+;;3. Try to call ~mu index --lazy-fetch~.
+;;   This fails if mu4e is already open (due to a write lock on the database), so
+;;   in that case we just ~touch~ a tmp file (=/tmp/mu_reindex_now=).
+;;4. Separately, we set up Emacs to check for the existance of
+;;   =/tmp/mu_reindex_now= once a second while mu4e is
+;;   running, and (after deleting the file) call ~mu4e-update-index~.
+;;
+;;Let's start off by handling the elisp side of things
+;;
+;;**** Rebuild mail index while using mu4e
+;;#+begin_src emacs-lisp
+;;(after! mu4e
+;;  (defvar mu4e-reindex-request-file "/tmp/mu_reindex_now"
+;;    "Location of the reindex request, signaled by existance")
+;;  (defvar mu4e-reindex-request-min-seperation 5.0
+;;    "Don't refresh again until this many second have elapsed.
+;;Prevents a series of redisplays from being called (when set to an appropriate value)")
+;;
+;;  (defvar mu4e-reindex-request--file-watcher nil)
+;;  (defvar mu4e-reindex-request--file-just-deleted nil)
+;;  (defvar mu4e-reindex-request--last-time 0)
+;;
+;;  (defun mu4e-reindex-request--add-watcher ()
+;;    (setq mu4e-reindex-request--file-just-deleted nil)
+;;    (setq mu4e-reindex-request--file-watcher
+;;          (file-notify-add-watch mu4e-reindex-request-file
+;;                                 '(change)
+;;                                 #'mu4e-file-reindex-request)))
+;;
+;;  (defadvice! mu4e-stop-watching-for-reindex-request ()
+;;    :after #'mu4e~proc-kill
+;;    (if mu4e-reindex-request--file-watcher
+;;        (file-notify-rm-watch mu4e-reindex-request--file-watcher)))
+;;
+;;  (defadvice! mu4e-watch-for-reindex-request ()
+;;    :after #'mu4e~proc-start
+;;    (mu4e-stop-watching-for-reindex-request)
+;;    (when (file-exists-p mu4e-reindex-request-file)
+;;      (delete-file mu4e-reindex-request-file))
+;;    (mu4e-reindex-request--add-watcher))
+;;
+;;  (defun mu4e-file-reindex-request (event)
+;;    "Act based on the existance of `mu4e-reindex-request-file'"
+;;    (if mu4e-reindex-request--file-just-deleted
+;;        (mu4e-reindex-request--add-watcher)
+;;      (when (equal (nth 1 event) 'created)
+;;        (delete-file mu4e-reindex-request-file)
+;;        (setq mu4e-reindex-request--file-just-deleted t)
+;;        (mu4e-reindex-maybe t))))
+;;
+;;  (defun mu4e-reindex-maybe (&optional new-request)
+;;    "Run `mu4e~proc-index' if it's been more than
+;;`mu4e-reindex-request-min-seperation'seconds since the last request,"
+;;    (let ((time-since-last-request (- (float-time)
+;;                                      mu4e-reindex-request--last-time)))
+;;      (when new-request
+;;        (setq mu4e-reindex-request--last-time (float-time)))
+;;      (if (> time-since-last-request mu4e-reindex-request-min-seperation)
+;;          (mu4e~proc-index nil t)
+;;        (when new-request
+;;          (run-at-time (* 1.1 mu4e-reindex-request-min-seperation) nil
+;;                       #'mu4e-reindex-maybe))))))
+;;#+end_src
+;;
+;;**** Config transcoding & service management
+;;As long as the =mbsyncrc= file exists, this is as easy as running
+;;#+begin_src shell :tangle (if (and (executable-find "mu") (not (file-exists-p "~/.config/imapnotify"))) "setup.sh" "no")
+;;~/.config/doom/misc/mbsync-imapnotify.py
+;;#+end_src
+;;
+;;When run without flags this will perform the following actions
+;;+ Read, and parse [[file:~/.mbsyncrc][~/.mbsyncrc]], specifically recognising the following properties
+;;  - ~IMAPAccount~
+;;  - ~Host~
+;;  - ~Port~
+;;  - ~User~
+;;  - ~Password~
+;;  - ~PassCmd~
+;;  - ~Patterns~
+;;+ Call ~mbsync --list ACCOUNT~, and filter results according to ~Patterns~
+;;+ Construct a imapnotify config for each account, with the following hooks
+;;  - onNewMail :: src_shell{mbsync --pull ACCOUNT:MAILBOX}
+;;  - onNewMailPost :: src_shell{if mu index --lazy-check; then test -f /tmp/mu_reindex_now && rm /tmp/mu_reindex_now; else touch /tmp/mu_reindex_now; fi}
+;;+ Compare accounts list to previous accounts, enable/disable the relevant
+;;  systemd services, called with the ~--now~ flag (start/stop services as well)
+;;
+;;This script also supports the following flags
+;;+ ~--status~ to get the status of the relevant systemd services supports =active=,
+;;  =failing=, and =disabled=
+;;+ ~--enable~ to enable all relevant systemd services
+;;+ ~--disable~ to disable all relevant systemd services
+;;#+begin_src python :tangle misc/mbsync-imapnotify.py :shebang "#!/usr/bin/env python3"
+;;from pathlib import Path
+;;import json
+;;import re
+;;import shutil
+;;import subprocess
+;;import sys
+;;import fnmatch
+;;
+;;mbsyncFile = Path("~/.mbsyncrc").expanduser()
+;;
+;;imapnotifyConfigFolder = Path("~/.config/imapnotify/").expanduser()
+;;imapnotifyConfigFolder.mkdir(exist_ok=True)
+;;imapnotifyConfigFilename = "notify.conf"
+;;
+;;imapnotifyDefault = {
+;;    "host": "",
+;;    "port": 993,
+;;    "tls": True,
+;;    "tlsOptions": {"rejectUnauthorized": True},
+;;    "onNewMail": "",
+;;    "onNewMailPost": "if mu index --lazy-check; then test -f /tmp/mu_reindex_now && rm /tmp/mu_reindex_now; else touch /tmp/mu_reindex_now; fi",
+;;}
+;;
+;;
+;;def stripQuotes(string):
+;;    if string[0] == '"' and string[-1] == '"':
+;;        return string[1:-1].replace('\\"', '"')
+;;
+;;
+;;mbsyncInotifyMapping = {
+;;    "Host": (str, "host"),
+;;    "Port": (int, "port"),
+;;    "User": (str, "username"),
+;;    "Password": (str, "password"),
+;;    "PassCmd": (stripQuotes, "passwordCmd"),
+;;    "Patterns": (str, "_patterns"),
+;;}
+;;
+;;oldAccounts = [d.name for d in imapnotifyConfigFolder.iterdir() if d.is_dir()]
+;;
+;;currentAccount = ""
+;;currentAccountData = {}
+;;
+;;successfulAdditions = []
+;;
+;;
+;;def processLine(line):
+;;    newAcc = re.match(r"^IMAPAccount ([^#]+)", line)
+;;
+;;    linecontent = re.sub(r"(^|[^\\])#.*", "", line).split(" ", 1)
+;;    if len(linecontent) != 2:
+;;        return
+;;
+;;    parameter, value = linecontent
+;;
+;;    if parameter == "IMAPAccount":
+;;        if currentAccountNumber > 0:
+;;            finaliseAccount()
+;;        newAccount(value)
+;;    elif parameter in mbsyncInotifyMapping.keys():
+;;        parser, key = mbsyncInotifyMapping[parameter]
+;;        currentAccountData[key] = parser(value)
+;;    elif parameter == "Channel":
+;;        currentAccountData["onNewMail"] = f"mbsync --pull --new {value}:'%s'"
+;;
+;;
+;;def newAccount(name):
+;;    global currentAccountNumber
+;;    global currentAccount
+;;    global currentAccountData
+;;    currentAccountNumber += 1
+;;    currentAccount = name
+;;    currentAccountData = {}
+;;    print(f"\n\033[1;32m{currentAccountNumber}\033[0;32m - {name}\033[0;37m")
+;;
+;;
+;;def accountToFoldername(name):
+;;    return re.sub(r"[^A-Za-z0-9]", "", name)
+;;
+;;
+;;def finaliseAccount():
+;;    if currentAccountNumber == 0:
+;;        return
+;;
+;;    global currentAccountData
+;;    try:
+;;        currentAccountData["boxes"] = getMailBoxes(currentAccount)
+;;    except subprocess.CalledProcessError as e:
+;;        print(
+;;            f"\033[1;31mError:\033[0;31m failed to fetch mailboxes (skipping): "
+;;            + f"`{' '.join(e.cmd)}' returned code {e.returncode}\033[0;37m"
+;;        )
+;;        return
+;;    except subprocess.TimeoutExpired as e:
+;;        print(
+;;            f"\033[1;31mError:\033[0;31m failed to fetch mailboxes (skipping): "
+;;            + f"`{' '.join(e.cmd)}' timed out after {e.timeout:.2f} seconds\033[0;37m"
+;;        )
+;;        return
+;;
+;;    if "_patterns" in currentAccountData:
+;;        currentAccountData["boxes"] = applyPatternFilter(
+;;            currentAccountData["_patterns"], currentAccountData["boxes"]
+;;        )
+;;
+;;    # strip not-to-be-exported data
+;;    currentAccountData = {
+;;        k: currentAccountData[k] for k in currentAccountData if k[0] != "_"
+;;    }
+;;
+;;    parametersSet = currentAccountData.keys()
+;;    currentAccountData = {**imapnotifyDefault, **currentAccountData}
+;;    for key, val in currentAccountData.items():
+;;        valColor = "\033[0;33m" if key in parametersSet else "\033[0;37m"
+;;        print(f"  \033[1;37m{key:<13} {valColor}{val}\033[0;37m")
+;;
+;;    if (
+;;            len(currentAccountData["boxes"]) > 15
+;;            and "@gmail.com" in currentAccountData["username"]
+;;    ):
+;;        print(
+;;            "  \033[1;31mWarning:\033[0;31m Gmail raises an error when more than"
+;;            + "\033[1;31m15\033[0;31m simultanious connections are attempted."
+;;            + "\n           You are attempting to monitor "
+;;            + f"\033[1;31m{len(currentAccountData['boxes'])}\033[0;31m mailboxes.\033[0;37m"
+;;        )
+;;
+;;    configFile = (
+;;        imapnotifyConfigFolder
+;;        / accountToFoldername(currentAccount)
+;;        / imapnotifyConfigFilename
+;;    )
+;;    configFile.parent.mkdir(exist_ok=True)
+;;
+;;    json.dump(currentAccountData, open(configFile, "w"), indent=2)
+;;    print(f" \033[0;35mConfig generated and saved to {configFile}\033[0;37m")
+;;
+;;    global successfulAdditions
+;;    successfulAdditions.append(accountToFoldername(currentAccount))
+;;
+;;
+;;def getMailBoxes(account):
+;;    boxes = subprocess.run(
+;;        ["mbsync", "--list", account], check=True, stdout=subprocess.PIPE, timeout=10.0
+;;    )
+;;    return boxes.stdout.decode("utf-8").strip().split("\n")
+;;
+;;
+;;def applyPatternFilter(pattern, mailboxes):
+;;    patternRegexs = getPatternRegexes(pattern)
+;;    return [m for m in mailboxes if testPatternRegexs(patternRegexs, m)]
+;;
+;;
+;;def getPatternRegexes(pattern):
+;;    def addGlob(b):
+;;        blobs.append(b.replace('\\"', '"'))
+;;        return ""
+;;
+;;    blobs = []
+;;    pattern = re.sub(r' ?"([^"]+)"', lambda m: addGlob(m.groups()[0]), pattern)
+;;    blobs.extend(pattern.split(" "))
+;;    blobs = [
+;;        (-1, fnmatch.translate(b[1::])) if b[0] == "!" else (1, fnmatch.translate(b))
+;;        for b in blobs
+;;    ]
+;;    return blobs
+;;
+;;
+;;def testPatternRegexs(regexCond, case):
+;;    for factor, regex in regexCond:
+;;        if factor * bool(re.match(regex, case)) < 0:
+;;            return False
+;;    return True
+;;
+;;
+;;def processSystemdServices():
+;;    keptAccounts = [acc for acc in successfulAdditions if acc in oldAccounts]
+;;    freshAccounts = [acc for acc in successfulAdditions if acc not in oldAccounts]
+;;    staleAccounts = [acc for acc in oldAccounts if acc not in successfulAdditions]
+;;
+;;    if keptAccounts:
+;;        print(f"\033[1;34m{len(keptAccounts)}\033[0;34m kept accounts:\033[0;37m")
+;;        restartAccountSystemdServices(keptAccounts)
+;;
+;;    if freshAccounts:
+;;        print(f"\033[1;32m{len(freshAccounts)}\033[0;32m new accounts:\033[0;37m")
+;;        enableAccountSystemdServices(freshAccounts)
+;;    else:
+;;        print(f"\033[0;32mNo new accounts.\033[0;37m")
+;;
+;;    notActuallyEnabledAccounts = [
+;;        acc for acc in successfulAdditions if not getAccountServiceState(acc)["enabled"]
+;;    ]
+;;    if notActuallyEnabledAccounts:
+;;        print(
+;;            f"\033[1;32m{len(notActuallyEnabledAccounts)}\033[0;32m accounts need re-enabling:\033[0;37m"
+;;        )
+;;        enableAccountSystemdServices(notActuallyEnabledAccounts)
+;;
+;;    if staleAccounts:
+;;        print(f"\033[1;33m{len(staleAccounts)}\033[0;33m removed accounts:\033[0;37m")
+;;        disableAccountSystemdServices(staleAccounts)
+;;    else:
+;;        print(f"\033[0;33mNo removed accounts.\033[0;37m")
+;;
+;;
+;;def enableAccountSystemdServices(accounts):
+;;    for account in accounts:
+;;        print(f" \033[0;32m - \033[1;37m{account:<18}", end="\033[0;37m", flush=True)
+;;        if setSystemdServiceState(
+;;                "enable", f"goimapnotify@{accountToFoldername(account)}.service"
+;;        ):
+;;            print("\033[1;32m enabled")
+;;
+;;
+;;def disableAccountSystemdServices(accounts):
+;;    for account in accounts:
+;;        print(f" \033[0;33m - \033[1;37m{account:<18}", end="\033[0;37m", flush=True)
+;;        if setSystemdServiceState(
+;;                "disable", f"goimapnotify@{accountToFoldername(account)}.service"
+;;        ):
+;;            print("\033[1;33m disabled")
+;;
+;;
+;;def restartAccountSystemdServices(accounts):
+;;    for account in accounts:
+;;        print(f" \033[0;34m - \033[1;37m{account:<18}", end="\033[0;37m", flush=True)
+;;        if setSystemdServiceState(
+;;                "restart", f"goimapnotify@{accountToFoldername(account)}.service"
+;;        ):
+;;            print("\033[1;34m restarted")
+;;
+;;
+;;def setSystemdServiceState(state, service):
+;;    try:
+;;        enabler = subprocess.run(
+;;            ["systemctl", "--user", state, service, "--now"],
+;;            check=True,
+;;            stderr=subprocess.DEVNULL,
+;;            timeout=5.0,
+;;        )
+;;        return True
+;;    except subprocess.CalledProcessError as e:
+;;        print(
+;;            f" \033[1;31mfailed\033[0;31m to {state}, `{' '.join(e.cmd)}'"
+;;            + f"returned code {e.returncode}\033[0;37m"
+;;        )
+;;    except subprocess.TimeoutExpired as e:
+;;        print(f" \033[1;31mtimed out after {e.timeout:.2f} seconds\033[0;37m")
+;;        return False
+;;
+;;
+;;def getAccountServiceState(account):
+;;    return {
+;;        state: bool(
+;;            1
+;;            - subprocess.run(
+;;                [
+;;                    "systemctl",
+;;                    "--user",
+;;                    f"is-{state}",
+;;                    "--quiet",
+;;                    f"goimapnotify@{accountToFoldername(account)}.service",
+;;                ],
+;;                stderr=subprocess.DEVNULL,
+;;            ).returncode
+;;        )
+;;        for state in ("enabled", "active", "failing")
+;;    }
+;;
+;;
+;;def getAccountServiceStates(accounts):
+;;    for account in accounts:
+;;        enabled, active, failing = getAccountServiceState(account).values()
+;;        print(f"  - \033[1;37m{account:<18}\033[0;37m ", end="", flush=True)
+;;        if not enabled:
+;;            print("\033[1;33mdisabled\033[0;37m")
+;;        elif active:
+;;            print("\033[1;32mactive\033[0;37m")
+;;        elif failing:
+;;            print("\033[1;31mfailing\033[0;37m")
+;;        else:
+;;            print("\033[1;35min an unrecognised state\033[0;37m")
+;;
+;;
+;;if len(sys.argv) > 1:
+;;    if sys.argv[1]   in ["-e", "--enable"]:
+;;        enableAccountSystemdServices(oldAccounts)
+;;        exit()
+;;    elif sys.argv[1] in ["-d", "--disable"]:
+;;        disableAccountSystemdServices(oldAccounts)
+;;        exit()
+;;    elif sys.argv[1] in ["-r", "--restart"]:
+;;        restartAccountSystemdServices(oldAccounts)
+;;        exit()
+;;    elif sys.argv[1] in ["-s", "--status"]:
+;;        getAccountServiceStates(oldAccounts)
+;;        exit()
+;;    elif sys.argv[1] in ["-h", "--help"]:
+;;        print("""\033[1;37mMbsync to IMAP Notify config generator.\033[0;37m
+;;
+;;Usage: mbsync-imapnotify [options]
+;;
+;;Options:
+;;    -e, --enable       enable all services
+;;    -d, --disable      disable all services
+;;    -r, --restart      restart all services
+;;    -s, --status       fetch the status for all services
+;;    -h, --help         show this help
+;;""", end='')
+;;        exit()
+;;    else:
+;;        print(f"\033[0;31mFlag {sys.argv[1]} not recognised, try --help\033[0;37m")
+;;        exit()
+;;
+;;
+;;mbsyncData = open(mbsyncFile, "r").read()
+;;
+;;currentAccountNumber = 0
+;;
+;;totalAccounts = len(re.findall(r"^IMAPAccount", mbsyncData, re.M))
+;;
+;;
+;;def main():
+;;    print("\033[1;34m:: MbSync to Go IMAP notify config file creator ::\033[0;37m")
+;;
+;;    shutil.rmtree(imapnotifyConfigFolder)
+;;    imapnotifyConfigFolder.mkdir(exist_ok=False)
+;;    print("\033[1;30mImap Notify config dir purged\033[0;37m")
+;;
+;;    print(f"Identified \033[1;32m{totalAccounts}\033[0;32m accounts.\033[0;37m")
+;;
+;;    for line in mbsyncData.split("\n"):
+;;        processLine(line)
+;;
+;;    finaliseAccount()
+;;
+;;    print(
+;;        f"\nConfig files generated for \033[1;36m{len(successfulAdditions)}\033[0;36m"
+;;        + f" out of \033[1;36m{totalAccounts}\033[0;37m accounts.\n"
+;;    )
+;;
+;;    processSystemdServices()
+;;
+;;
+;;if __name__ == "__main__":
+;;    main()
+;;#+end_src
+;;
+;;**** Systemd
+;;We then have a service file to run ~goimapnotify~ on all of these generated config files.
+;;We'll use a template service file so we can enable a unit per-account.
+;;#+begin_src systemd :tangle ~/.config/systemd/user/goimapnotify@.service
+;;[Unit]
+;;Description=IMAP notifier using IDLE, golang version.
+;;ConditionPathExists=%h/.config/imapnotify/%I/notify.conf
+;;After=network.target
+;;
+;;[Service]
+;;ExecStart=%h/.local/bin/goimapnotify -conf %h/.config/imapnotify/%I/notify.conf
+;;Restart=always
+;;RestartSec=30
+;;
+;;[Install]
+;;WantedBy=default.target
+;;#+end_src
+;;
+;;Enabling the service is actually taken care of by that python script.
+;;
+;;From one or two small tests, this can bring the delay down to as low as five
+;;seconds, which I'm quite happy with.
+;;
+;;This works well for fetching new mail, but we also want to propagate other
+;;changes (e.g. marking mail as read), and make sure we're up to date at the
+;;start, so for that I'll do the 'normal' thing and run ~mbsync -all~ every so often
+;;--- let's say five minutes.
+;;
+;;We can accomplish this via a systemd timer, and service file.
+;;#+begin_src systemd :tangle (if (executable-find "mu") "~/.config/systemd/user/mbsync.timer" "no")
+;;[Unit]
+;;Description=call mbsync on all accounts every 5 minutes
+;;ConditionPathExists=%h/.mbsyncrc
+;;
+;;[Timer]
+;;OnBootSec=5m
+;;OnUnitInactiveSec=5m
+;;
+;;[Install]
+;;WantedBy=default.target
+;;#+end_src
+;;
+;;#+begin_src systemd :tangle (if (executable-find "mu") "~/.config/systemd/user/mbsync.service" "no")
+;;[Unit]
+;;Description=mbsync service, sync all mail
+;;Documentation=man:mbsync(1)
+;;ConditionPathExists=%h/.mbsyncrc
+;;
+;;[Service]
+;;Type=oneshot
+;;ExecStart=/usr/bin/mbsync -c %h/.mbsyncrc --all
+;;
+;;[Install]
+;;WantedBy=mail.target
+;;#+end_src
+;;
+;;Enabling (and starting) this is as simple as
+;;#+begin_src shell :tangle (if (or (not (executable-find "mu")) (string= "enabled\n" (shell-command-to-string "systemctl --user is-enabled mbsync.timer"))) "no" "setup.sh")
+;;systemctl --user enable mbsync.timer --now
+;;#+end_src
+;;*** Indexing/Searching
+;;This is performed by [[https://www.djcbsoftware.nl/code/mu/][Mu]]. This is a tool for finding emails stored in the [[http://en.wikipedia.org/wiki/Maildir][Maildir]] format.
+;;According to the homepage, it's main features are
+;;+ Fast indexing
+;;+ Good searching
+;;+ Support for encrypted and signed messages
+;;+ Rich CLI tooling
+;;+ accent/case normalisation
+;;+ strong integration with email clients
+;;
+;;Unfortunately ~mu~ is not currently packaged from me. Oh well, I guess I'm
+;;building it from source then. I needed to install these packages
+;;+ =gmime-devel=
+;;+ =xapian-core-devel=
+;;
+;;#+name: Install mu from source
+;;#+begin_src shell :eval no :tangle (if (and (file-directory-p "~/.mail") (not (executable-find "mu"))) "setup.sh" "no")
+;;cd ~/.local/lib/
+;;git clone https://github.com/djcb/mu.git
+;;cd ./mu
+;;./autogen.sh
+;;make
+;;sudo make install
+;;#+end_src
+;;
+;;To check how my version compares to the latest published:
+;;
+;;#+begin_src shell :tangle no
+;;curl --silent "https://api.github.com/repos/djcb/mu/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+;;mu --version | head -n 1 | sed 's/.* version //'
+;;#+end_src
+;;
+;;#+results:
+;;| 1.4.6 |
+;;| 1.4.6 |
+;;*** Sending
+;;[[https://www.nongnu.org/smtpmail/][SmtpMail]] seems to be the 'default' starting point, but that's not packaged for
+;;me. [[https://marlam.de/msmtp/][msmtp]] is however, so I'll give that a shot. Reading around a bit (googling
+;;"msmtp vs sendmail" for example) almost every comparison mentioned seems to
+;;suggest msmtp to be a better choice. I have seen the following points raised
+;;+ ~sendmail~ has several vulnerabilities
+;;+ ~sendmail~ is tedious to configure
+;;+ ~ssmtp~ is no longer maintained
+;;+ ~msmtp~ is a maintained alternative to ~ssmtp~
+;;+ ~msmtp~ is easier to configure
+;;
+;;The config file is [[file:~/.config/msmtp/config][~/.config/msmtp/config]].
+;;
+;;**** System hackery
+;;Unfortunately, I seem to have run into a [[https://bugs.archlinux.org/task/44994][bug]] present in my packaged version, so
+;;we'll just install the latest from source.
+;;
+;;For full use of the ~auth~ options, I need =GNU SASL=, which isn't packaged for me.
+;;I don't think I want it, but in case I do, I'll need to do this.
+;;#+name: Install gsasl from source
+;;#+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "msmtp"))) "setup.sh" "no")
+;;export GSASL_VERSION=1.8.1
+;;cd ~/.local/lib/
+;;curl "ftp://ftp.gnu.org/gnu/gsasl/libgsasl-$GSASL_VERSION.tar.gz" | tar xz
+;;curl "ftp://ftp.gnu.org/gnu/gsasl/gsasl-$GSASL_VERSION.tar.gz" | tar xz
+;;cd "./libgsasl-$GSASL_VERSION"
+;;./configure
+;;make
+;;sudo make install
+;;cd ..
+;;cd "./gsasl-$VERSION"
+;;./configure
+;;make
+;;sudo make install
+;;cd ..
+;;#+end_src
+;;
+;;Now actually compile ~msmtp~.
+;;#+name: Install msmtp from source
+;;#+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "msmtp"))) "setup.sh" "no")
+;;cd ~/.local/lib/
+;;git clone https://github.com/marlam/msmtp-mirror.git ./msmtp
+;;cd ./msmtp
+;;libtoolize --force
+;;aclocal
+;;autoheader
+;;automake --force-missing --add-missing
+;;autoconf
+;;# if using GSASL
+;;# PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --with-libgsasl
+;;./configure
+;;make
+;;sudo make install
+;;#+end_src
+;;
+;;If using =GSASL= (from earlier) we need to make ensure that the dynamic library in
+;;in the library path. We can do by adding an executable with the same name
+;;earlier on in my ~$PATH~.
+;;#+begin_src sh :tangle no :shebang "#!/bin/sh"
+;;LD_LIBRARY_PATH=/usr/local/lib exec /usr/local/bin/msmtp "$@"
+;;#+end_src
+;;
+;;*** Mu4e
+;;:PROPERTIES:
+;;:header-args:emacs-lisp: :tangle no :noweb-ref mu4e-conf
+;;:END:
+;;
+;;Webmail clients are nice and all, but I still don't believe that SPAs in my
+;;browser can replaced desktop apps ... sorry Gmail. I'm also liking google less
+;;and less.
+;;
+;;Mailspring is a decent desktop client, quite lightweight for electron
+;;(apparently the backend is in =C=, which probably helps), however I miss Emacs
+;;stuff.
+;;
+;;While =Notmuch= seems very promising, and I've heard good things about it, it
+;;doesn't seem to make any changes to the emails themselves. All data is stored in
+;;Notmuch's database. While this is a very interesting model, occasionally I need
+;;to pull up an email on say my phone, and so not I want the tagging/folders etc.
+;;to be applied to the mail itself --- not stored in a database.
+;;
+;;On the other hand =Mu4e= is also talked about a lot in positive terms, and seems
+;;to possess a similarly strong feature set --- and modifies the mail itself (I.e.
+;;information is accessible without the database). =Mu4e= also seems to have a large
+;;user base, which tends to correlate with better support and attention.
+;;
+;;As I installed mu4e from source, I need to add the =/usr/local/= loadpath so Mu4e has a chance of loading
+;;#+begin_src emacs-lisp :tangle (if (file-directory-p "/usr/local/share/emacs/site-lisp/mu4e") "yes" "no")
+;;(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
+;;#+end_src
+;;
+;;Alternatively, I may need to add the =/usr/share/= path.
+;;#+begin_src emacs-lisp :tangle (if (file-directory-p "/usr/share/emacs/site-lisp/mu4e") "yes" "no")
+;;(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
+;;#+end_src
+;;
+;;Let's also just shove all the Elisp code here in an src_elisp{(after! ...)} block.
+;;#+begin_src emacs-lisp :noweb no-export :tangle yes :noweb-ref nil
+;;(after! mu4e
+;;  <<mu4e-conf>>
+;;)
+;;#+end_src
+;;
+;;**** Viewing Mail
+;;There seem to be some advantages with using Gnus' article view (such as inline
+;;images), and judging from [[https://github.com/djcb/mu/pull/1442#issuecomment-591695814][djcb/mu!1442 (comment)]] this seems to be the 'way of
+;;the future' for mu4e.
+;;
+;;There are some all-the-icons font related issues, so we need to redefine the
+;;fancy chars, and make sure they get the correct width.
+;;
+;;To account for the increase width of each flag character, and make perform a
+;;few more visual tweaks, we'll tweak the headers a bit
+;;#+begin_src emacs-lisp
+;;(setq mu4e-headers-fields
+;;      '((:flags . 6)
+;;        (:account-stripe . 2)
+;;        (:from-or-to . 25)
+;;        (:folder . 10)
+;;        (:recipnum . 2)
+;;        (:subject . 80)
+;;        (:human-date . 8))
+;;      +mu4e-min-header-frame-width 142
+;;      mu4e-headers-date-format "%d/%m/%y"
+;;      mu4e-headers-time-format "⧖ %H:%M"
+;;      mu4e-headers-results-limit 1000
+;;      mu4e-index-cleanup t)
+;;
+;;(add-to-list 'mu4e-bookmarks
+;;             '(:name "Yesterday's messages" :query "date:2d..1d" :key ?y) t)
+;;
+;;(defvar +mu4e-header--folder-colors nil)
+;;(appendq! mu4e-header-info-custom
+;;          '((:folder .
+;;             (:name "Folder" :shortname "Folder" :help "Lowest level folder" :function
+;;              (lambda (msg)
+;;                (+mu4e-colorize-str
+;;                 (replace-regexp-in-string "\\`.*/" "" (mu4e-message-field msg :maildir))
+;;                 '+mu4e-header--folder-colors))))))
+;;#+end_src
+;;
+;;We'll also use a nicer alert icon
+;;#+begin_src emacs-lisp
+;;(setq mu4e-alert-icon "/usr/share/icons/Papirus/64x64/apps/evolution.svg")
+;;#+end_src
+;;**** Sending Mail
+;;Let's send emails too.
+;;#+begin_src emacs-lisp
+;;(setq sendmail-program "/usr/bin/msmtp"
+;;      send-mail-function #'smtpmail-send-it
+;;      message-sendmail-f-is-evil t
+;;      message-sendmail-extra-arguments '("--read-envelope-from"); , "--read-recipients")
+;;      message-send-mail-function #'message-send-mail-with-sendmail)
+;;#+end_src
+;;
+;;It's also nice to avoid accidentally sending emails with the wrong account. If
+;;we can send from the address in the ~To~ field, let's do that. Opening a prompt
+;;otherwise also seems sensible.
+;;
+;;We can register Emacs as a potential email client with a desktop file. We could
+;;put an =emacsclient ...= entry in the =Exec= field, but I've found this a bit dodgy.
+;;Instead let's package the =emacslient= behaviour in a little executable
+;;=~/.local/bin/emacsmail=.
+;;
+;;#+begin_src shell :tangle ~/.local/bin/emacsmail :shebang "#!/usr/bin/env sh" :mkdirp yes :tangle-mode (identity #o755) :comments no
+;;emacsclient -create-frame --alternate-editor='' --no-wait --eval \
+;;"(progn (x-focus-frame nil) (mu4e-compose-from-mailto \"$1\" t))"
+;;#+end_src
+;;
+;;Now we can just call that in a desktop file.
+;;
+;;#+begin_src conf :tangle ~/.local/share/applications/emacsmail.desktop :mkdirp yes
+;;[Desktop Entry]
+;;Name=Mu4e
+;;GenericName=Compose a new message with Mu4e in Emacs
+;;Comment=Open mu4e compose window
+;;MimeType=x-scheme-handler/mailto;
+;;Exec=emacsmail %u
+;;Icon=emacs
+;;Type=Application
+;;Terminal=false
+;;Categories=Network;Email;
+;;StartupWMClass=Emacs
+;;#+end_src
+;;
+;;To register this, just call
+;;#+begin_src shell :tangle (if (or (not (executable-find "mu")) (string= (shell-command-to-string "xdg-mime query default x-scheme-handler/mailto") "emacsmail.desktop\n")) "no" "setup.sh")
+;;update-desktop-database ~/.local/share/applications
+;;#+end_src
+;;
+;;We also want to define ~mu4e-compose-from-mailto~.
+;;#+begin_src emacs-lisp
+;;(defun mu4e-compose-from-mailto (mailto-string &optional quit-frame-after)
+;;  (require 'mu4e)
+;;  (unless mu4e~server-props (mu4e t) (sleep-for 0.1))
+;;  (let* ((mailto (message-parse-mailto-url mailto-string))
+;;         (to (cdr (assoc "To" mailto)))
+;;         (subject (or (cdr (assoc "Subject" mailto)) ""))
+;;         (body (cdr (assoc "Body" mailto)))
+;;         (headers (-filter (lambda (spec) (not (-contains-p '("To" "Subject" "Body") (car spec)))) mailto)))
+;;    (when-let ((mu4e-main (get-buffer mu4e-main-buffer-name)))
+;;      (switch-to-buffer mu4e-main))
+;;    (mu4e~compose-mail to subject headers)
+;;    (when body
+;;      (goto-char (point-min))
+;;      (if (eq major-mode 'org-msg-edit-mode)
+;;          (org-msg-goto-body)
+;;        (mu4e-compose-goto-bottom))
+;;      (insert body))
+;;    (goto-char (point-min))
+;;    (cond ((null to) (search-forward "To: "))
+;;          ((string= "" subject) (search-forward "Subject: "))
+;;          (t (if (eq major-mode 'org-msg-edit-mode)
+;;                 (org-msg-goto-body)
+;;               (mu4e-compose-goto-bottom))))
+;;    (font-lock-ensure)
+;;    (when evil-normal-state-minor-mode
+;;      (evil-append 1))
+;;    (when quit-frame-after
+;;      (add-hook 'kill-buffer-hook
+;;                `(lambda ()
+;;                   (when (eq (selected-frame) ,(selected-frame))
+;;                     (delete-frame)))))))
+;;#+end_src
+;;
+;;It would also be nice to change the name pre-filled in =From:= when drafting.
+;;#+begin_src emacs-lisp
+;;(defvar mu4e-from-name "Timothy"
+;;  "Name used in \"From:\" template.")
+;;(defadvice! mu4e~draft-from-construct-renamed (orig-fn)
+;;  "Wrap `mu4e~draft-from-construct-renamed' to change the name."
+;;  :around #'mu4e~draft-from-construct
+;;  (let ((user-full-name mu4e-from-name))
+;;    (funcall orig-fn)))
+;;#+end_src
+;;
+;;We can also use this a signature,
+;;#+begin_src emacs-lisp
+;;(setq message-signature mu4e-from-name)
+;;#+end_src
+;;**** Working with the Org mailing list
+;;***** Adding =X-Woof= headers
+;;
+;;I'm fairly active on the Org mailing list (ML). The Org ML has a linked
+;;bug/patch tracker, https://updates.orgmode.org/ managed by [[https://github.com/bzg/woof][Woof]]. However, I feel
+;;like I spend too much time looking up what the appropriate headers are for
+;;updating the status of bugs and patches. What I need, is some sort of convenient
+;;tool. Let's write one.
+;;
+;;First, a function that asks what I want to do and returns the appropriate =X-Woof=
+;;header.
+;;#+begin_src emacs-lisp
+;;(defun +mu4e-get-woof-header ()
+;;  (pcase (read-char
+;;          (format "\
+;;%s
+;;  %s Declare %s Applied %s Aborted
+;;%s
+;;  %s Confirm %s Fixed
+;;%s
+;;  %s Request %s Resolved
+;;
+;;%s remove X-Woof header"
+;;                  (propertize "Patch" 'face 'outline-3)
+;;                  (propertize "p" 'face '(bold consult-key))
+;;                  (propertize "a" 'face '(bold consult-key))
+;;                  (propertize "c" 'face '(bold consult-key))
+;;                  (propertize "Bug" 'face 'outline-3)
+;;                  (propertize "b" 'face '(bold consult-key))
+;;                  (propertize "f" 'face '(bold consult-key))
+;;                  (propertize "Help" 'face 'outline-3)
+;;                  (propertize "h" 'face '(bold consult-key))
+;;                  (propertize "r" 'face '(bold consult-key))
+;;                  (propertize "x" 'face '(bold error))))
+;;    (?p "X-Woof-Patch: confirmed")
+;;    (?a "X-Woof-Patch: applied")
+;;    (?c "X-Woof-Patch: cancelled")
+;;    (?b "X-Woof-Bug: confirmed")
+;;    (?f "X-Woof-Bug: fixed")
+;;    (?h "X-Woof-Help: confirmed")
+;;    (?r "X-Woof-Help: cancelled")
+;;    (?x 'delete)))
+;;#+end_src
+;;
+;;Now we just need a function which will add such a header to a buffer
+;;#+begin_src emacs-lisp
+;;(defun +mu4e-insert-woof-header ()
+;;  "Insert an X-Woof header into the current message."
+;;  (interactive)
+;;  (when-let ((header (+mu4e-get-woof-header)))
+;;    (save-excursion
+;;      (goto-char (point-min))
+;;      (search-forward "--text follows this line--")
+;;      (unless (eq header 'delete)
+;;        (beginning-of-line)
+;;        (insert header "\n")
+;;        (forward-line -1))
+;;      (when (re-search-backward "^X-Woof-" nil t)
+;;        (kill-whole-line)))))
+;;
+;;(map! :map mu4e-compose-mode-map
+;;      :localleader
+;;      :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
+;;
+;;(map! :map org-msg-edit-mode-map
+;;      :after org-msg
+;;      :localleader
+;;      :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
+;;#+end_src
+;;
+;;Lovely! That should make adding these headers a breeze.
+;;
+;;***** Patch workflow
+;;
+;;Testing patches from the ML is currently more hassle than it needs to be. Let's
+;;change that.
+;;
+;;#+begin_src emacs-lisp
+;;(after! mu4e
+;;  (defvar +org-ml-target-dir "~/.emacs.d/.local/straight/repos/org-mode/")
+;;  (defvar +org-ml-max-age 600
+;;    "Maximum permissible age in seconds.")
+;;  (defvar +org-ml--cache-timestamp 0)
+;;  (defvar +org-ml--cache nil)
+;;
+;;  (define-minor-mode +org-ml-patchy-mood-mode
+;;    "Apply patches to Org in bulk."
+;;    :global t
+;;    (let ((action (cons "apply patch to org" #'+org-ml-apply-patch)))
+;;      (if +org-ml-patchy-mood-mode
+;;          (add-to-list 'mu4e-view-actions action)
+;;        (setq mu4e-view-actions (delete action mu4e-view-actions)))))
+;;
+;;  (defun +org-ml-apply-patch (msg)
+;;    "Apply the patch in the current message to Org."
+;;    (interactive)
+;;    (unless msg (setq msg (mu4e-message-at-point)))
+;;    (with-current-buffer (get-buffer-create "*Shell: Org apply patches*")
+;;      (erase-buffer)
+;;      (let* ((default-directory +org-ml-target-dir)
+;;             (exit-code (call-process "git" nil t nil "am" (mu4e-message-field msg :path))))
+;;        (magit-refresh)
+;;        (when (not (= 0 exit-code))
+;;          (+popup/buffer)))))
+;;
+;;  (defun +org-ml-current-patches ()
+;;    "Get the currently open patches, as a list of alists.
+;;Entries of the form (subject . id)."
+;;    (delq nil
+;;          (mapcar
+;;           (lambda (entry)
+;;             (unless (plist-get entry :fixed)
+;;               (cons
+;;                (format "%-8s  %s"
+;;                        (propertize
+;;                         (replace-regexp-in-string "T.*" ""
+;;                                                   (plist-get entry :date))
+;;                         'face 'font-lock-doc-face)
+;;                        (propertize
+;;                         (replace-regexp-in-string "\\[PATCH\\] ?" ""
+;;                                                   (plist-get entry :summary))
+;;                         'face 'font-lock-keyword-face))
+;;                (plist-get entry :id))))
+;;           (with-current-buffer (url-retrieve-synchronously "https://updates.orgmode.org/data/patches")
+;;             (goto-char url-http-end-of-headers)
+;;             (json-parse-buffer :object-type 'plist)))))
+;;
+;;  (defun +org-ml-select-patch-thread ()
+;;    "Find and apply a proposed Org patch."
+;;    (interactive)
+;;    (let* ((current-workspace (+workspace-current))
+;;           (patches (progn
+;;                      (when (or (not +org-ml--cache)
+;;                                (> (- (float-time) +org-ml--cache-timestamp)
+;;                                   +org-ml-max-age))
+;;                        (setq +org-ml--cache (+org-ml-current-patches)
+;;                              +org-ml--cache-timestamp (float-time)))
+;;                      +org-ml--cache))
+;;           (msg-id (cdr (assoc (completing-read
+;;                                "Thread: " (mapcar #'car patches))
+;;                               patches))))
+;;      (+workspace-switch +mu4e-workspace-name)
+;;      (mu4e-view-message-with-message-id msg-id)
+;;      (unless +org-ml-patchy-mood-mode
+;;        (add-to-list 'mu4e-view-actions
+;;                     (cons "apply patch to org" #'+org-ml-transient-mu4e-action)))))
+;;
+;;  (defun +org-ml-transient-mu4e-action (msg)
+;;    (setq mu4e-view-actions
+;;          (delete (cons "apply patch to org" #'+org-ml-transient-mu4e-action)
+;;                  mu4e-view-actions))
+;;    (+workspace/other)
+;;    (magit-status +org-ml-target-dir)
+;;    (+org-ml-apply-patch msg)))
+;;#+end_src
+;;
+;;***** Mail list archive links
+;;
+;;The other thing which it's good to be easily able to do is grab a link to the
+;;current message on https://list.orgmode.org.
+;;
+;;#+begin_src emacs-lisp
+;;(after! mu4e
+;;  (defun +mu4e-ml-message-link (msg)
+;;    "Copy the link to MSG on the mailing list archives."
+;;    (let* ((list-addr (or (mu4e-message-field msg :mailing-list)
+;;                          (cdar (mu4e-message-field-raw msg :list-post))
+;;                          (thread-last (append (mu4e-message-field msg :to)
+;;                                               (mu4e-message-field msg :cc))
+;;                            (mapcar #'last)
+;;                            (mapcar #'cdr)
+;;                            (mapcar (lambda (addr)
+;;                                      (when (string-match-p "emacs.*@gnu\\.org$" addr)
+;;                                        (replace-regexp-in-string "@" "." addr))))
+;;                            (delq nil)
+;;                            (car))))
+;;           (msg-url
+;;            (cond
+;;             ((string= "emacs-orgmode.gnu.org" list-addr)
+;;              (format "https://list.orgmode.org/%s" (mu4e-message-field msg :message-id)))
+;;             (t (user-error "Mailing list %s not supported" list-addr)))))
+;;      (message "Link %s copied to clipboard" (gui-select-text msg-url))
+;;      msg-url))
+;;
+;;  (add-to-list 'mu4e-view-actions (cons "link to message ML" #'+mu4e-ml-message-link) t))
+;;#+end_src
+;;
+;;In a similar manner, when clicking on such a link (say when someone uses a link
+;;to the archive to refer to an earlier email) I'd much rather look at it in mu4e.
+;;
+;;#+begin_src emacs-lisp
+;;(defun +browse-url-orgmode-ml (url &optional _)
+;;  "Open an orgmode list url using notmuch."
+;;  (let ((id (and (or (string-match "^https?://orgmode\\.org/list/\\([^/]+\\)" url)
+;;                     (string-match "^https?://list\\.orgmode\\.org/\\([^/]+\\)" url))
+;;                 (match-string 1 url))))
+;;    (mu4e-view-message-with-message-id id)))
+;;
+;;(add-to-list 'browse-url-handlers (cons "^https?://orgmode\\.org/list" #'+browse-url-orgmode-ml))
+;;(add-to-list 'browse-url-handlers (cons "^https?://list\\.orgmode\\.org/" #'+browse-url-orgmode-ml))
+;;#+end_src
+;;
+;;*** Org Msg
+;;Doom does a fantastic stuff with the defaults with this, so we only make a few
+;;minor tweaks.
+;;#+begin_src emacs-lisp
+;;(setq +org-msg-accent-color "#1a5fb4"
+;;      org-msg-greeting-fmt "\nHi%s,\n\n"
+;;      org-msg-signature "\n\n#+begin_signature\nAll the best,\\\\\n@@html:<b>@@Timothy@@html:</b>@@\n#+end_signature")
+;;(map! :map org-msg-edit-mode-map
+;;      :after org-msg
+;;      :n "G" #'org-msg-goto-body)
+;;#+end_src
+;;* Language configuration
 ** General
 *** File Templates
 
@@ -5331,44 +5050,6 @@ I can check this by checking the content of the SSH key =~/.ssh/id_ed25519.pub=.
 To account for this situation properly, we need a short script to determine the
 correct package statement needed.
 
-#+name: org-pkg-statement
-#+begin_src emacs-lisp :tangle no
-(condition-case nil
-    (load (expand-file-name "core/core.el" user-emacs-directory) nil t) ; For `doom-local-dir'
-  (error (setq doom-local-dir (expand-file-name ".local/" user-emacs-directory)))) ; Fall back on the default value.
-(let ((dev-key (and (file-exists-p "~/.ssh/id_ed25519.pub")
-                    (= 0 (shell-command "cat ~/.ssh/id_ed25519.pub | grep -q AAAAC3NzaC1lZDI1NTE5AAAAIOZZqcJOLdN+QFHKyW8ST2zz750+8TdvO9IT5geXpQVt"))))
-      (dev-pkg (let ((default-directory (expand-file-name "straight/repos/org-mode" doom-local-dir)))
-                 (and (file-exists-p default-directory)
-                      (string= "tec@git.savannah.gnu.org:/srv/git/emacs/org-mode.git\n" (shell-command-to-string "git remote get-url origin")))))
-      (recipe-common '(:files ("*.el" "lisp/*.el" "etc")
-                       :pre-build
-                       (with-temp-file (doom-path (straight--repos-dir "org-mode") "org-version.el")
-                         (insert "(fset 'org-release (lambda () \"9.5\"))\n"
-                                 (format "(fset 'org-git-version (lambda () \"%s\"))\n"
-                                         (substring (shell-command-to-string "git rev-parse --short HEAD") 0 -1))
-                                 "(provide 'org-version)\n"))
-                       :includes org)))
-  (prin1-to-string
-   `(package! org-mode
-      :recipe (,@(cond ((and dev-key dev-pkg)
-                        (list :host nil :repo nil :local-repo (expand-file-name "straight/repos/org-mode" doom-local-dir)))
-                       (dev-key
-                        (list :host nil :repo "tec@git.savannah.gnu.org:/srv/git/emacs/org-mode.git"))
-                       (t
-                        (list :host 'github :repo "emacs-straight/org-mode")))
-               ,@recipe-common)
-      :pin nil)))
-#+end_src
-
-#+begin_src emacs-lisp :noweb no-export
-<<org-pkg-statement()>>
-(unpin! org-mode) ; there be bugs
-(package! org-contrib
-  :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
-           :files ("lisp/*.el"))
-  :pin "c6aef31ccfc7c4418c3b51e98f7c3bd8e255f5e6")
-#+end_src
 
 **** Visuals
 ***** Org Modern
@@ -5678,7 +5359,9 @@ It's nice to be able to link to music
 **** Tweaking defaults
 
 #+begin_src emacs-lisp
-(setq org-directory "~/.org"                      ; let's put files here
+(setq org-directory "~/org"                      ; let's put files here
+      ;;org-agenda-files '("~/org/todo.org"
+      ;;                   "~/org/habits.org")
       org-use-property-inheritance t              ; it's convenient to have properties inherited
       org-log-done 'time                          ; having the time a item is done sounds convenient
       org-list-allow-alphabetical t               ; have a. A. a) A) list bullets
@@ -5804,6 +5487,10 @@ Unfortunately, it ignores the ~file = {...}~ =.bib= keys though. Let's fix that.
 I separate files on =;=, which may just be a Zotero/BetterBibLaTeX thing, but it's
 a good idea in my case at least.
 
+#+begin_src emacs-lisp :tangle yes
+(setq jethro/default-bibliography `(,(expand-file-name "org/notes/biblio.bib" org-directory)))
+#+end_src
+
 #+begin_src emacs-lisp :noweb-ref none
 (use-package! org-ref
   ;; :after org
@@ -5854,15 +5541,16 @@ To improve =org-cite=.
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
   :config
-  (setq citar-bibliography
-        (let ((libfile-search-names '("library.json" "Library.json" "library.bib" "Library.bib"))
-              (libfile-dir "~/Zotero")
-              paths)
-          (dolist (libfile libfile-search-names)
-            (when (and (not paths)
-                       (file-exists-p (expand-file-name libfile libfile-dir)))
-              (setq paths (list (expand-file-name libfile libfile-dir)))))
-          paths))
+  ;; (setq citar-bibliography
+  ;;       (let ((libfile-search-names '("library.json" "Library.json" "library.bib" "Library.bib"))
+  ;;             (libfile-dir "~/Zotero")
+  ;;             paths)
+  ;;         (dolist (libfile libfile-search-names)
+  ;;           (when (and (not paths)
+  ;;                      (file-exists-p (expand-file-name libfile libfile-dir)))
+  ;;             (setq paths (list (expand-file-name libfile libfile-dir)))))
+  ;;         paths))
+  (setq citar-bibliography jethro/default-bibliography)
   (setq citar-symbols
       `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
         (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
@@ -5953,6 +5641,8 @@ I think it would be nice to have a function to convert =org-ref= citations to
                                  (cdr (assoc (match-string 1) cite-conversions))
                                  (match-string 2))))))))
 #+end_src
+
+
 
 ***** cdlatex
 
@@ -6052,77 +5742,54 @@ The agenda is nice, but a souped up version is nicer.
   :commands org-super-agenda-mode)
 #+end_src
 
-#+begin_src emacs-lisp
-(after! org-agenda
-  (org-super-agenda-mode))
+ #+begin_src emacs-lisp
+ (after! org-agenda
+   (org-super-agenda-mode))
 
 (setq org-agenda-skip-scheduled-if-done t
       org-agenda-skip-deadline-if-done t
       org-agenda-include-deadlines t
-      org-agenda-block-separator nil
+      org-agenda-block-separator 45
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
-      org-agenda-compact-blocks t)
-
-(setq org-agenda-custom-commands
-      '(("o" "Overview"
-         ((agenda "" ((org-agenda-span 'day)
-                      (org-super-agenda-groups
-                       '((:name "Today"
-                          :time-grid t
-                          :date today
-                          :todo "TODAY"
-                          :scheduled today
-                          :order 1)))))
-          (alltodo "" ((org-agenda-overriding-header "")
-                       (org-super-agenda-groups
-                        '((:name "Next to do"
-                           :todo "NEXT"
-                           :order 1)
-                          (:name "Important"
-                           :tag "Important"
-                           :priority "A"
-                           :order 6)
-                          (:name "Due Today"
-                           :deadline today
-                           :order 2)
-                          (:name "Due Soon"
-                           :deadline future
-                           :order 8)
-                          (:name "Overdue"
-                           :deadline past
-                           :face error
-                           :order 7)
-                          (:name "Assignments"
-                           :tag "Assignment"
-                           :order 10)
-                          (:name "Issues"
-                           :tag "Issue"
-                           :order 12)
-                          (:name "Emacs"
-                           :tag "Emacs"
-                           :order 13)
-                          (:name "Projects"
-                           :tag "Project"
-                           :order 14)
-                          (:name "Research"
-                           :tag "Research"
-                           :order 15)
-                          (:name "To read"
-                           :tag "Read"
-                           :order 30)
-                          (:name "Waiting"
-                           :todo "WAITING"
-                           :order 20)
-                          (:name "University"
-                           :tag "uni"
-                           :order 32)
-                          (:name "Trivial"
-                           :priority<= "E"
-                           :tag ("Trivial" "Unimportant")
-                           :todo ("SOMEDAY" )
-                           :order 90)
-                          (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+      org-agenda-compact-blocks nil
+      org-columns-default-format "%40ITEM(Task) %Effort(EE){:} %CLOCKSUM(Time Spent) %SCHEDULED(Scheduled) %DEADLINE(Deadline)"
+      )
 #+end_src
+
+**** CUSTOM: some changes from [[[[https://yannesposito.com/posts/0015-how-i-use-org-mode/index.html#workflow-3--org-capture---org-refile]]
+
+# #+begin_src emacs-lisp :tangle yes
+# (defun y/go-to-today-agenda ()
+#   (interactive)
+#   (org-agenda nil "a"))
+# ;; Faster jump to agenda today keybinding shortcut (SPC y a)
+# (map! :leader
+#       :desc "Today's agenda"
+#       "y a" #'y/go-to-today-agenda)
+
+# ;; How to create default clocktable
+# (setq org-clock-clocktable-default-properties
+#       '(:scope subtree :maxlevel 4 :timestamp t :link t :tags t :narrow 36! :match "work"))
+
+# ;; How to display default clock report in agenda view
+# (setq org-agenda-clockreport-parameter-plist
+#       '(:lang "en" :maxlevel 4 :fileskip0 t :link t :indent t :narrow 80!))
+
+# ;; *** Projectile; default TODO file to create in your projects
+# (setq org-projectile-file "inbox.org")
+
+# ;; *** Refile mapped to SPC y o r
+# (map! :leader :desc "org-refile" "y o r" #'org-refile)
+
+# ;; Refile to either the =refile.org= file or to =agenda.org= org =standup.org=
+# (setq org-refile-target-files
+#     '("~/org/tracker.org"
+#       "~/org/inbox.org"))
+
+# (setq org-refile-targets
+#     '((nil :maxlevel . 5)
+#       (org-refile-target-files :maxlevel . 5)))
+# #+end_src
 
 **** Capture
 
@@ -6131,316 +5798,268 @@ Let's setup some org-capture templates, and make them visually nice to access.
 #+attr_html: :class invertible :alt My org-capture dialouge.
 [[https://tecosaur.com/lfs/emacs-config/screenshots/org-capture.png]]
 
-~doct~ (Declarative Org Capture Templates) seems to be a nicer way to
-set up org-capture.
+CUSTOM:
+make use of reverse datetrees
+
 #+begin_src emacs-lisp :noweb-ref none :tangle packages.el
 (package! doct
   :recipe (:host github :repo "progfolio/doct")
   :pin "8464809754f3316d5a2fdcf3c01ce1e8736b323b")
 #+end_src
 
-#+begin_src emacs-lisp :noweb-ref none :tangle yes
-(use-package! doct
-  :commands doct)
+#+begin_src emacs-lisp :tangle yes
+(setq-default org-reverse-datetree-level-formats
+              '("%Y"                    ; year
+                (lambda (time) (format-time-string "%Y-%m %B" (org-reverse-datetree-monday time))) ; month
+                "%Y W%W"                ; week
+                "%Y-%m-%d %A"           ; date
+                ))
 #+end_src
 
-#+begin_src emacs-lisp :noweb no-export
-(after! org-capture
-  <<prettify-capture>>
-
-  (defun +doct-icon-declaration-to-icon (declaration)
-    "Convert :icon declaration to icon"
-    (let ((name (pop declaration))
-          (set  (intern (concat "all-the-icons-" (plist-get declaration :set))))
-          (face (intern (concat "all-the-icons-" (plist-get declaration :color))))
-          (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
-      (apply set `(,name :face ,face :v-adjust ,v-adjust))))
-
-  (defun +doct-iconify-capture-templates (groups)
-    "Add declaration's :icon to each template group in GROUPS."
-    (let ((templates (doct-flatten-lists-in groups)))
-      (setq doct-templates (mapcar (lambda (template)
-                                     (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
-                                                 (spec (plist-get (plist-get props :doct) :icon)))
-                                       (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
-                                                                      "\t"
-                                                                      (nth 1 template))))
-                                     template)
-                                   templates))))
-
-  (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
-
-  (defvar +org-capture-recipies  "~/Desktop/TEC/Organisation/recipies.org")
-
-  (defun set-org-capture-templates ()
-    (setq org-capture-templates
-          (doct `(("Personal todo" :keys "t"
-                   :icon ("checklist" :set "octicon" :color "green")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Inbox"
-                   :type entry
-                   :template ("* TODO %?"
-                              "%i %a"))
-                  ("Personal note" :keys "n"
-                   :icon ("sticky-note-o" :set "faicon" :color "green")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Inbox"
-                   :type entry
-                   :template ("* %?"
-                              "%i %a"))
-                  ("Email" :keys "e"
-                   :icon ("envelope" :set "faicon" :color "blue")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Inbox"
-                   :type entry
-                   :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
-                              "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
-                              "about %^{topic}"
-                              "%U %i %a"))
-                  ("Interesting" :keys "i"
-                   :icon ("eye" :set "faicon" :color "lcyan")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Interesting"
-                   :type entry
-                   :template ("* [ ] %{desc}%? :%{i-type}:"
-                              "%i %a")
-                   :children (("Webpage" :keys "w"
-                               :icon ("globe" :set "faicon" :color "green")
-                               :desc "%(org-cliplink-capture) "
-                               :i-type "read:web")
-                              ("Article" :keys "a"
-                               :icon ("file-text" :set "octicon" :color "yellow")
-                               :desc ""
-                               :i-type "read:reaserch")
-                              ("\tRecipie" :keys "r"
-                               :icon ("spoon" :set "faicon" :color "dorange")
-                               :file +org-capture-recipies
-                               :headline "Unsorted"
-                               :template "%(org-chef-get-recipe-from-url)")
-                              ("Information" :keys "i"
-                               :icon ("info-circle" :set "faicon" :color "blue")
-                               :desc ""
-                               :i-type "read:info")
-                              ("Idea" :keys "I"
-                               :icon ("bubble_chart" :set "material" :color "silver")
-                               :desc ""
-                               :i-type "idea")))
-                  ("Tasks" :keys "k"
-                   :icon ("inbox" :set "octicon" :color "yellow")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Tasks"
-                   :type entry
-                   :template ("* TODO %? %^G%{extra}"
-                              "%i %a")
-                   :children (("General Task" :keys "k"
-                               :icon ("inbox" :set "octicon" :color "yellow")
-                               :extra "")
-                              ("Task with deadline" :keys "d"
-                               :icon ("timer" :set "material" :color "orange" :v-adjust -0.1)
-                               :extra "\nDEADLINE: %^{Deadline:}t")
-                              ("Scheduled Task" :keys "s"
-                               :icon ("calendar" :set "octicon" :color "orange")
-                               :extra "\nSCHEDULED: %^{Start time:}t")))
-                  ("Project" :keys "p"
-                   :icon ("repo" :set "octicon" :color "silver")
-                   :prepend t
-                   :type entry
-                   :headline "Inbox"
-                   :template ("* %{time-or-todo} %?"
-                              "%i"
-                              "%a")
-                   :file ""
-                   :custom (:time-or-todo "")
-                   :children (("Project-local todo" :keys "t"
-                               :icon ("checklist" :set "octicon" :color "green")
-                               :time-or-todo "TODO"
-                               :file +org-capture-project-todo-file)
-                              ("Project-local note" :keys "n"
-                               :icon ("sticky-note" :set "faicon" :color "yellow")
-                               :time-or-todo "%U"
-                               :file +org-capture-project-notes-file)
-                              ("Project-local changelog" :keys "c"
-                               :icon ("list" :set "faicon" :color "blue")
-                               :time-or-todo "%U"
-                               :heading "Unreleased"
-                               :file +org-capture-project-changelog-file)))
-                  ("\tCentralised project templates"
-                   :keys "o"
-                   :type entry
-                   :prepend t
-                   :template ("* %{time-or-todo} %?"
-                              "%i"
-                              "%a")
-                   :children (("Project todo"
-                               :keys "t"
-                               :prepend nil
-                               :time-or-todo "TODO"
-                               :heading "Tasks"
-                               :file +org-capture-central-project-todo-file)
-                              ("Project note"
-                               :keys "n"
-                               :time-or-todo "%U"
-                               :heading "Notes"
-                               :file +org-capture-central-project-notes-file)
-                              ("Project changelog"
-                               :keys "c"
-                               :time-or-todo "%U"
-                               :heading "Unreleased"
-                               :file +org-capture-central-project-changelog-file)))))))
-
-  (set-org-capture-templates)
-  (unless (display-graphic-p)
-    (add-hook 'server-after-make-frame-hook
-              (defun org-capture-reinitialise-hook ()
-                (when (display-graphic-p)
-                  (set-org-capture-templates)
-                  (remove-hook 'server-after-make-frame-hook
-                               #'org-capture-reinitialise-hook))))))
+**** GTD
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-gtd)
 #+end_src
-It would also be nice to improve how the capture dialogue looks
-#+name: prettify-capture
-#+begin_src emacs-lisp :noweb-ref none
-(defun org-capture-select-template-prettier (&optional keys)
-  "Select a capture template, in a prettier way than default
-Lisp programs can force the template by setting KEYS to a string."
-  (let ((org-capture-templates
-         (or (org-contextualize-keys
-              (org-capture-upgrade-templates org-capture-templates)
-              org-capture-templates-contexts)
-             '(("t" "Task" entry (file+headline "" "Tasks")
-                "* TODO %?\n  %u\n  %a")))))
-    (if keys
-        (or (assoc keys org-capture-templates)
-            (error "No capture template referred to by \"%s\" keys" keys))
-      (org-mks org-capture-templates
-               "Select a capture template\n━━━━━━━━━━━━━━━━━━━━━━━━━"
-               "Template key: "
-               `(("q" ,(concat (all-the-icons-octicon "stop" :face 'all-the-icons-red :v-adjust 0.01) "\tAbort")))))))
-(advice-add 'org-capture-select-template :override #'org-capture-select-template-prettier)
 
-(defun org-mks-pretty (table title &optional prompt specials)
-  "Select a member of an alist with multiple keys. Prettified.
-
-TABLE is the alist which should contain entries where the car is a string.
-There should be two types of entries.
-
-1. prefix descriptions like (\"a\" \"Description\")
-   This indicates that `a' is a prefix key for multi-letter selection, and
-   that there are entries following with keys like \"ab\", \"ax\"…
-
-2. Select-able members must have more than two elements, with the first
-   being the string of keys that lead to selecting it, and the second a
-   short description string of the item.
-
-The command will then make a temporary buffer listing all entries
-that can be selected with a single key, and all the single key
-prefixes.  When you press the key for a single-letter entry, it is selected.
-When you press a prefix key, the commands (and maybe further prefixes)
-under this key will be shown and offered for selection.
-
-TITLE will be placed over the selection in the temporary buffer,
-PROMPT will be used when prompting for a key.  SPECIALS is an
-alist with (\"key\" \"description\") entries.  When one of these
-is selected, only the bare key is returned."
-  (save-window-excursion
-    (let ((inhibit-quit t)
-          (buffer (org-switch-to-buffer-other-window "*Org Select*"))
-          (prompt (or prompt "Select: "))
-          case-fold-search
-          current)
-      (unwind-protect
-          (catch 'exit
-            (while t
-              (setq-local evil-normal-state-cursor (list nil))
-              (erase-buffer)
-              (insert title "\n\n")
-              (let ((des-keys nil)
-                    (allowed-keys '("\C-g"))
-                    (tab-alternatives '("\s" "\t" "\r"))
-                    (cursor-type nil))
-                ;; Populate allowed keys and descriptions keys
-                ;; available with CURRENT selector.
-                (let ((re (format "\\`%s\\(.\\)\\'"
-                                  (if current (regexp-quote current) "")))
-                      (prefix (if current (concat current " ") "")))
-                  (dolist (entry table)
-                    (pcase entry
-                      ;; Description.
-                      (`(,(and key (pred (string-match re))) ,desc)
-                       (let ((k (match-string 1 key)))
-                         (push k des-keys)
-                         ;; Keys ending in tab, space or RET are equivalent.
-                         (if (member k tab-alternatives)
-                             (push "\t" allowed-keys)
-                           (push k allowed-keys))
-                         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) (propertize "›" 'face 'font-lock-comment-face) "  " desc "…" "\n")))
-                      ;; Usable entry.
-                      (`(,(and key (pred (string-match re))) ,desc . ,_)
-                       (let ((k (match-string 1 key)))
-                         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) "   " desc "\n")
-                         (push k allowed-keys)))
-                      (_ nil))))
-                ;; Insert special entries, if any.
-                (when specials
-                  (insert "─────────────────────────\n")
-                  (pcase-dolist (`(,key ,description) specials)
-                    (insert (format "%s   %s\n" (propertize key 'face '(bold all-the-icons-red)) description))
-                    (push key allowed-keys)))
-                ;; Display UI and let user select an entry or
-                ;; a sub-level prefix.
-                (goto-char (point-min))
-                (unless (pos-visible-in-window-p (point-max))
-                  (org-fit-window-to-buffer))
-                (let ((pressed (org--mks-read-key allowed-keys
-                                                  prompt
-                                                  (not (pos-visible-in-window-p (1- (point-max)))))))
-                  (setq current (concat current pressed))
-                  (cond
-                   ((equal pressed "\C-g") (user-error "Abort"))
-                   ;; Selection is a prefix: open a new menu.
-                   ((member pressed des-keys))
-                   ;; Selection matches an association: return it.
-                   ((let ((entry (assoc current table)))
-                      (and entry (throw 'exit entry))))
-                   ;; Selection matches a special entry: return the
-                   ;; selection prefix.
-                   ((assoc current specials) (throw 'exit current))
-                   (t (error "No entry available")))))))
-        (when buffer (kill-buffer buffer))))))
-(advice-add 'org-mks :override #'org-mks-pretty)
-#+end_src
-The [[file:~/.emacs.d/bin/org-capture][org-capture bin]] is rather nice, but I'd be nicer with a smaller frame, and
-no modeline.
-#+begin_src emacs-lisp
-(setf (alist-get 'height +org-capture-frame-parameters) 15)
-;; (alist-get 'name +org-capture-frame-parameters) "❖ Capture") ;; ATM hardcoded in other places, so changing breaks stuff
-(setq +org-capture-fn
-      (lambda ()
-        (interactive)
-        (set-window-parameter nil 'mode-line-format 'none)
-        (org-capture)))
+#+begin_src emacs-lisp :tangle yes
+(use-package! org-gtd
+  :after org
+  :demand t
+  :custom
+  (org-gtd-directory "~/org/gtd")
+  (org-edna-use-inheritance t)
+  :config
+  (org-edna-mode)
+  :bind
+  (("C-c d c" . org-gtd-capture)
+   ("C-c d e" . org-gtd-engage)
+   ("C-c d p" . org-gtd-process-inbox)
+   ("C-c d n" . org-gtd-show-all-next)
+   ("C-c d s" . org-gtd-show-stuck-projects)
+   :map org-gtd-process-map
+   ("C-c c" . org-gtd-choose)))
 #+end_src
 
 **** Roam
 ***** Basic settings
+******
 
-I'll just set this to be within =Organisation= folder for now, in the future it
-could be worth seeing if I could hook this up to a [[https://nextcloud.com/][Nextcloud]] instance.
-#+begin_src emacs-lisp :noweb-ref none :tangle yes
-(setq org-roam-directory "~/Desktop/TEC/Organisation/Roam/")
+****** CUSTOM: from jethrokuan
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-capture-templates
+      `(("i" "Inbox" entry  (file "gtd/inbox.org")
+         ,(concat "* TODO %?\n"
+                  "/Entered on/ %U"))
+        ("s" "Slipbox" entry  (file "notes/inbox.org")
+         "* %?\n")))
+
+(defun jethro/org-capture-inbox ()
+  (interactive)
+  (org-capture nil "i"))
+
+(defun jethro/org-capture-slipbox ()
+  (interactive)
+  (org-capture nil "s"))
 #+end_src
 
-That said, if the directory doesn't exist we likely don't want to be using roam.
-Since we don't want to trigger errors (which will happen as soon as roam tries
-to initialise), let's not load roam.
-#+begin_src emacs-lisp :noweb-ref none :tangle (if (file-exists-p "~/Desktop/TEC/Organisation/Roam/") "no" "packages.el")
-(package! org-roam :disable t)
+#+begin_src emacs-lisp :tangle yes
+(use-package! org-roam
+  :init
+  (map! :leader
+        :prefix "n"
+        :desc "org-roam" "l" #'org-roam-buffer-toggle
+        :desc "org-roam-node-insert" "i" #'org-roam-node-insert
+        :desc "org-roam-node-find" "f" #'org-roam-node-find
+        :desc "org-roam-ref-find" "r" #'org-roam-ref-find
+        :desc "org-roam-show-graph" "g" #'org-roam-show-graph
+        :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
+        :desc "org-roam-capture" "c" #'org-roam-capture)
+  (setq org-roam-directory (file-truename "~/org/notes/")
+        ;;org-roam-database-connector 'sqlite-builtin
+        org-roam-db-gc-threshold most-positive-fixnum
+        org-id-link-to-org-use-id t)
+  :config
+  (org-roam-db-autosync-mode +1)
+  (set-popup-rules!
+    `((,(regexp-quote org-roam-buffer) ; persistent org-roam buffer
+       :side right :width .33 :height .5 :ttl nil :modeline nil :quit nil :slot 1)
+      ("^\\*org-roam: " ; node dedicated org-roam buffer
+       :side right :width .33 :height .5 :ttl nil :modeline nil :quit nil :slot 2)))
+  (add-hook 'org-roam-mode-hook #'turn-on-visual-line-mode)
+  (setq org-roam-capture-templates
+        '(("m" "main" plain
+           "\n%?"
+           :if-new (file+head "main/${slug}.org"
+                              "#+title: ${title}\n")
+           :immediate-finish t
+           :unnarrowed t)
+          ("r" "reference" plain "\n%?"
+           :if-new
+           (file+head "reference/${slug}.org" "#+title: ${title}\n")
+           :immediate-finish t
+           :unnarrowed t)
+          ("a" "article" plain "\n%?"
+           :if-new
+           (file+head "articles/${slug}.org" "#+title: ${title}\n#+filetags: :article:\n")
+           :immediate-finish t
+           :unnarrowed t)))
+  (defun jethro/tag-new-node-as-draft ()
+    (org-roam-tag-add '("draft")))
+  (add-hook 'org-roam-capture-new-node-hook #'jethro/tag-new-node-as-draft)
+  (cl-defmethod org-roam-node-type ((node org-roam-node))
+    "Return the TYPE of NODE."
+    (condition-case nil
+        (file-name-nondirectory
+         (directory-file-name
+          (file-name-directory
+           (file-relative-name (org-roam-node-file node) org-roam-directory))))
+      (error "")))
+  (setq org-roam-node-display-template
+        (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (require 'citar)
+  (defun jethro/org-roam-node-from-cite (keys-entries)
+    (interactive (list (citar-select-ref :multiple nil :rebuild-cache t)))
+    (let ((title (citar--format-entry-no-widths (cdr keys-entries)
+                                                "${author editor} :: ${title}")))
+      (org-roam-capture- :templates
+                         '(("r" "reference" plain "%?" :if-new
+                            (file+head "reference/${citekey}.org"
+                                       ":PROPERTIES:
+:ROAM_REFS: [cite:@${citekey}]
+:END:
+#+title: ${title}\n")
+                            :immediate-finish t
+                            :unnarrowed t))
+                         :info (list :citekey (car keys-entries))
+                         :node (org-roam-node-create :title title)
+                         :props '(:finalize find-file)))))
 #+end_src
+
+
+ ******* CUSTOM: from SystemCrafers
+# #+begin_src emacs-lisp :tangle yes
+# (use-package org-roam
+#   :ensure t
+#   :demand t  ;; Ensure org-roam is loaded by default
+#   :init
+#   (setq org-roam-v2-ack t)
+#   :custom
+#   (org-roam-directory "~/org/roam/")
+#   (org-roam-completion-everywhere t)
+#   :bind (("C-c n l" . org-roam-buffer-toggle)
+#          ("C-c n f" . org-roam-node-find)
+#          ("C-c n i" . org-roam-node-insert)
+#          ("C-c n I" . org-roam-node-insert-immediate)
+#          ("C-c n p" . my/org-roam-find-project)
+#          ("C-c n t" . my/org-roam-capture-task)
+#          ("C-c n b" . my/org-roam-capture-inbox)
+#          :map org-mode-map
+#          ("C-M-i" . completion-at-point)
+#          :map org-roam-dailies-map
+#          ("Y" . org-roam-dailies-capture-yesterday)
+#          ("T" . org-roam-dailies-capture-tomorrow))
+#   :bind-keymap
+#   ("C-c n d" . org-roam-dailies-map)
+#   :config
+#   (require 'org-roam-dailies) ;; Ensure the keymap is available
+#   (org-roam-db-autosync-mode))
+
+# (defun org-roam-node-insert-immediate (arg &rest args)
+#   (interactive "P")
+#   (let ((args (push arg args))
+#         (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+#                                                   '(:immediate-finish t)))))
+#     (apply #'org-roam-node-insert args)))
+
+# (defun my/org-roam-filter-by-tag (tag-name)
+#   (lambda (node)
+#     (member tag-name (org-roam-node-tags node))))
+
+# (defun my/org-roam-list-notes-by-tag (tag-name)
+#   (mapcar #'org-roam-node-file
+#           (seq-filter
+#            (my/org-roam-filter-by-tag tag-name)
+#            (org-roam-node-list))))
+
+# (defun my/org-roam-refresh-agenda-list ()
+#   (interactive)
+#   (setq org-agenda-files (my/org-roam-list-notes-by-tag "Project")))
+
+# ;; Build the agenda list the first time for the session
+# (my/org-roam-refresh-agenda-list)
+
+# (defun my/org-roam-project-finalize-hook ()
+#   "Adds the captured project file to `org-agenda-files' if the
+# capture was not aborted."
+#   ;; Remove the hook since it was added temporarily
+#   (remove-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+#   ;; Add project file to the agenda list if the capture was confirmed
+#   (unless org-note-abort
+#     (with-current-buffer (org-capture-get :buffer)
+#       (add-to-list 'org-agenda-files (buffer-file-name)))))
+
+# (defun my/org-roam-find-project ()
+#   (interactive)
+#   ;; Add the project file to the agenda after capture is finished
+#   (add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+#   ;; Select a project file to open, creating it if necessary
+#   (org-roam-node-find
+#    nil
+#    nil
+#    (my/org-roam-filter-by-tag "Project")
+#    :templates
+#    '(("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
+#       :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+category: ${title}\n#+filetags: Project")
+#       :unnarrowed t))))
+
+# (defun my/org-roam-capture-inbox ()
+#   (interactive)
+#   (org-roam-capture- :node (org-roam-node-create)
+#                      :templates '(("i" "inbox" plain "* %?"
+#                                   :if-new (file+head "Inbox.org" "#+title: Inbox\n")))))
+
+# (defun my/org-roam-capture-task ()
+#   (interactive)
+#   ;; Add the project file to the agenda after capture is finished
+#   (add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+#   ;; Capture the new task, creating the project file if necessary
+#   (org-roam-capture- :node (org-roam-node-read
+#                             nil
+#                             (my/org-roam-filter-by-tag "Project"))
+#                      :templates '(("p" "project" plain "** TODO %?"
+#                                    :if-new (file+head+olp "%<%Y%m%d%H%M%S>-${slug}.org"
+#                                                           "#+title: ${title}\n#+category: ${title}\n#+filetags: Project"
+#                                                           ("Tasks"))))))
+
+# (defun my/org-roam-copy-todo-to-today ()
+#   (interactive)
+#   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
+#         (org-roam-dailies-capture-templates
+#           '(("t" "tasks" entry "%?"
+#              :if-new (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))))
+#         (org-after-refile-insert-hook #'save-buffer)
+#         today-file
+#         pos)
+#     (save-window-excursion
+#       (org-roam-dailies--capture (current-time) t)
+#       (setq today-file (buffer-file-name))
+#       (setq pos (point)))
+
+#     ;; Only refile if the target file is different than the current file
+#     (unless (equal (file-truename today-file)
+#                    (file-truename (buffer-file-name)))
+#       (org-refile nil nil (list "Tasks" today-file nil pos)))))
+
+# (add-to-list 'org-after-todo-state-change-hook
+#              (lambda ()
+#                (when (equal org-state "DONE")
+#                  (my/org-roam-copy-todo-to-today))))
+# #+end_src
+
 
 ***** Modeline file name
 
@@ -6456,6 +6075,7 @@ the [[*Window title][Window title]].
        (subst-char-in-string ?_ ?  buffer-file-name))
     (funcall orig-fun)))
 #+end_src
+
 
 ***** Graph view
 
@@ -7242,13 +6862,12 @@ and add an extra ~org-bullet~ to the default list of four.
 (setq org-ellipsis " ▾ "
       org-hide-leading-stars t
       org-priority-highest ?A
-      org-priority-lowest ?E
+      org-priority-lowest ?D
       org-priority-faces
       '((?A . 'all-the-icons-red)
         (?B . 'all-the-icons-orange)
         (?C . 'all-the-icons-yellow)
-        (?D . 'all-the-icons-green)
-        (?E . 'all-the-icons-blue)))
+        (?D . 'all-the-icons-green)))
 #+end_src
 
 It's also nice to make use of the =prettify-symbols-mode= for a few Org syntactic
@@ -7266,10 +6885,10 @@ other settings.
             :properties    "⚙"
             :end           "∎"
             :priority_a   ,(propertize "⚑" 'face 'all-the-icons-red)
-            :priority_b   ,(propertize "⬆" 'face 'all-the-icons-orange)
+            :priority_b   ,(propertize "■" 'face 'all-the-icons-orange)
             :priority_c   ,(propertize "■" 'face 'all-the-icons-yellow)
-            :priority_d   ,(propertize "⬇" 'face 'all-the-icons-green)
-            :priority_e   ,(propertize "❓" 'face 'all-the-icons-blue)))
+            :priority_d   ,(propertize "❓" 'face 'all-the-icons-green)))
+
 (set-ligatures! 'org-mode
   :merge t
   :list_property "::"
@@ -7283,8 +6902,8 @@ other settings.
   :priority_a    "[#A]"
   :priority_b    "[#B]"
   :priority_c    "[#C]"
-  :priority_d    "[#D]"
-  :priority_e    "[#E]")
+  :priority_d    "[#D]")
+(plist-put +ligatures-extra-symbols :name "⁍")
 #+end_src
 
 While we're at it we may as well make tags prettier as well 🙂
@@ -7396,7 +7015,7 @@ let's make it transparent.
 We can either render from a ~dvi~ or ~pdf~ file, so let's benchmark ~latex~ and
 ~pdflatex~.
 | ~latex~ time | ~pdflatex~ time |
-|------------+---------------|
+|--------------+-----------------|
 | 135 \pm 2 ms | 215 \pm 3 ms    |
 
 On the rendering side, there are two ~.dvi~-to-image converters which I am
@@ -7406,12 +7025,12 @@ size and prefer a vector graphic.
 
 Using the above latex expression and benchmarking lead to the following results:
 | ~dvipng~ time | ~dvisvgm~ time | ~pdf2svg~ time |
-|-------------+--------------+--------------|
+|---------------+----------------+----------------|
 | 89 \pm 2 ms   | 178 \pm 2 ms   | 12 \pm 2 ms    |
 
 Now let's combine this to see what's best
-| Tool chain         | Total time | Resultant file size |
-|--------------------+------------+---------------------|
+| Tool chain             | Total time   | Resultant file size |
+|------------------------+--------------+---------------------|
 | ~latex~ + ~dvipng~     | 226 \pm 2 ms | 7 KiB               |
 | ~latex~ + ~dvisvgm~    | 392 \pm 4 ms | 8 KiB               |
 | ~pdflatex~ + ~pdf2svg~ | 230 \pm 2 ms | 16 KiB              |
@@ -9773,51 +9392,51 @@ Now, there are some symbols that aren't included in =inputenc=, but we should be
 able to handle anyway. For them we define a table of LaTeX translations
 
 #+name: latex-non-ascii-char-substitutions
-| Character | LaTeX |
-|-----------+-------|
-| ɑ         | \(\alpha\) |
-| β         | \(\beta\) |
-| γ         | \(\gamma\) |
-| δ         | \(\delta\) |
-| ε         | \(\epsilon\) |
+| Character | LaTeX           |
+|-----------+-----------------|
+| ɑ         | \(\alpha\)      |
+| β         | \(\beta\)       |
+| γ         | \(\gamma\)      |
+| δ         | \(\delta\)      |
+| ε         | \(\epsilon\)    |
 | ϵ         | \(\varepsilon\) |
-| ζ         | \(\zeta\) |
-| η         | \(\eta\) |
-| θ         | \(\theta\) |
-| ϑ         | \(\vartheta\) |
-| ι         | \(\iota\) |
-| κ         | \(\kappa\) |
-| λ         | \(\lambda\) |
-| μ         | \(\mu\) |
-| ν         | \(\nu\) |
-| ξ         | \(\xi\) |
-| π         | \(\pi\) |
-| ϖ         | \(\varpi\) |
-| ρ         | \(\rho\) |
-| ϱ         | \(\varrho\) |
-| σ         | \(\sigma\) |
-| ς         | \(\varsigma\) |
-| τ         | \(\tau\) |
-| υ         | \(\upsilon\) |
-| ϕ         | \(\phi\) |
-| φ         | \(\varphi\) |
-| ψ         | \(\psi\) |
-| ω         | \(\omega\) |
-| Γ         | \(\Gamma\) |
-| Δ         | \(\Delta\) |
-| Θ         | \(\Theta\) |
-| Λ         | \(\Lambda\) |
-| Ξ         | \(\Xi\) |
-| Π         | \(\Pi\) |
-| Σ         | \(\Sigma\) |
-| Υ         | \(\Upsilon\) |
-| Φ         | \(\Phi\) |
-| Ψ         | \(\Psi\) |
-| Ω         | \(\Omega\) |
-| א         | \(\aleph\) |
-| ב         | \(\beth\) |
-| ד         | \(\daleth\) |
-| ג         | \(\gimel\) |
+| ζ         | \(\zeta\)       |
+| η         | \(\eta\)        |
+| θ         | \(\theta\)      |
+| ϑ         | \(\vartheta\)   |
+| ι         | \(\iota\)       |
+| κ         | \(\kappa\)      |
+| λ         | \(\lambda\)     |
+| μ         | \(\mu\)         |
+| ν         | \(\nu\)         |
+| ξ         | \(\xi\)         |
+| π         | \(\pi\)         |
+| ϖ         | \(\varpi\)      |
+| ρ         | \(\rho\)        |
+| ϱ         | \(\varrho\)     |
+| σ         | \(\sigma\)      |
+| ς         | \(\varsigma\)   |
+| τ         | \(\tau\)        |
+| υ         | \(\upsilon\)    |
+| ϕ         | \(\phi\)        |
+| φ         | \(\varphi\)     |
+| ψ         | \(\psi\)        |
+| ω         | \(\omega\)      |
+| Γ         | \(\Gamma\)      |
+| Δ         | \(\Delta\)      |
+| Θ         | \(\Theta\)      |
+| Λ         | \(\Lambda\)     |
+| Ξ         | \(\Xi\)         |
+| Π         | \(\Pi\)         |
+| Σ         | \(\Sigma\)      |
+| Υ         | \(\Upsilon\)    |
+| Φ         | \(\Phi\)        |
+| Ψ         | \(\Psi\)        |
+| Ω         | \(\Omega\)      |
+| א         | \(\aleph\)      |
+| ב         | \(\beth\)       |
+| ד         | \(\daleth\)     |
+| ג         | \(\gimel\)      |
 
 #+name: gen-latex-non-ascii-char-substitutions
 #+begin_src emacs-lisp :noweb-ref none :var latex-non-ascii-char-substitutions=latex-non-ascii-char-substitutions
@@ -10731,31 +10350,57 @@ In case of Emacs28,
 
 ** Python
 
-Since I'm using =mypyls=, as suggested in [[file:~/.emacs.d/modules/lang/python/README.org::*Language Server Protocol Support][:lang python LSP support]] I'll tweak the
-priority of =mypyls=
+;;priority of =mypyls=
 #+begin_src emacs-lisp
 (after! lsp-python-ms
   (set-lsp-priority! 'mspyls 1))
 #+end_src
 
-** PDF
+*** Auto-completion: Jedi
+
+CUSTOM: Using pyright as LSP
+
+;;#+begin_src emacs-lisp :tangle packages.el
+;;(package! company-jedi)
+;;#+end_src
+;;
+;;#+begin_src emacs-lisp :tangle yes
+;;(defun my/python-mode-hook ()
+;;  (add-to-list 'company-backends 'company-jedi))
+;;
+;;(add-hook 'python-mode-hook 'my/python-mode-hook)
+;;#+end_src
+;;
+;;** PDF
 *** MuPDF
 
 =pdf-tools= is nice, but a =mupdf=-based solution is nicer.
 
 #+begin_src emacs-lisp :tangle no
-(package! paper :recipe (:host github :repo "ymarco/paper-mode"
-                         :files ("*.el" ".so")
-                         :pre-build ("make")))
+;;(package! paper :recipe (:host github :repo "ymarco/paper-mode"
+;;                         :files ("*.el" ".so")
+;;                         :pre-build ("make")))
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
 ;; (use-package paper
-;;   ;; :mode ("\\.pdf\\'"  . paper-mode)
-;;   ;; :mode ("\\.epub\\'"  . paper-mode)
-;;   :config
-;;   (require 'evil-collection-paper)
-;;   (evil-collection-paper-setup))
+;;  :mode ("\\.pdf\\'"  . paper-mode)
+;;  :mode ("\\.epub\\'"  . paper-mode)
+;;  :config
+;;  (require 'evil-collection-paper)
+;;  (evil-collection-paper-setup))
+#+end_src
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! pdf-tools)
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(use-package pdf-view
+  :hook (pdf-tools-enabled . pdf-view-midnight-minor-mode)
+  :hook (pdf-tools-enabled . hide-mode-line-mode)
+  :config
+  (setq pdf-view-midnight-colors '("#ABB2BF" . "#282C35")))
 #+end_src
 
 *** Terminal viewing
