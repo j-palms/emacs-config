@@ -1,17 +1,10 @@
-# SPDX-FileCopyrightText: © 2020-2021 tecosaur <tec@tecosaur.com>
-# SPDX-License-Identifier: MIT
 #+title: Doom Emacs Configuration
 #+subtitle: The Methods, Management, and Menagerie@@latex:\\@@ of Madness@@latex: --- in meticulous detail@@
 #+author: tecosaur
-#+date: @@html:<!--@@{{{git-rev}}}@@html:-->@@@@latex:\\\Large\bfseries@@ {{{modification-time(%Y-%m-%d, t)}}} @@latex:\\\normalsize\mdseries@@{{{modification-time(%H:%M, t)}}} @@latex:\acr{\lowercase{@@{{{timezone}}}@@latex:}}\iffalse@@, {{{git-rev}}}@@latex:\fi@@
-#+macro: timezone (eval (substring (shell-command-to-string "date +%Z") 0 -1))
-#+macro: git-rev (eval (format "@@html:<a href=\"https://github.com/tecosaur/emacs-config/commit/%1$s\" style=\"text-decoration: none\"><code style=\"padding: 0; color: var(--text-light); font-size: inherit; opacity: 0.7\">%1$s</code></a>@@@@latex:\\href{https://github.com/tecosaur/emacs-config/commit/%1$s}{\\normalsize\\texttt{%1$s}}@@" (substring (shell-command-to-string "git rev-parse --short HEAD") 0 -1)))
-#+html_head: <link rel='shortcut icon' type='image/png' href='https://www.gnu.org/software/emacs/favicon.png'>
 #+property: header-args:emacs-lisp :tangle yes :comments link
 #+property: header-args:elisp :exports code
 #+property: header-args:shell :tangle "setup.sh"
 #+property: header-args :tangle no :results silent :eval no-export
-#+embed: LICENCE :description MIT licence file
 #+options: coverpage:yes
 #+startup: fold
 
@@ -326,13 +319,27 @@ for more info).
 #+begin_src shell :exports none :comments no :tangle-mode (identity #o755)
 #!/usr/bin/env bash
 #+end_src
+** CUSTOM:Auto-compile
+#+begin_src emacs-lisp :tangle packages.el
+(package! auto-compile)
+#+end_src
+#+begin_src emacs-lisp :tangle yes
+(setq load-prefer-newer t)
+(package-initialize)
+(require 'auto-compile)
+(auto-compile-on-load-mode)
+(auto-compile-on-save-mode)
+
+(setq auto-compile-display-buffer nil)
+(setq auto-compile-mode-line-counter t)
+#+end_src
 
 ** Personal Information
 
 It's useful to have some basic personal information
 #+begin_src emacs-lisp
-(setq user-full-name "TEC"
-      user-mail-address "contact@tecosaur.net")
+(setq user-full-name "Josua Palmstedt"
+      user-mail-address "palmstedt@posteo.de")
 #+end_src
 Apparently this is used by ~GPG~, and all sorts of other things.
 
@@ -341,11 +348,10 @@ Speaking of ~GPG~, I want to use =~/.authinfo.gpg= instead of the default in
 make a difference, and I don't want to accidentally purge this file (I have done
 src_shell{rm -rf~/.emac.d~ before}. I also want to cache as much as possible, as
 my home machine is pretty safe, and my laptop is shutdown a lot.
-#+begin_src emacs-lisp
-(setq auth-sources '("~/.authinfo.gpg")
-      auth-source-cache-expiry nil) ; default is 7200 (2h)
-#+end_src
-
+# #+begin_src emacs-lisp
+# (setq auth-sources '("~/.authinfo.gpg")
+#       auth-source-cache-expiry nil) ; default is 7200 (2h)
+# #+end_src
 ** Better defaults
 *** Simple settings
 
@@ -367,10 +373,16 @@ the following:
       ;; scroll-preserve-screen-position 'always     ; Don't have `point' jump around
       scroll-margin 2)                            ; It's nice to maintain a little margin
 
+(setq-default inhibit-startup-screen t)
+(setq inhibit-splash-screen t)
+(setq inhibit-startup-message t)
+(setq initial-scratch-message "")
+(setq initial-major-mode 'fundamental-mode)
+
 (display-time-mode 1)                             ; Enable time in the mode-line
 
-(unless (string-match-p "^Power N/A" (battery))   ; On laptops...
-  (display-battery-mode 1))                       ; it's nice to know how much power you have
+;;(unless (string-match-p "Power N/A" (battery))   ; On laptops...
+(display-battery-mode 1)                       ; it's nice to know how much power you have
 
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 #+end_src
@@ -531,8 +543,8 @@ I reckon enabling half the modules Doom provides should do it.
 
 #+name: doom-completion
 #+begin_src emacs-lisp
-(company                     ; the ultimate code completion backend
- +childframe)                ; ... when your children are better than you
+company                     ; the ultimate code completion backend
+;; +childframe)                ; ... when your children are better than you
 ;;helm                       ; the *other* search engine for love and life
 ;;ido                        ; the other *other* search engine...
 ;; (ivy                      ; a search engine for love and life
@@ -590,7 +602,9 @@ snippets                     ; my elves. They type so I don't have to
 
 #+name: doom-emacs
 #+begin_src emacs-lisp
-(dired +icons)               ; making dired pretty [functional]
+(dired
+ +icons
+ +dirvish)               ; making dired pretty [functional]
 electric                     ; smarter, keyword-based electric-indent
 (ibuffer +icons)             ; interactive buffer management
 undo                         ; persistent, smarter undo for your inevitable mistakes
@@ -614,9 +628,9 @@ grammar                      ; tasing grammar mistake every you make
 
 #+name: doom-tools
 #+begin_src emacs-lisp
-ansible                      ; a crucible for infrastructure as code
+;;ansible                      ; a crucible for infrastructure as code
 ;;debugger                   ; FIXME stepping through code, to help you add bugs
-;;direnv                     ; be direct about your environment
+direnv                     ; be direct about your environment
 docker                       ; port everything to containers
 ;;editorconfig               ; let someone else argue about tabs vs spaces
 ;;ein                        ; tame Jupyter notebooks with emacs
@@ -625,8 +639,9 @@ docker                       ; port everything to containers
 (lookup                      ; helps you navigate your code and documentation
  +dictionary                 ; dictionary/thesaurus is nice
  +docsets)                   ; ...or in Dash docsets locally
-lsp                          ; Language Server Protocol
-;;macos                      ; MacOS-specific commands
+(lsp                          ; Language Server Protocol
+ +peek)
+ ;;macos                      ; MacOS-specific commands
 (magit                       ; a git porcelain for Emacs
  +forge)                     ; interface with git forges
 make                         ; run make tasks from Emacs
@@ -680,9 +695,9 @@ ess                          ; emacs speaks statistics
 ;;hy                         ; readability of scheme w/ speed of python
 ;;idris                      ;
 json                         ; At least it ain't XML
-;;(java +lsp)                ; the poster child for carpal tunnel syndrome
-(javascript +lsp)            ; all(hope(abandon(ye(who(enter(here))))))
-(julia +lsp)                 ; Python, R, and MATLAB in a blender
+;;(java +meghanada)          ; the poster child for carpal tunnel syndrome
+;;(javascript +lsp)            ; all(hope(abandon(ye(who(enter(here))))))
+;;(julia +lsp)                 ; Python, R, and MATLAB in a blender
 ;;kotlin                     ; a better, slicker Java(Script)
 (latex                       ; writing papers in Emacs has never been so fun
  +latexmk                    ; what else would you use?
@@ -703,20 +718,24 @@ markdown                     ; writing docs for people to ignore
  +jupyter                    ; ipython/jupyter support for babel
  +pandoc                     ; export-with-pandoc support
  +gnuplot                    ; who doesn't like pretty pictures
- ;;+pomodoro                 ; be fruitful with the tomato technique
+ +pomodoro                 ; be fruitful with the tomato technique
  +present                    ; using org-mode for presentations
  +roam2)                     ; wander around notes
 ;;php                        ; perl's insecure younger brother
 ;;plantuml                   ; diagrams for confusing people more
 ;;purescript                 ; javascript, but functional
-(python +lsp +pyright)       ; beautiful is better than ugly
+(python
+ +lsp
+ +poetry
+ +pyright
+ +pyenv)       ; beautiful is better than ugly
 ;;qt                         ; the 'cutest' gui framework ever
 ;;racket                     ; a DSL for DSLs
 ;;raku                       ; the artist formerly known as perl6
 ;;rest                       ; Emacs as a REST client
 ;;rst                        ; ReST in peace
 ;;(ruby +rails)              ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-(rust +lsp)                  ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+;;(rust +lsp)                  ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
 ;;scala                      ; java, but good
 scheme                       ; a fully conniving family of lisps
 sh                           ; she sells {ba,z,fi}sh shells on the C xor
@@ -756,7 +775,7 @@ I couldn't resist the Email and Feed modules.
 ;;calendar                   ; A dated approach to timetabling
 ;;emms                       ; Multimedia in Emacs is music to my ears
 everywhere                   ; *leave* Emacs!? You must be joking.
-irc                          ; how neckbeards socialize
+;;irc                          ; how neckbeards socialize
 (rss +org)                   ; emacs as an RSS reader
 ;;twitter                    ; twitter client https://twitter.com/vnought
 #+end_src
@@ -827,6 +846,17 @@ if the system doesn't have any of those fonts.
 
 This way whenever fonts are missing, after Doom's UI has initialised, a warning
 listing the missing fonts should appear for at least half a second.
+
+
+CUSTOM:
+Rebind the keybindings for changing the font size.
+
+#+begin_src emacs-lisp
+(map! :n "C-="    #'doom/reset-font-size
+      ;; Buffer-local font resizing
+      :n "C-+"    #'text-scale-increase
+      :n "C--"    #'text-scale-decrease)
+#+end_src
 
 **** Theme and modeline
 
@@ -1121,254 +1151,252 @@ I'd like to have just the buffer name, then if applicable the project folder
 
 For example when I open my config file it the window will be titled =config.org ●
 doom= then as soon as I make a change it will become =config.org ◉ doom=.
+# *** Splash screen
+# Emacs can render an image as the splash screen, and [[https://github.com/MarioRicalde][@MarioRicalde]] came up with a
+# cracker! He's also provided me with a nice Emacs-style /E/. I was using the
+# blackhole image, but as I've stripped down the splash screen I've switched to
+# just using the /E/.
 
-*** Splash screen
+# #+attr_latex: :width 0.2\linewidth
+# #+attr_html: :style width:20% :alt Fancy Emacs "E"
+# [[file:misc/splash-images/emacs-e.svg]]
 
-Emacs can render an image as the splash screen, and [[https://github.com/MarioRicalde][@MarioRicalde]] came up with a
-cracker! He's also provided me with a nice Emacs-style /E/. I was using the
-blackhole image, but as I've stripped down the splash screen I've switched to
-just using the /E/.
+# Now we just make it theme-appropriate, and resize with the frame.
 
-#+attr_latex: :width 0.2\linewidth
-#+attr_html: :style width:20% :alt Fancy Emacs "E"
-[[file:misc/splash-images/emacs-e.svg]]
+# #+begin_src emacs-lisp
+# (defvar fancy-splash-image-template
+#   (expand-file-name "misc/splash-images/emacs-e-template.svg" doom-private-dir)
+#   "Default template svg used for the splash image, with substitutions from ")
 
-Now we just make it theme-appropriate, and resize with the frame.
+# (defvar fancy-splash-sizes
+#   `((:height 300 :min-height 50 :padding (0 . 2))
+#     (:height 250 :min-height 42 :padding (2 . 4))
+#     (:height 200 :min-height 35 :padding (3 . 3))
+#     (:height 150 :min-height 28 :padding (3 . 3))
+#     (:height 100 :min-height 20 :padding (2 . 2))
+#     (:height 75  :min-height 15 :padding (2 . 1))
+#     (:height 50  :min-height 10 :padding (1 . 0))
+#     (:height 1   :min-height 0  :padding (0 . 0)))
+#   "list of plists with the following properties
+#   :height the height of the image
+#   :min-height minimum `frame-height' for image
+#   :padding `+doom-dashboard-banner-padding' (top . bottom) to apply
+#   :template non-default template file
+#   :file file to use instead of template")
 
-#+begin_src emacs-lisp
-(defvar fancy-splash-image-template
-  (expand-file-name "misc/splash-images/emacs-e-template.svg" doom-private-dir)
-  "Default template svg used for the splash image, with substitutions from ")
+# (defvar fancy-splash-template-colours
+#   '(("$colour1" . keywords) ("$colour2" . type) ("$colour3" . base5) ("$colour4" . base8))
+#   "list of colour-replacement alists of the form (\"$placeholder\" . 'theme-colour) which applied the template")
 
-(defvar fancy-splash-sizes
-  `((:height 300 :min-height 50 :padding (0 . 2))
-    (:height 250 :min-height 42 :padding (2 . 4))
-    (:height 200 :min-height 35 :padding (3 . 3))
-    (:height 150 :min-height 28 :padding (3 . 3))
-    (:height 100 :min-height 20 :padding (2 . 2))
-    (:height 75  :min-height 15 :padding (2 . 1))
-    (:height 50  :min-height 10 :padding (1 . 0))
-    (:height 1   :min-height 0  :padding (0 . 0)))
-  "list of plists with the following properties
-  :height the height of the image
-  :min-height minimum `frame-height' for image
-  :padding `+doom-dashboard-banner-padding' (top . bottom) to apply
-  :template non-default template file
-  :file file to use instead of template")
+# (unless (file-exists-p (expand-file-name "theme-splashes" doom-cache-dir))
+#   (make-directory (expand-file-name "theme-splashes" doom-cache-dir) t))
 
-(defvar fancy-splash-template-colours
-  '(("$colour1" . keywords) ("$colour2" . type) ("$colour3" . base5) ("$colour4" . base8))
-  "list of colour-replacement alists of the form (\"$placeholder\" . 'theme-colour) which applied the template")
+# (defun fancy-splash-filename (theme-name height)
+#   (expand-file-name (concat (file-name-as-directory "theme-splashes")
+#                             theme-name
+#                             "-" (number-to-string height) ".svg")
+#                     doom-cache-dir))
 
-(unless (file-exists-p (expand-file-name "theme-splashes" doom-cache-dir))
-  (make-directory (expand-file-name "theme-splashes" doom-cache-dir) t))
+# (defun fancy-splash-clear-cache ()
+#   "Delete all cached fancy splash images"
+#   (interactive)
+#   (delete-directory (expand-file-name "theme-splashes" doom-cache-dir) t)
+#   (message "Cache cleared!"))
 
-(defun fancy-splash-filename (theme-name height)
-  (expand-file-name (concat (file-name-as-directory "theme-splashes")
-                            theme-name
-                            "-" (number-to-string height) ".svg")
-                    doom-cache-dir))
+# (defun fancy-splash-generate-image (template height)
+#   "Read TEMPLATE and create an image if HEIGHT with colour substitutions as
+#    described by `fancy-splash-template-colours' for the current theme"
+#   (with-temp-buffer
+#     (insert-file-contents template)
+#     (re-search-forward "$height" nil t)
+#     (replace-match (number-to-string height) nil nil)
+#     (dolist (substitution fancy-splash-template-colours)
+#       (goto-char (point-min))
+#       (while (re-search-forward (car substitution) nil t)
+#         (replace-match (doom-color (cdr substitution)) nil nil)))
+#     (write-region nil nil
+#                   (fancy-splash-filename (symbol-name doom-theme) height) nil nil)))
 
-(defun fancy-splash-clear-cache ()
-  "Delete all cached fancy splash images"
-  (interactive)
-  (delete-directory (expand-file-name "theme-splashes" doom-cache-dir) t)
-  (message "Cache cleared!"))
+# (defun fancy-splash-generate-images ()
+#   "Perform `fancy-splash-generate-image' in bulk"
+#   (dolist (size fancy-splash-sizes)
+#     (unless (plist-get size :file)
+#       (fancy-splash-generate-image (or (plist-get size :template)
+#                                        fancy-splash-image-template)
+#                                    (plist-get size :height)))))
 
-(defun fancy-splash-generate-image (template height)
-  "Read TEMPLATE and create an image if HEIGHT with colour substitutions as
-   described by `fancy-splash-template-colours' for the current theme"
-  (with-temp-buffer
-    (insert-file-contents template)
-    (re-search-forward "$height" nil t)
-    (replace-match (number-to-string height) nil nil)
-    (dolist (substitution fancy-splash-template-colours)
-      (goto-char (point-min))
-      (while (re-search-forward (car substitution) nil t)
-        (replace-match (doom-color (cdr substitution)) nil nil)))
-    (write-region nil nil
-                  (fancy-splash-filename (symbol-name doom-theme) height) nil nil)))
+# (defun ensure-theme-splash-images-exist (&optional height)
+#   (unless (file-exists-p (fancy-splash-filename
+#                           (symbol-name doom-theme)
+#                           (or height
+#                               (plist-get (car fancy-splash-sizes) :height))))
+#     (fancy-splash-generate-images)))
 
-(defun fancy-splash-generate-images ()
-  "Perform `fancy-splash-generate-image' in bulk"
-  (dolist (size fancy-splash-sizes)
-    (unless (plist-get size :file)
-      (fancy-splash-generate-image (or (plist-get size :template)
-                                       fancy-splash-image-template)
-                                   (plist-get size :height)))))
+# (defun get-appropriate-splash ()
+#   (let ((height (frame-height)))
+#     (cl-some (lambda (size) (when (>= height (plist-get size :min-height)) size))
+#              fancy-splash-sizes)))
 
-(defun ensure-theme-splash-images-exist (&optional height)
-  (unless (file-exists-p (fancy-splash-filename
-                          (symbol-name doom-theme)
-                          (or height
-                              (plist-get (car fancy-splash-sizes) :height))))
-    (fancy-splash-generate-images)))
+# (setq fancy-splash-last-size nil)
+# (setq fancy-splash-last-theme nil)
+# (defun set-appropriate-splash (&rest _)
+#   (let ((appropriate-image (get-appropriate-splash)))
+#     (unless (and (equal appropriate-image fancy-splash-last-size)
+#                  (equal doom-theme fancy-splash-last-theme)))
+#     (unless (plist-get appropriate-image :file)
+#       (ensure-theme-splash-images-exist (plist-get appropriate-image :height)))
+#     (setq fancy-splash-image
+#           (or (plist-get appropriate-image :file)
+#               (fancy-splash-filename (symbol-name doom-theme) (plist-get appropriate-image :height))))
+#     (setq +doom-dashboard-banner-padding (plist-get appropriate-image :padding))
+#     (setq fancy-splash-last-size appropriate-image)
+#     (setq fancy-splash-last-theme doom-theme)
+#     (+doom-dashboard-reload)))
 
-(defun get-appropriate-splash ()
-  (let ((height (frame-height)))
-    (cl-some (lambda (size) (when (>= height (plist-get size :min-height)) size))
-             fancy-splash-sizes)))
+# (add-hook 'window-size-change-functions #'set-appropriate-splash)
+# (add-hook 'doom-load-theme-hook #'set-appropriate-splash)
+# #+end_src
 
-(setq fancy-splash-last-size nil)
-(setq fancy-splash-last-theme nil)
-(defun set-appropriate-splash (&rest _)
-  (let ((appropriate-image (get-appropriate-splash)))
-    (unless (and (equal appropriate-image fancy-splash-last-size)
-                 (equal doom-theme fancy-splash-last-theme)))
-    (unless (plist-get appropriate-image :file)
-      (ensure-theme-splash-images-exist (plist-get appropriate-image :height)))
-    (setq fancy-splash-image
-          (or (plist-get appropriate-image :file)
-              (fancy-splash-filename (symbol-name doom-theme) (plist-get appropriate-image :height))))
-    (setq +doom-dashboard-banner-padding (plist-get appropriate-image :padding))
-    (setq fancy-splash-last-size appropriate-image)
-    (setq fancy-splash-last-theme doom-theme)
-    (+doom-dashboard-reload)))
+# Now the only thing missing is a an extra interesting line, whether that be some
+# corporate BS, an developer excuse, or a fun (useless) fact.
 
-(add-hook 'window-size-change-functions #'set-appropriate-splash)
-(add-hook 'doom-load-theme-hook #'set-appropriate-splash)
-#+end_src
+# The following is rather long, but it essentially
+# + fetches a phrase from an API
+# + inserts it into the dashboard (asynchronously)
+# + moves ~point~ to the phrase
+# + re-uses the last phrase for requests within a few seconds of it being fetched
 
-Now the only thing missing is a an extra interesting line, whether that be some
-corporate BS, an developer excuse, or a fun (useless) fact.
+# #+begin_src emacs-lisp
+# (defvar splash-phrase-source-folder
+#   (expand-file-name "misc/splash-phrases" doom-private-dir)
+#   "A folder of text files with a fun phrase on each line.")
 
-The following is rather long, but it essentially
-+ fetches a phrase from an API
-+ inserts it into the dashboard (asynchronously)
-+ moves ~point~ to the phrase
-+ re-uses the last phrase for requests within a few seconds of it being fetched
+# (defvar splash-phrase-sources
+#   (let* ((files (directory-files splash-phrase-source-folder nil "\\.txt\\'"))
+#          (sets (delete-dups (mapcar
+#                              (lambda (file)
+#                                (replace-regexp-in-string "\\(?:-[0-9]+-\\w+\\)?\\.txt" "" file))
+#                              files))))
+#     (mapcar (lambda (sset)
+#               (cons sset
+#                     (delq nil (mapcar
+#                                (lambda (file)
+#                                  (when (string-match-p (regexp-quote sset) file)
+#                                    file))
+#                                files))))
+#             sets))
+#   "A list of cons giving the phrase set name, and a list of files which contain phrase components.")
 
-#+begin_src emacs-lisp
-(defvar splash-phrase-source-folder
-  (expand-file-name "misc/splash-phrases" doom-private-dir)
-  "A folder of text files with a fun phrase on each line.")
+# (defvar splash-phrase-set
+#   (nth (random (length splash-phrase-sources)) (mapcar #'car splash-phrase-sources))
+#   "The default phrase set. See `splash-phrase-sources'.")
 
-(defvar splash-phrase-sources
-  (let* ((files (directory-files splash-phrase-source-folder nil "\\.txt\\'"))
-         (sets (delete-dups (mapcar
-                             (lambda (file)
-                               (replace-regexp-in-string "\\(?:-[0-9]+-\\w+\\)?\\.txt" "" file))
-                             files))))
-    (mapcar (lambda (sset)
-              (cons sset
-                    (delq nil (mapcar
-                               (lambda (file)
-                                 (when (string-match-p (regexp-quote sset) file)
-                                   file))
-                               files))))
-            sets))
-  "A list of cons giving the phrase set name, and a list of files which contain phrase components.")
+# (defun splase-phrase-set-random-set ()
+#   "Set a new random splash phrase set."
+#   (interactive)
+#   (setq splash-phrase-set
+#         (nth (random (1- (length splash-phrase-sources)))
+#              (cl-set-difference (mapcar #'car splash-phrase-sources) (list splash-phrase-set))))
+#   (+doom-dashboard-reload t))
 
-(defvar splash-phrase-set
-  (nth (random (length splash-phrase-sources)) (mapcar #'car splash-phrase-sources))
-  "The default phrase set. See `splash-phrase-sources'.")
+# (defvar splase-phrase--cache nil)
 
-(defun splase-phrase-set-random-set ()
-  "Set a new random splash phrase set."
-  (interactive)
-  (setq splash-phrase-set
-        (nth (random (1- (length splash-phrase-sources)))
-             (cl-set-difference (mapcar #'car splash-phrase-sources) (list splash-phrase-set))))
-  (+doom-dashboard-reload t))
+# (defun splash-phrase-get-from-file (file)
+#   "Fetch a random line from FILE."
+#   (let ((lines (or (cdr (assoc file splase-phrase--cache))
+#                    (cdar (push (cons file
+#                                      (with-temp-buffer
+#                                        (insert-file-contents (expand-file-name file splash-phrase-source-folder))
+#                                        (split-string (string-trim (buffer-string)) "\n")))
+#                                splase-phrase--cache)))))
+#     (nth (random (length lines)) lines)))
 
-(defvar splase-phrase--cache nil)
+# (defun splash-phrase (&optional set)
+#   "Construct a splash phrase from SET. See `splash-phrase-sources'."
+#   (mapconcat
+#    #'splash-phrase-get-from-file
+#    (cdr (assoc (or set splash-phrase-set) splash-phrase-sources))
+#    " "))
 
-(defun splash-phrase-get-from-file (file)
-  "Fetch a random line from FILE."
-  (let ((lines (or (cdr (assoc file splase-phrase--cache))
-                   (cdar (push (cons file
-                                     (with-temp-buffer
-                                       (insert-file-contents (expand-file-name file splash-phrase-source-folder))
-                                       (split-string (string-trim (buffer-string)) "\n")))
-                               splase-phrase--cache)))))
-    (nth (random (length lines)) lines)))
+# (defun doom-dashboard-phrase ()
+#   "Get a splash phrase, flow it over multiple lines as needed, and make fontify it."
+#   (mapconcat
+#    (lambda (line)
+#      (+doom-dashboard--center
+#       +doom-dashboard--width
+#       (with-temp-buffer
+#         (insert-text-button
+#          line
+#          'action
+#          (lambda (_) (+doom-dashboard-reload t))
+#          'face 'doom-dashboard-menu-title
+#          'mouse-face 'doom-dashboard-menu-title
+#          'help-echo "Random phrase"
+#          'follow-link t)
+#         (buffer-string))))
+#    (split-string
+#     (with-temp-buffer
+#       (insert (splash-phrase))
+#       (setq fill-column (min 70 (/ (* 2 (window-width)) 3)))
+#       (fill-region (point-min) (point-max))
+#       (buffer-string))
+#     "\n")
+#    "\n"))
 
-(defun splash-phrase (&optional set)
-  "Construct a splash phrase from SET. See `splash-phrase-sources'."
-  (mapconcat
-   #'splash-phrase-get-from-file
-   (cdr (assoc (or set splash-phrase-set) splash-phrase-sources))
-   " "))
+# (defadvice! doom-dashboard-widget-loaded-with-phrase ()
+#   :override #'doom-dashboard-widget-loaded
+#   (setq line-spacing 0.2)
+#   (insert
+#    "\n\n"
+#    (propertize
+#     (+doom-dashboard--center
+#      +doom-dashboard--width
+#      (doom-display-benchmark-h 'return))
+#     'face 'doom-dashboard-loaded)
+#    "\n"
+#    (doom-dashboard-phrase)
+#    "\n"))
+# #+end_src
 
-(defun doom-dashboard-phrase ()
-  "Get a splash phrase, flow it over multiple lines as needed, and make fontify it."
-  (mapconcat
-   (lambda (line)
-     (+doom-dashboard--center
-      +doom-dashboard--width
-      (with-temp-buffer
-        (insert-text-button
-         line
-         'action
-         (lambda (_) (+doom-dashboard-reload t))
-         'face 'doom-dashboard-menu-title
-         'mouse-face 'doom-dashboard-menu-title
-         'help-echo "Random phrase"
-         'follow-link t)
-        (buffer-string))))
-   (split-string
-    (with-temp-buffer
-      (insert (splash-phrase))
-      (setq fill-column (min 70 (/ (* 2 (window-width)) 3)))
-      (fill-region (point-min) (point-max))
-      (buffer-string))
-    "\n")
-   "\n"))
+# Lastly, the doom dashboard "useful commands" are no longer useful to me.
+# So, we'll disable them and then for a particularly /clean/ look disable
+# the modeline and ~hl-line-mode~, then also hide the cursor.
 
-(defadvice! doom-dashboard-widget-loaded-with-phrase ()
-  :override #'doom-dashboard-widget-loaded
-  (setq line-spacing 0.2)
-  (insert
-   "\n\n"
-   (propertize
-    (+doom-dashboard--center
-     +doom-dashboard--width
-     (doom-display-benchmark-h 'return))
-    'face 'doom-dashboard-loaded)
-   "\n"
-   (doom-dashboard-phrase)
-   "\n"))
-#+end_src
+# #+begin_src emacs-lisp
+# (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
+# (add-hook! '+doom-dashboard-mode-hook (hide-mode-line-mode 1) (hl-line-mode -1))
+# (setq-hook! '+doom-dashboard-mode-hook evil-normal-state-cursor (list nil))
+# #+end_src
 
-Lastly, the doom dashboard "useful commands" are no longer useful to me.
-So, we'll disable them and then for a particularly /clean/ look disable
-the modeline and ~hl-line-mode~, then also hide the cursor.
+# At the end, we have a minimal but rather nice splash screen.
 
-#+begin_src emacs-lisp
-(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
-(add-hook! '+doom-dashboard-mode-hook (hide-mode-line-mode 1) (hl-line-mode -1))
-(setq-hook! '+doom-dashboard-mode-hook evil-normal-state-cursor (list nil))
-#+end_src
+# #+attr_html: :class invertible :alt The splash screen, just loaded.
+# [[https://tecosaur.com/lfs/emacs-config/screenshots/splash-screen.png]]
 
-At the end, we have a minimal but rather nice splash screen.
+# I haven't forgotten about the ASCII banner though! Once again we're going for
+# something simple.
 
-#+attr_html: :class invertible :alt The splash screen, just loaded.
-[[https://tecosaur.com/lfs/emacs-config/screenshots/splash-screen.png]]
+# #+begin_src emacs-lisp
+# (defun doom-dashboard-draw-ascii-emacs-banner-fn ()
+#   (let* ((banner
+#           '(",---.,-.-.,---.,---.,---."
+#             "|---'| | |,---||    `---."
+#             "`---'` ' '`---^`---'`---'"))
+#          (longest-line (apply #'max (mapcar #'length banner))))
+#     (put-text-property
+#      (point)
+#      (dolist (line banner (point))
+#        (insert (+doom-dashboard--center
+#                 +doom-dashboard--width
+#                 (concat
+#                  line (make-string (max 0 (- longest-line (length line)))
+#                                    32)))
+#                "\n"))
+#      'face 'doom-dashboard-banner)))
 
-I haven't forgotten about the ASCII banner though! Once again we're going for
-something simple.
-
-#+begin_src emacs-lisp
-(defun doom-dashboard-draw-ascii-emacs-banner-fn ()
-  (let* ((banner
-          '(",---.,-.-.,---.,---.,---."
-            "|---'| | |,---||    `---."
-            "`---'` ' '`---^`---'`---'"))
-         (longest-line (apply #'max (mapcar #'length banner))))
-    (put-text-property
-     (point)
-     (dolist (line banner (point))
-       (insert (+doom-dashboard--center
-                +doom-dashboard--width
-                (concat
-                 line (make-string (max 0 (- longest-line (length line)))
-                                   32)))
-               "\n"))
-     'face 'doom-dashboard-banner)))
-
-(unless (display-graphic-p) ; for some reason this messes up the graphical splash screen atm
-  (setq +doom-dashboard-ascii-banner-fn #'doom-dashboard-draw-ascii-emacs-banner-fn))
-#+end_src
+# (unless (display-graphic-p) ; for some reason this messes up the graphical splash screen atm
+#   (setq +doom-dashboard-ascii-banner-fn #'doom-dashboard-draw-ascii-emacs-banner-fn))
+# #+end_src
 
 *** Systemd daemon
 
@@ -1894,9 +1922,9 @@ contributes a typing delay. I'm not sure it's much, but it is an extra
 ~pre-command-hook~ that I don't benefit from, so...
 It seems that there's a dedicated package for this, so instead of just disabling
 the mode on startup, let's prevent installation of the package.
-#+begin_src emacs-lisp :tangle packages.el
-(package! evil-escape :disable t)
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! evil-escape :disable t)
+# #+end_src
 
 *** Consult
 
@@ -2140,8 +2168,8 @@ It's nice to have completions almost all the time, in my opinion. Key strokes
 are just waiting to be saved!
 #+begin_src emacs-lisp
 (after! company
-  (setq company-idle-delay 0.5
-        company-minimum-prefix-length 2)
+  (setq company-idle-delay 0
+        company-minimum-prefix-length 1)
   (setq company-show-numbers t)
   (add-hook 'evil-normal-state-entry-hook #'company-abort)) ;; make aborting less annoying.
 #+end_src
@@ -2257,7 +2285,8 @@ prompt recognition.
 #+begin_src emacs-lisp
 (after! tramp
   (setenv "SHELL" "/bin/bash")
-  (setq tramp-shell-prompt-pattern "\\(?:^\\|\\)[^]#$%>\n]*#?[]#$%>] *\\(\\[[0-9;]*[a-zA-Z] *\\)*")) ;; default + 
+  (setq tramp-shell-prompt-pattern "\\(?:^\\|
+\\)[^]#$%>\n]*#?[]#$%>] *\\(\\[[0-9;]*[a-zA-Z] *\\)*")) ;; default + 
 #+end_src
 
 **** Troubleshooting
@@ -3429,7 +3458,7 @@ something through Emacs?
 (use-package! calibredb
   :commands calibredb
   :config
-  (setq calibredb-root-dir "~/Desktop/TEC/Other/Ebooks"
+  (setq calibredb-root-dir "~/Documents/books"
         calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
   (map! :map calibredb-show-mode-map
         :ne "?" #'calibredb-entry-dispatch
@@ -3700,300 +3729,6 @@ panel.
       (switch-to-buffer "*Calculator*")
       (select-window main-window))))
 #+end_src
-
-** IRC
-
-=circe= is a client for IRC in Emacs (hey, isn't that a nice project
-name+acronym), and a greek enchantress who turned humans into animals.
-
-Let's use the former to chat to +recluses+ discerning individuals online.
-
-[[xkcd:1782]]
-
-Before we start seeing and sending messages, we need to authenticate with our
-IRC servers. The circe manual provided a snippet for putting some of the auth
-details in =.authinfo.gpg= --- but I think we should go further than that: have
-the entire server info in our authinfo.
-
-First, a reasonable format by which we can specify:
-+ server
-+ port
-+ SASL username
-+ SASL password
-+ channels to join
-
-We can have these stored like so
-#+begin_src authinfo
-machine chat.freenode.net login USERNAME password PASSWORD port PORT for irc channels emacs,org-mode
-#+end_src
-
-The ~for irc~ bit is used so we can uniquely identify all IRC auth info. By
-omitting the =#= in channel names we can have a list of channels comma-separated
-(no space!) which the secrets API will return as a single string.
-
-#+name: irc-authinfo-reader
-#+begin_src emacs-lisp :tangle no
-(defun auth-server-pass (server)
-  (if-let ((secret (plist-get (car (auth-source-search :host server)) :secret)))
-      (if (functionp secret)
-          (funcall secret) secret)
-    (error "Could not fetch password for host %s" server)))
-
-(defun register-irc-auths ()
-  (require 'circe)
-  (require 'dash)
-  (let ((accounts (-filter (lambda (a) (string= "irc" (plist-get a :for)))
-                           (auth-source-search :require '(:for) :max 10))))
-    (appendq! circe-network-options
-              (mapcar (lambda (entry)
-                        (let* ((host (plist-get entry :host))
-                               (label (or (plist-get entry :label) host))
-                               (_ports (mapcar #'string-to-number
-                                               (s-split "," (plist-get entry :port))))
-                               (port (if (= 1 (length _ports)) (car _ports) _ports))
-                               (user (plist-get entry :user))
-                               (nick (or (plist-get entry :nick) user))
-                               (channels (mapcar (lambda (c) (concat "#" c))
-                                                 (s-split "," (plist-get entry :channels)))))
-                          `(,label
-                            :host ,host :port ,port :nick ,nick
-                            :sasl-username ,user :sasl-password auth-server-pass
-                            :channels ,channels)))
-                      accounts))))
-#+end_src
-
-We'll just call src_elisp{(register-irc-auths)} on a hook when we start Circe
-up.
-
-Now we're ready to go, let's actually wire-up Circe, with one or two
-configuration tweaks.
-#+begin_src emacs-lisp :noweb no-export
-(after! circe
-  (setq-default circe-use-tls t)
-  (setq circe-notifications-alert-icon "/usr/share/icons/breeze/actions/24/network-connect.svg"
-        lui-logging-directory (expand-file-name "irc" doom-etc-dir)
-        lui-logging-file-format "{buffer}/%Y/%m-%d.txt"
-        circe-format-self-say "{nick:+13s} ┃ {body}")
-
-  (custom-set-faces!
-    '(circe-my-message-face :weight unspecified))
-
-  (enable-lui-logging-globally)
-  (enable-circe-display-images)
-
-  <<org-emph-to-irc>>
-
-  <<circe-emojis>>
-  <<circe-emoji-alists>>
-
-  (defun named-circe-prompt ()
-    (lui-set-prompt
-     (concat (propertize (format "%13s > " (circe-nick))
-                         'face 'circe-prompt-face)
-             "")))
-  (add-hook 'circe-chat-mode-hook #'named-circe-prompt)
-
-  (appendq! all-the-icons-mode-icon-alist
-            '((circe-channel-mode all-the-icons-material "message" :face all-the-icons-lblue)
-              (circe-server-mode all-the-icons-material "chat_bubble_outline" :face all-the-icons-purple))))
-
-<<irc-authinfo-reader>>
-
-(add-transient-hook! #'=irc (register-irc-auths))
-#+end_src
-
-*** Org-style emphasis
-
-Let's do our *bold*, /italic/, and _underline_ in org-syntax, using IRC control characters.
-#+name: org-emph-to-irc
-#+begin_src emacs-lisp
-(defun lui-org-to-irc ()
-  "Examine a buffer with simple org-mode formatting, and converts the empasis:
-,*bold*, /italic/, and _underline_ to IRC semi-standard escape codes.
-=code= is converted to inverse (highlighted) text."
-  (goto-char (point-min))
-  (while (re-search-forward "\\_<\\(?1:[*/_=]\\)\\(?2:[^[:space:]]\\(?:.*?[^[:space:]]\\)?\\)\\1\\_>" nil t)
-    (replace-match
-     (concat (pcase (match-string 1)
-               ("*" "")
-               ("/" "")
-               ("_" "")
-               ("=" ""))
-             (match-string 2)
-             "") nil nil)))
-
-(add-hook 'lui-pre-input-hook #'lui-org-to-irc)
-#+end_src
-
-*** Emojis
-
-Let's setup Circe to use some emojis
-#+name: circe-emojis
-#+begin_src emacs-lisp :tangle no
-(defun lui-ascii-to-emoji ()
-  (goto-char (point-min))
-  (while (re-search-forward "\\( \\)?::?\\([^[:space:]:]+\\):\\( \\)?" nil t)
-    (replace-match
-     (concat
-      (match-string 1)
-      (or (cdr (assoc (match-string 2) lui-emojis-alist))
-          (concat ":" (match-string 2) ":"))
-      (match-string 3))
-     nil nil)))
-
-(defun lui-emoticon-to-emoji ()
-  (dolist (emoticon lui-emoticons-alist)
-    (goto-char (point-min))
-    (while (re-search-forward (concat " " (car emoticon) "\\( \\)?") nil t)
-      (replace-match (concat " "
-                             (cdr (assoc (cdr emoticon) lui-emojis-alist))
-                             (match-string 1))))))
-
-(define-minor-mode lui-emojify
-  "Replace :emojis: and ;) emoticons with unicode emoji chars."
-  :global t
-  :init-value t
-  (if lui-emojify
-      (add-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)
-    (remove-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)))
-#+end_src
-
-Now, some actual emojis to use.
-#+name: circe-emoji-alists
-#+begin_src emacs-lisp :tangle no
-(defvar lui-emojis-alist
-  '(("grinning"                      . "😀")
-    ("smiley"                        . "😃")
-    ("smile"                         . "😄")
-    ("grin"                          . "😁")
-    ("laughing"                      . "😆")
-    ("sweat_smile"                   . "😅")
-    ("joy"                           . "😂")
-    ("rofl"                          . "🤣")
-    ("relaxed"                       . "☺️")
-    ("blush"                         . "😊")
-    ("innocent"                      . "😇")
-    ("slight_smile"                  . "🙂")
-    ("upside_down"                   . "🙃")
-    ("wink"                          . "😉")
-    ("relieved"                      . "😌")
-    ("heart_eyes"                    . "😍")
-    ("yum"                           . "😋")
-    ("stuck_out_tongue"              . "😛")
-    ("stuck_out_tongue_closed_eyes"  . "😝")
-    ("stuck_out_tongue_wink"         . "😜")
-    ("zanzy"                         . "🤪")
-    ("raised_eyebrow"                . "🤨")
-    ("monocle"                       . "🧐")
-    ("nerd"                          . "🤓")
-    ("cool"                          . "😎")
-    ("star_struck"                   . "🤩")
-    ("party"                         . "🥳")
-    ("smirk"                         . "😏")
-    ("unamused"                      . "😒")
-    ("disapointed"                   . "😞")
-    ("pensive"                       . "😔")
-    ("worried"                       . "😟")
-    ("confused"                      . "😕")
-    ("slight_frown"                  . "🙁")
-    ("frown"                         . "☹️")
-    ("persevere"                     . "😣")
-    ("confounded"                    . "😖")
-    ("tired"                         . "😫")
-    ("weary"                         . "😩")
-    ("pleading"                      . "🥺")
-    ("tear"                          . "😢")
-    ("cry"                           . "😢")
-    ("sob"                           . "😭")
-    ("triumph"                       . "😤")
-    ("angry"                         . "😠")
-    ("rage"                          . "😡")
-    ("exploding_head"                . "🤯")
-    ("flushed"                       . "😳")
-    ("hot"                           . "🥵")
-    ("cold"                          . "🥶")
-    ("scream"                        . "😱")
-    ("fearful"                       . "😨")
-    ("disapointed"                   . "😰")
-    ("relieved"                      . "😥")
-    ("sweat"                         . "😓")
-    ("thinking"                      . "🤔")
-    ("shush"                         . "🤫")
-    ("liar"                          . "🤥")
-    ("blank_face"                    . "😶")
-    ("neutral"                       . "😐")
-    ("expressionless"                . "😑")
-    ("grimace"                       . "😬")
-    ("rolling_eyes"                  . "🙄")
-    ("hushed"                        . "😯")
-    ("frowning"                      . "😦")
-    ("anguished"                     . "😧")
-    ("wow"                           . "😮")
-    ("astonished"                    . "😲")
-    ("sleeping"                      . "😴")
-    ("drooling"                      . "🤤")
-    ("sleepy"                        . "😪")
-    ("dizzy"                         . "😵")
-    ("zipper_mouth"                  . "🤐")
-    ("woozy"                         . "🥴")
-    ("sick"                          . "🤢")
-    ("vomiting"                      . "🤮")
-    ("sneeze"                        . "🤧")
-    ("mask"                          . "😷")
-    ("bandaged_head"                 . "🤕")
-    ("money_face"                    . "🤑")
-    ("cowboy"                        . "🤠")
-    ("imp"                           . "😈")
-    ("ghost"                         . "👻")
-    ("alien"                         . "👽")
-    ("robot"                         . "🤖")
-    ("clap"                          . "👏")
-    ("thumpup"                       . "👍")
-    ("+1"                            . "👍")
-    ("thumbdown"                     . "👎")
-    ("-1"                            . "👎")
-    ("ok"                            . "👌")
-    ("pinch"                         . "🤏")
-    ("left"                          . "👈")
-    ("right"                         . "👉")
-    ("down"                          . "👇")
-    ("wave"                          . "👋")
-    ("pray"                          . "🙏")
-    ("eyes"                          . "👀")
-    ("brain"                         . "🧠")
-    ("facepalm"                      . "🤦")
-    ("tada"                          . "🎉")
-    ("fire"                          . "🔥")
-    ("flying_money"                  . "💸")
-    ("lighbulb"                      . "💡")
-    ("heart"                         . "❤️")
-    ("sparkling_heart"               . "💖")
-    ("heartbreak"                    . "💔")
-    ("100"                           . "💯")))
-
-(defvar lui-emoticons-alist
-  '((":)"   . "slight_smile")
-    (";)"   . "wink")
-    (":D"   . "smile")
-    ("=D"   . "grin")
-    ("xD"   . "laughing")
-    (";("   . "joy")
-    (":P"   . "stuck_out_tongue")
-    (";D"   . "stuck_out_tongue_wink")
-    ("xP"   . "stuck_out_tongue_closed_eyes")
-    (":("   . "slight_frown")
-    (";("   . "cry")
-    (";'("  . "sob")
-    (">:("  . "angry")
-    (">>:(" . "rage")
-    (":o"   . "wow")
-    (":O"   . "astonished")
-    (":/"   . "confused")
-    (":-/"  . "thinking")
-    (":|"   . "neutral")
-    (":-|"  . "expressionless")))
-#+end_src
-
 ** Newsfeed
 
 RSS feeds are still a thing. Why not make use of them with =elfeed=.
@@ -5578,44 +5313,6 @@ I can check this by checking the content of the SSH key =~/.ssh/id_ed25519.pub=.
 To account for this situation properly, we need a short script to determine the
 correct package statement needed.
 
-#+name: org-pkg-statement
-#+begin_src emacs-lisp :tangle no
-(condition-case nil
-    (load (expand-file-name "core/core.el" user-emacs-directory) nil t) ; For `doom-local-dir'
-  (error (setq doom-local-dir (expand-file-name ".local/" user-emacs-directory)))) ; Fall back on the default value.
-(let ((dev-key (and (file-exists-p "~/.ssh/id_ed25519.pub")
-                    (= 0 (shell-command "cat ~/.ssh/id_ed25519.pub | grep -q AAAAC3NzaC1lZDI1NTE5AAAAIOZZqcJOLdN+QFHKyW8ST2zz750+8TdvO9IT5geXpQVt"))))
-      (dev-pkg (let ((default-directory (expand-file-name "straight/repos/org-mode" doom-local-dir)))
-                 (and (file-exists-p default-directory)
-                      (string= "tec@git.savannah.gnu.org:/srv/git/emacs/org-mode.git\n" (shell-command-to-string "git remote get-url origin")))))
-      (recipe-common '(:files ("*.el" "lisp/*.el" "etc")
-                       :pre-build
-                       (with-temp-file "org-version.el"
-                         (insert "(fset 'org-release (lambda () \"9.5\"))\n"
-                                 (format "(fset 'org-git-version (lambda () \"%s\"))\n"
-                                         (substring (shell-command-to-string "git rev-parse --short HEAD") 0 -1))
-                                 "(provide 'org-version)\n"))
-                       :includes org)))
-  (prin1-to-string
-   `(package! org-mode
-      :recipe (,@(cond ((and dev-key dev-pkg)
-                        (list :host nil :repo nil :local-repo (expand-file-name "straight/repos/org-mode" doom-local-dir)))
-                       (dev-key
-                        (list :host nil :repo "tec@git.savannah.gnu.org:/srv/git/emacs/org-mode.git"))
-                       (t
-                        (list :host 'github :repo "emacs-straight/org-mode")))
-               ,@recipe-common)
-      :pin nil)))
-#+end_src
-
-#+begin_src emacs-lisp :noweb no-export
-<<org-pkg-statement()>>
-(unpin! org-mode) ; there be bugs
-(package! org-contrib
-  :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
-           :files ("lisp/*.el"))
-  :pin "c6aef31ccfc7c4418c3b51e98f7c3bd8e255f5e6")
-#+end_src
 
 **** Visuals
 ***** Org Modern
@@ -6056,6 +5753,10 @@ Unfortunately, it ignores the ~file = {...}~ =.bib= keys though. Let's fix that.
 I separate files on =;=, which may just be a Zotero/BetterBibLaTeX thing, but it's
 a good idea in my case at least.
 
+#+begin_src emacs-lisp :tangle yes
+(setq jethro/default-bibliography `(,(expand-file-name "org/notes/biblio.bib" org-directory)))
+#+end_src
+
 #+begin_src emacs-lisp :noweb-ref none
 (use-package! org-ref
   ;; :after org
@@ -6106,15 +5807,16 @@ To improve =org-cite=.
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
   :config
-  (setq citar-bibliography
-        (let ((libfile-search-names '("library.json" "Library.json" "library.bib" "Library.bib"))
-              (libfile-dir "~/Zotero")
-              paths)
-          (dolist (libfile libfile-search-names)
-            (when (and (not paths)
-                       (file-exists-p (expand-file-name libfile libfile-dir)))
-              (setq paths (list (expand-file-name libfile libfile-dir)))))
-          paths))
+  ;; (setq citar-bibliography
+  ;;       (let ((libfile-search-names '("library.json" "Library.json" "library.bib" "Library.bib"))
+  ;;             (libfile-dir "~/Zotero")
+  ;;             paths)
+  ;;         (dolist (libfile libfile-search-names)
+  ;;           (when (and (not paths)
+  ;;                      (file-exists-p (expand-file-name libfile libfile-dir)))
+  ;;             (setq paths (list (expand-file-name libfile libfile-dir)))))
+  ;;         paths))
+  (setq citar-bibliography jethro/default-bibliography)
   (setq citar-symbols
       `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
         (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
@@ -6205,6 +5907,8 @@ I think it would be nice to have a function to convert =org-ref= citations to
                                  (cdr (assoc (match-string 1) cite-conversions))
                                  (match-string 2))))))))
 #+end_src
+
+
 
 ***** cdlatex
 
@@ -6304,77 +6008,54 @@ The agenda is nice, but a souped up version is nicer.
   :commands org-super-agenda-mode)
 #+end_src
 
-#+begin_src emacs-lisp
-(after! org-agenda
-  (org-super-agenda-mode))
+ #+begin_src emacs-lisp
+ (after! org-agenda
+   (org-super-agenda-mode))
 
 (setq org-agenda-skip-scheduled-if-done t
       org-agenda-skip-deadline-if-done t
       org-agenda-include-deadlines t
-      org-agenda-block-separator nil
+      org-agenda-block-separator 45
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
-      org-agenda-compact-blocks t)
-
-(setq org-agenda-custom-commands
-      '(("o" "Overview"
-         ((agenda "" ((org-agenda-span 'day)
-                      (org-super-agenda-groups
-                       '((:name "Today"
-                          :time-grid t
-                          :date today
-                          :todo "TODAY"
-                          :scheduled today
-                          :order 1)))))
-          (alltodo "" ((org-agenda-overriding-header "")
-                       (org-super-agenda-groups
-                        '((:name "Next to do"
-                           :todo "NEXT"
-                           :order 1)
-                          (:name "Important"
-                           :tag "Important"
-                           :priority "A"
-                           :order 6)
-                          (:name "Due Today"
-                           :deadline today
-                           :order 2)
-                          (:name "Due Soon"
-                           :deadline future
-                           :order 8)
-                          (:name "Overdue"
-                           :deadline past
-                           :face error
-                           :order 7)
-                          (:name "Assignments"
-                           :tag "Assignment"
-                           :order 10)
-                          (:name "Issues"
-                           :tag "Issue"
-                           :order 12)
-                          (:name "Emacs"
-                           :tag "Emacs"
-                           :order 13)
-                          (:name "Projects"
-                           :tag "Project"
-                           :order 14)
-                          (:name "Research"
-                           :tag "Research"
-                           :order 15)
-                          (:name "To read"
-                           :tag "Read"
-                           :order 30)
-                          (:name "Waiting"
-                           :todo "WAITING"
-                           :order 20)
-                          (:name "University"
-                           :tag "uni"
-                           :order 32)
-                          (:name "Trivial"
-                           :priority<= "E"
-                           :tag ("Trivial" "Unimportant")
-                           :todo ("SOMEDAY" )
-                           :order 90)
-                          (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+      org-agenda-compact-blocks nil
+      org-columns-default-format "%40ITEM(Task) %Effort(EE){:} %CLOCKSUM(Time Spent) %SCHEDULED(Scheduled) %DEADLINE(Deadline)"
+      )
 #+end_src
+
+**** CUSTOM: some changes from [[[[https://yannesposito.com/posts/0015-how-i-use-org-mode/index.html#workflow-3--org-capture---org-refile]]
+
+# #+begin_src emacs-lisp :tangle yes
+# (defun y/go-to-today-agenda ()
+#   (interactive)
+#   (org-agenda nil "a"))
+# ;; Faster jump to agenda today keybinding shortcut (SPC y a)
+# (map! :leader
+#       :desc "Today's agenda"
+#       "y a" #'y/go-to-today-agenda)
+
+# ;; How to create default clocktable
+# (setq org-clock-clocktable-default-properties
+#       '(:scope subtree :maxlevel 4 :timestamp t :link t :tags t :narrow 36! :match "work"))
+
+# ;; How to display default clock report in agenda view
+# (setq org-agenda-clockreport-parameter-plist
+#       '(:lang "en" :maxlevel 4 :fileskip0 t :link t :indent t :narrow 80!))
+
+# ;; *** Projectile; default TODO file to create in your projects
+# (setq org-projectile-file "inbox.org")
+
+# ;; *** Refile mapped to SPC y o r
+# (map! :leader :desc "org-refile" "y o r" #'org-refile)
+
+# ;; Refile to either the =refile.org= file or to =agenda.org= org =standup.org=
+# (setq org-refile-target-files
+#     '("~/org/tracker.org"
+#       "~/org/inbox.org"))
+
+# (setq org-refile-targets
+#     '((nil :maxlevel . 5)
+#       (org-refile-target-files :maxlevel . 5)))
+# #+end_src
 
 **** Capture
 
@@ -6383,316 +6064,268 @@ Let's setup some org-capture templates, and make them visually nice to access.
 #+attr_html: :class invertible :alt My org-capture dialouge.
 [[https://tecosaur.com/lfs/emacs-config/screenshots/org-capture.png]]
 
-~doct~ (Declarative Org Capture Templates) seems to be a nicer way to
-set up org-capture.
+CUSTOM:
+make use of reverse datetrees
+
 #+begin_src emacs-lisp :noweb-ref none :tangle packages.el
 (package! doct
   :recipe (:host github :repo "progfolio/doct")
   :pin "8464809754f3316d5a2fdcf3c01ce1e8736b323b")
 #+end_src
 
-#+begin_src emacs-lisp :noweb-ref none :tangle yes
-(use-package! doct
-  :commands doct)
+#+begin_src emacs-lisp :tangle yes
+(setq-default org-reverse-datetree-level-formats
+              '("%Y"                    ; year
+                (lambda (time) (format-time-string "%Y-%m %B" (org-reverse-datetree-monday time))) ; month
+                "%Y W%W"                ; week
+                "%Y-%m-%d %A"           ; date
+                ))
 #+end_src
 
-#+begin_src emacs-lisp :noweb no-export
-(after! org-capture
-  <<prettify-capture>>
-
-  (defun +doct-icon-declaration-to-icon (declaration)
-    "Convert :icon declaration to icon"
-    (let ((name (pop declaration))
-          (set  (intern (concat "all-the-icons-" (plist-get declaration :set))))
-          (face (intern (concat "all-the-icons-" (plist-get declaration :color))))
-          (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
-      (apply set `(,name :face ,face :v-adjust ,v-adjust))))
-
-  (defun +doct-iconify-capture-templates (groups)
-    "Add declaration's :icon to each template group in GROUPS."
-    (let ((templates (doct-flatten-lists-in groups)))
-      (setq doct-templates (mapcar (lambda (template)
-                                     (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
-                                                 (spec (plist-get (plist-get props :doct) :icon)))
-                                       (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
-                                                                      "\t"
-                                                                      (nth 1 template))))
-                                     template)
-                                   templates))))
-
-  (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
-
-  (defvar +org-capture-recipies  "~/Desktop/TEC/Organisation/recipies.org")
-
-  (defun set-org-capture-templates ()
-    (setq org-capture-templates
-          (doct `(("Personal todo" :keys "t"
-                   :icon ("checklist" :set "octicon" :color "green")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Inbox"
-                   :type entry
-                   :template ("* TODO %?"
-                              "%i %a"))
-                  ("Personal note" :keys "n"
-                   :icon ("sticky-note-o" :set "faicon" :color "green")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Inbox"
-                   :type entry
-                   :template ("* %?"
-                              "%i %a"))
-                  ("Email" :keys "e"
-                   :icon ("envelope" :set "faicon" :color "blue")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Inbox"
-                   :type entry
-                   :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
-                              "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
-                              "about %^{topic}"
-                              "%U %i %a"))
-                  ("Interesting" :keys "i"
-                   :icon ("eye" :set "faicon" :color "lcyan")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Interesting"
-                   :type entry
-                   :template ("* [ ] %{desc}%? :%{i-type}:"
-                              "%i %a")
-                   :children (("Webpage" :keys "w"
-                               :icon ("globe" :set "faicon" :color "green")
-                               :desc "%(org-cliplink-capture) "
-                               :i-type "read:web")
-                              ("Article" :keys "a"
-                               :icon ("file-text" :set "octicon" :color "yellow")
-                               :desc ""
-                               :i-type "read:reaserch")
-                              ("\tRecipie" :keys "r"
-                               :icon ("spoon" :set "faicon" :color "dorange")
-                               :file +org-capture-recipies
-                               :headline "Unsorted"
-                               :template "%(org-chef-get-recipe-from-url)")
-                              ("Information" :keys "i"
-                               :icon ("info-circle" :set "faicon" :color "blue")
-                               :desc ""
-                               :i-type "read:info")
-                              ("Idea" :keys "I"
-                               :icon ("bubble_chart" :set "material" :color "silver")
-                               :desc ""
-                               :i-type "idea")))
-                  ("Tasks" :keys "k"
-                   :icon ("inbox" :set "octicon" :color "yellow")
-                   :file +org-capture-todo-file
-                   :prepend t
-                   :headline "Tasks"
-                   :type entry
-                   :template ("* TODO %? %^G%{extra}"
-                              "%i %a")
-                   :children (("General Task" :keys "k"
-                               :icon ("inbox" :set "octicon" :color "yellow")
-                               :extra "")
-                              ("Task with deadline" :keys "d"
-                               :icon ("timer" :set "material" :color "orange" :v-adjust -0.1)
-                               :extra "\nDEADLINE: %^{Deadline:}t")
-                              ("Scheduled Task" :keys "s"
-                               :icon ("calendar" :set "octicon" :color "orange")
-                               :extra "\nSCHEDULED: %^{Start time:}t")))
-                  ("Project" :keys "p"
-                   :icon ("repo" :set "octicon" :color "silver")
-                   :prepend t
-                   :type entry
-                   :headline "Inbox"
-                   :template ("* %{time-or-todo} %?"
-                              "%i"
-                              "%a")
-                   :file ""
-                   :custom (:time-or-todo "")
-                   :children (("Project-local todo" :keys "t"
-                               :icon ("checklist" :set "octicon" :color "green")
-                               :time-or-todo "TODO"
-                               :file +org-capture-project-todo-file)
-                              ("Project-local note" :keys "n"
-                               :icon ("sticky-note" :set "faicon" :color "yellow")
-                               :time-or-todo "%U"
-                               :file +org-capture-project-notes-file)
-                              ("Project-local changelog" :keys "c"
-                               :icon ("list" :set "faicon" :color "blue")
-                               :time-or-todo "%U"
-                               :heading "Unreleased"
-                               :file +org-capture-project-changelog-file)))
-                  ("\tCentralised project templates"
-                   :keys "o"
-                   :type entry
-                   :prepend t
-                   :template ("* %{time-or-todo} %?"
-                              "%i"
-                              "%a")
-                   :children (("Project todo"
-                               :keys "t"
-                               :prepend nil
-                               :time-or-todo "TODO"
-                               :heading "Tasks"
-                               :file +org-capture-central-project-todo-file)
-                              ("Project note"
-                               :keys "n"
-                               :time-or-todo "%U"
-                               :heading "Notes"
-                               :file +org-capture-central-project-notes-file)
-                              ("Project changelog"
-                               :keys "c"
-                               :time-or-todo "%U"
-                               :heading "Unreleased"
-                               :file +org-capture-central-project-changelog-file)))))))
-
-  (set-org-capture-templates)
-  (unless (display-graphic-p)
-    (add-hook 'server-after-make-frame-hook
-              (defun org-capture-reinitialise-hook ()
-                (when (display-graphic-p)
-                  (set-org-capture-templates)
-                  (remove-hook 'server-after-make-frame-hook
-                               #'org-capture-reinitialise-hook))))))
+**** GTD
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-gtd :recipe (:host github :repo "j-palms/org-gtd.el"))
 #+end_src
-It would also be nice to improve how the capture dialogue looks
-#+name: prettify-capture
-#+begin_src emacs-lisp :noweb-ref none
-(defun org-capture-select-template-prettier (&optional keys)
-  "Select a capture template, in a prettier way than default
-Lisp programs can force the template by setting KEYS to a string."
-  (let ((org-capture-templates
-         (or (org-contextualize-keys
-              (org-capture-upgrade-templates org-capture-templates)
-              org-capture-templates-contexts)
-             '(("t" "Task" entry (file+headline "" "Tasks")
-                "* TODO %?\n  %u\n  %a")))))
-    (if keys
-        (or (assoc keys org-capture-templates)
-            (error "No capture template referred to by \"%s\" keys" keys))
-      (org-mks org-capture-templates
-               "Select a capture template\n━━━━━━━━━━━━━━━━━━━━━━━━━"
-               "Template key: "
-               `(("q" ,(concat (all-the-icons-octicon "stop" :face 'all-the-icons-red :v-adjust 0.01) "\tAbort")))))))
-(advice-add 'org-capture-select-template :override #'org-capture-select-template-prettier)
 
-(defun org-mks-pretty (table title &optional prompt specials)
-  "Select a member of an alist with multiple keys. Prettified.
-
-TABLE is the alist which should contain entries where the car is a string.
-There should be two types of entries.
-
-1. prefix descriptions like (\"a\" \"Description\")
-   This indicates that `a' is a prefix key for multi-letter selection, and
-   that there are entries following with keys like \"ab\", \"ax\"…
-
-2. Select-able members must have more than two elements, with the first
-   being the string of keys that lead to selecting it, and the second a
-   short description string of the item.
-
-The command will then make a temporary buffer listing all entries
-that can be selected with a single key, and all the single key
-prefixes.  When you press the key for a single-letter entry, it is selected.
-When you press a prefix key, the commands (and maybe further prefixes)
-under this key will be shown and offered for selection.
-
-TITLE will be placed over the selection in the temporary buffer,
-PROMPT will be used when prompting for a key.  SPECIALS is an
-alist with (\"key\" \"description\") entries.  When one of these
-is selected, only the bare key is returned."
-  (save-window-excursion
-    (let ((inhibit-quit t)
-          (buffer (org-switch-to-buffer-other-window "*Org Select*"))
-          (prompt (or prompt "Select: "))
-          case-fold-search
-          current)
-      (unwind-protect
-          (catch 'exit
-            (while t
-              (setq-local evil-normal-state-cursor (list nil))
-              (erase-buffer)
-              (insert title "\n\n")
-              (let ((des-keys nil)
-                    (allowed-keys '("\C-g"))
-                    (tab-alternatives '("\s" "\t" "\r"))
-                    (cursor-type nil))
-                ;; Populate allowed keys and descriptions keys
-                ;; available with CURRENT selector.
-                (let ((re (format "\\`%s\\(.\\)\\'"
-                                  (if current (regexp-quote current) "")))
-                      (prefix (if current (concat current " ") "")))
-                  (dolist (entry table)
-                    (pcase entry
-                      ;; Description.
-                      (`(,(and key (pred (string-match re))) ,desc)
-                       (let ((k (match-string 1 key)))
-                         (push k des-keys)
-                         ;; Keys ending in tab, space or RET are equivalent.
-                         (if (member k tab-alternatives)
-                             (push "\t" allowed-keys)
-                           (push k allowed-keys))
-                         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) (propertize "›" 'face 'font-lock-comment-face) "  " desc "…" "\n")))
-                      ;; Usable entry.
-                      (`(,(and key (pred (string-match re))) ,desc . ,_)
-                       (let ((k (match-string 1 key)))
-                         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) "   " desc "\n")
-                         (push k allowed-keys)))
-                      (_ nil))))
-                ;; Insert special entries, if any.
-                (when specials
-                  (insert "─────────────────────────\n")
-                  (pcase-dolist (`(,key ,description) specials)
-                    (insert (format "%s   %s\n" (propertize key 'face '(bold all-the-icons-red)) description))
-                    (push key allowed-keys)))
-                ;; Display UI and let user select an entry or
-                ;; a sub-level prefix.
-                (goto-char (point-min))
-                (unless (pos-visible-in-window-p (point-max))
-                  (org-fit-window-to-buffer))
-                (let ((pressed (org--mks-read-key allowed-keys
-                                                  prompt
-                                                  (not (pos-visible-in-window-p (1- (point-max)))))))
-                  (setq current (concat current pressed))
-                  (cond
-                   ((equal pressed "\C-g") (user-error "Abort"))
-                   ;; Selection is a prefix: open a new menu.
-                   ((member pressed des-keys))
-                   ;; Selection matches an association: return it.
-                   ((let ((entry (assoc current table)))
-                      (and entry (throw 'exit entry))))
-                   ;; Selection matches a special entry: return the
-                   ;; selection prefix.
-                   ((assoc current specials) (throw 'exit current))
-                   (t (error "No entry available")))))))
-        (when buffer (kill-buffer buffer))))))
-(advice-add 'org-mks :override #'org-mks-pretty)
-#+end_src
-The [[file:~/.config/emacs/bin/org-capture][org-capture bin]] is rather nice, but I'd be nicer with a smaller frame, and
-no modeline.
-#+begin_src emacs-lisp
-(setf (alist-get 'height +org-capture-frame-parameters) 15)
-;; (alist-get 'name +org-capture-frame-parameters) "❖ Capture") ;; ATM hardcoded in other places, so changing breaks stuff
-(setq +org-capture-fn
-      (lambda ()
-        (interactive)
-        (set-window-parameter nil 'mode-line-format 'none)
-        (org-capture)))
+#+begin_src emacs-lisp :tangle yes
+(use-package! org-gtd
+  :after org
+  :demand t
+  :custom
+  (org-gtd-directory "~/org/gtd")
+  (org-edna-use-inheritance t)
+  :config
+  (org-edna-mode)
+  :bind
+  (("C-c d c" . org-gtd-capture)
+   ("C-c d e" . org-gtd-engage)
+   ("C-c d p" . org-gtd-process-inbox)
+   ("C-c d n" . org-gtd-show-all-next)
+   ("C-c d s" . org-gtd-show-stuck-projects)
+   :map org-gtd-process-map
+   ("C-c c" . org-gtd-choose)))
 #+end_src
 
 **** Roam
 ***** Basic settings
+******
 
-I'll just set this to be within =Organisation= folder for now, in the future it
-could be worth seeing if I could hook this up to a [[https://nextcloud.com/][Nextcloud]] instance.
-#+begin_src emacs-lisp :noweb-ref none :tangle yes
-(setq org-roam-directory "~/Desktop/TEC/Organisation/Roam/")
+****** CUSTOM: from jethrokuan
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-capture-templates
+      `(("i" "Inbox" entry  (file "gtd/inbox.org")
+         ,(concat "* TODO %?\n"
+                  "/Entered on/ %U"))
+        ("s" "Slipbox" entry  (file "notes/inbox.org")
+         "* %?\n")))
+
+(defun jethro/org-capture-inbox ()
+  (interactive)
+  (org-capture nil "i"))
+
+(defun jethro/org-capture-slipbox ()
+  (interactive)
+  (org-capture nil "s"))
 #+end_src
 
-That said, if the directory doesn't exist we likely don't want to be using roam.
-Since we don't want to trigger errors (which will happen as soon as roam tries
-to initialise), let's not load roam.
-#+begin_src emacs-lisp :noweb-ref none :tangle (if (file-exists-p "~/Desktop/TEC/Organisation/Roam/") "no" "packages.el")
-(package! org-roam :disable t)
+#+begin_src emacs-lisp :tangle yes
+(use-package! org-roam
+  :init
+  (map! :leader
+        :prefix "n"
+        :desc "org-roam" "l" #'org-roam-buffer-toggle
+        :desc "org-roam-node-insert" "i" #'org-roam-node-insert
+        :desc "org-roam-node-find" "f" #'org-roam-node-find
+        :desc "org-roam-ref-find" "r" #'org-roam-ref-find
+        :desc "org-roam-show-graph" "g" #'org-roam-show-graph
+        :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
+        :desc "org-roam-capture" "c" #'org-roam-capture)
+  (setq org-roam-directory (file-truename "~/org/notes/")
+        ;;org-roam-database-connector 'sqlite-builtin
+        org-roam-db-gc-threshold most-positive-fixnum
+        org-id-link-to-org-use-id t)
+  :config
+  (org-roam-db-autosync-mode +1)
+  (set-popup-rules!
+    `((,(regexp-quote org-roam-buffer) ; persistent org-roam buffer
+       :side right :width .33 :height .5 :ttl nil :modeline nil :quit nil :slot 1)
+      ("^\\*org-roam: " ; node dedicated org-roam buffer
+       :side right :width .33 :height .5 :ttl nil :modeline nil :quit nil :slot 2)))
+  (add-hook 'org-roam-mode-hook #'turn-on-visual-line-mode)
+  (setq org-roam-capture-templates
+        '(("m" "main" plain
+           "\n%?"
+           :if-new (file+head "main/${slug}.org"
+                              "#+title: ${title}\n")
+           :immediate-finish t
+           :unnarrowed t)
+          ("r" "reference" plain "\n%?"
+           :if-new
+           (file+head "reference/${slug}.org" "#+title: ${title}\n")
+           :immediate-finish t
+           :unnarrowed t)
+          ("a" "article" plain "\n%?"
+           :if-new
+           (file+head "articles/${slug}.org" "#+title: ${title}\n#+filetags: :article:\n")
+           :immediate-finish t
+           :unnarrowed t)))
+  (defun jethro/tag-new-node-as-draft ()
+    (org-roam-tag-add '("draft")))
+  (add-hook 'org-roam-capture-new-node-hook #'jethro/tag-new-node-as-draft)
+  (cl-defmethod org-roam-node-type ((node org-roam-node))
+    "Return the TYPE of NODE."
+    (condition-case nil
+        (file-name-nondirectory
+         (directory-file-name
+          (file-name-directory
+           (file-relative-name (org-roam-node-file node) org-roam-directory))))
+      (error "")))
+  (setq org-roam-node-display-template
+        (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (require 'citar)
+  (defun jethro/org-roam-node-from-cite (keys-entries)
+    (interactive (list (citar-select-ref :multiple nil :rebuild-cache t)))
+    (let ((title (citar--format-entry-no-widths (cdr keys-entries)
+                                                "${author editor} :: ${title}")))
+      (org-roam-capture- :templates
+                         '(("r" "reference" plain "%?" :if-new
+                            (file+head "reference/${citekey}.org"
+                                       ":PROPERTIES:
+:ROAM_REFS: [cite:@${citekey}]
+:END:
+#+title: ${title}\n")
+                            :immediate-finish t
+                            :unnarrowed t))
+                         :info (list :citekey (car keys-entries))
+                         :node (org-roam-node-create :title title)
+                         :props '(:finalize find-file)))))
 #+end_src
+
+
+ ******* CUSTOM: from SystemCrafers
+# #+begin_src emacs-lisp :tangle yes
+# (use-package org-roam
+#   :ensure t
+#   :demand t  ;; Ensure org-roam is loaded by default
+#   :init
+#   (setq org-roam-v2-ack t)
+#   :custom
+#   (org-roam-directory "~/org/roam/")
+#   (org-roam-completion-everywhere t)
+#   :bind (("C-c n l" . org-roam-buffer-toggle)
+#          ("C-c n f" . org-roam-node-find)
+#          ("C-c n i" . org-roam-node-insert)
+#          ("C-c n I" . org-roam-node-insert-immediate)
+#          ("C-c n p" . my/org-roam-find-project)
+#          ("C-c n t" . my/org-roam-capture-task)
+#          ("C-c n b" . my/org-roam-capture-inbox)
+#          :map org-mode-map
+#          ("C-M-i" . completion-at-point)
+#          :map org-roam-dailies-map
+#          ("Y" . org-roam-dailies-capture-yesterday)
+#          ("T" . org-roam-dailies-capture-tomorrow))
+#   :bind-keymap
+#   ("C-c n d" . org-roam-dailies-map)
+#   :config
+#   (require 'org-roam-dailies) ;; Ensure the keymap is available
+#   (org-roam-db-autosync-mode))
+
+# (defun org-roam-node-insert-immediate (arg &rest args)
+#   (interactive "P")
+#   (let ((args (push arg args))
+#         (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+#                                                   '(:immediate-finish t)))))
+#     (apply #'org-roam-node-insert args)))
+
+# (defun my/org-roam-filter-by-tag (tag-name)
+#   (lambda (node)
+#     (member tag-name (org-roam-node-tags node))))
+
+# (defun my/org-roam-list-notes-by-tag (tag-name)
+#   (mapcar #'org-roam-node-file
+#           (seq-filter
+#            (my/org-roam-filter-by-tag tag-name)
+#            (org-roam-node-list))))
+
+# (defun my/org-roam-refresh-agenda-list ()
+#   (interactive)
+#   (setq org-agenda-files (my/org-roam-list-notes-by-tag "Project")))
+
+# ;; Build the agenda list the first time for the session
+# (my/org-roam-refresh-agenda-list)
+
+# (defun my/org-roam-project-finalize-hook ()
+#   "Adds the captured project file to `org-agenda-files' if the
+# capture was not aborted."
+#   ;; Remove the hook since it was added temporarily
+#   (remove-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+#   ;; Add project file to the agenda list if the capture was confirmed
+#   (unless org-note-abort
+#     (with-current-buffer (org-capture-get :buffer)
+#       (add-to-list 'org-agenda-files (buffer-file-name)))))
+
+# (defun my/org-roam-find-project ()
+#   (interactive)
+#   ;; Add the project file to the agenda after capture is finished
+#   (add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+#   ;; Select a project file to open, creating it if necessary
+#   (org-roam-node-find
+#    nil
+#    nil
+#    (my/org-roam-filter-by-tag "Project")
+#    :templates
+#    '(("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
+#       :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+category: ${title}\n#+filetags: Project")
+#       :unnarrowed t))))
+
+# (defun my/org-roam-capture-inbox ()
+#   (interactive)
+#   (org-roam-capture- :node (org-roam-node-create)
+#                      :templates '(("i" "inbox" plain "* %?"
+#                                   :if-new (file+head "Inbox.org" "#+title: Inbox\n")))))
+
+# (defun my/org-roam-capture-task ()
+#   (interactive)
+#   ;; Add the project file to the agenda after capture is finished
+#   (add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+#   ;; Capture the new task, creating the project file if necessary
+#   (org-roam-capture- :node (org-roam-node-read
+#                             nil
+#                             (my/org-roam-filter-by-tag "Project"))
+#                      :templates '(("p" "project" plain "** TODO %?"
+#                                    :if-new (file+head+olp "%<%Y%m%d%H%M%S>-${slug}.org"
+#                                                           "#+title: ${title}\n#+category: ${title}\n#+filetags: Project"
+#                                                           ("Tasks"))))))
+
+# (defun my/org-roam-copy-todo-to-today ()
+#   (interactive)
+#   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
+#         (org-roam-dailies-capture-templates
+#           '(("t" "tasks" entry "%?"
+#              :if-new (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))))
+#         (org-after-refile-insert-hook #'save-buffer)
+#         today-file
+#         pos)
+#     (save-window-excursion
+#       (org-roam-dailies--capture (current-time) t)
+#       (setq today-file (buffer-file-name))
+#       (setq pos (point)))
+
+#     ;; Only refile if the target file is different than the current file
+#     (unless (equal (file-truename today-file)
+#                    (file-truename (buffer-file-name)))
+#       (org-refile nil nil (list "Tasks" today-file nil pos)))))
+
+# (add-to-list 'org-after-todo-state-change-hook
+#              (lambda ()
+#                (when (equal org-state "DONE")
+#                  (my/org-roam-copy-todo-to-today))))
+# #+end_src
+
 
 ***** Modeline file name
 
@@ -6708,6 +6341,7 @@ the [[*Window title][Window title]].
        (subst-char-in-string ?_ ?  buffer-file-name))
     (funcall orig-fun)))
 #+end_src
+
 
 ***** Graph view
 
@@ -7522,13 +7156,12 @@ and add an extra ~org-bullet~ to the default list of four.
 (setq org-ellipsis " ▾ "
       org-hide-leading-stars t
       org-priority-highest ?A
-      org-priority-lowest ?E
+      org-priority-lowest ?D
       org-priority-faces
       '((?A . 'all-the-icons-red)
         (?B . 'all-the-icons-orange)
         (?C . 'all-the-icons-yellow)
-        (?D . 'all-the-icons-green)
-        (?E . 'all-the-icons-blue)))
+        (?D . 'all-the-icons-green)))
 #+end_src
 
 It's also nice to make use of the =prettify-symbols-mode= for a few Org syntactic
@@ -7679,7 +7312,7 @@ let's make it transparent.
 We can either render from a ~dvi~ or ~pdf~ file, so let's benchmark ~latex~ and
 ~pdflatex~.
 | ~latex~ time | ~pdflatex~ time |
-|------------+---------------|
+|--------------+-----------------|
 | 135 \pm 2 ms | 215 \pm 3 ms    |
 
 On the rendering side, there are two ~.dvi~-to-image converters which I am
@@ -7689,12 +7322,12 @@ size and prefer a vector graphic.
 
 Using the above latex expression and benchmarking lead to the following results:
 | ~dvipng~ time | ~dvisvgm~ time | ~pdf2svg~ time |
-|-------------+--------------+--------------|
+|---------------+----------------+----------------|
 | 89 \pm 2 ms   | 178 \pm 2 ms   | 12 \pm 2 ms    |
 
 Now let's combine this to see what's best
-| Tool chain         | Total time | Resultant file size |
-|--------------------+------------+---------------------|
+| Tool chain             | Total time   | Resultant file size |
+|------------------------+--------------+---------------------|
 | ~latex~ + ~dvipng~     | 226 \pm 2 ms | 7 KiB               |
 | ~latex~ + ~dvisvgm~    | 392 \pm 4 ms | 8 KiB               |
 | ~pdflatex~ + ~pdf2svg~ | 230 \pm 2 ms | 16 KiB              |
@@ -10056,51 +9689,51 @@ Now, there are some symbols that aren't included in =inputenc=, but we should be
 able to handle anyway. For them we define a table of LaTeX translations
 
 #+name: latex-non-ascii-char-substitutions
-| Character | LaTeX |
-|-----------+-------|
-| ɑ         | \(\alpha\) |
-| β         | \(\beta\) |
-| γ         | \(\gamma\) |
-| δ         | \(\delta\) |
-| ε         | \(\epsilon\) |
+| Character | LaTeX           |
+|-----------+-----------------|
+| ɑ         | \(\alpha\)      |
+| β         | \(\beta\)       |
+| γ         | \(\gamma\)      |
+| δ         | \(\delta\)      |
+| ε         | \(\epsilon\)    |
 | ϵ         | \(\varepsilon\) |
-| ζ         | \(\zeta\) |
-| η         | \(\eta\) |
-| θ         | \(\theta\) |
-| ϑ         | \(\vartheta\) |
-| ι         | \(\iota\) |
-| κ         | \(\kappa\) |
-| λ         | \(\lambda\) |
-| μ         | \(\mu\) |
-| ν         | \(\nu\) |
-| ξ         | \(\xi\) |
-| π         | \(\pi\) |
-| ϖ         | \(\varpi\) |
-| ρ         | \(\rho\) |
-| ϱ         | \(\varrho\) |
-| σ         | \(\sigma\) |
-| ς         | \(\varsigma\) |
-| τ         | \(\tau\) |
-| υ         | \(\upsilon\) |
-| ϕ         | \(\phi\) |
-| φ         | \(\varphi\) |
-| ψ         | \(\psi\) |
-| ω         | \(\omega\) |
-| Γ         | \(\Gamma\) |
-| Δ         | \(\Delta\) |
-| Θ         | \(\Theta\) |
-| Λ         | \(\Lambda\) |
-| Ξ         | \(\Xi\) |
-| Π         | \(\Pi\) |
-| Σ         | \(\Sigma\) |
-| Υ         | \(\Upsilon\) |
-| Φ         | \(\Phi\) |
-| Ψ         | \(\Psi\) |
-| Ω         | \(\Omega\) |
-| א         | \(\aleph\) |
-| ב         | \(\beth\) |
-| ד         | \(\daleth\) |
-| ג         | \(\gimel\) |
+| ζ         | \(\zeta\)       |
+| η         | \(\eta\)        |
+| θ         | \(\theta\)      |
+| ϑ         | \(\vartheta\)   |
+| ι         | \(\iota\)       |
+| κ         | \(\kappa\)      |
+| λ         | \(\lambda\)     |
+| μ         | \(\mu\)         |
+| ν         | \(\nu\)         |
+| ξ         | \(\xi\)         |
+| π         | \(\pi\)         |
+| ϖ         | \(\varpi\)      |
+| ρ         | \(\rho\)        |
+| ϱ         | \(\varrho\)     |
+| σ         | \(\sigma\)      |
+| ς         | \(\varsigma\)   |
+| τ         | \(\tau\)        |
+| υ         | \(\upsilon\)    |
+| ϕ         | \(\phi\)        |
+| φ         | \(\varphi\)     |
+| ψ         | \(\psi\)        |
+| ω         | \(\omega\)      |
+| Γ         | \(\Gamma\)      |
+| Δ         | \(\Delta\)      |
+| Θ         | \(\Theta\)      |
+| Λ         | \(\Lambda\)     |
+| Ξ         | \(\Xi\)         |
+| Π         | \(\Pi\)         |
+| Σ         | \(\Sigma\)      |
+| Υ         | \(\Upsilon\)    |
+| Φ         | \(\Phi\)        |
+| Ψ         | \(\Psi\)        |
+| Ω         | \(\Omega\)      |
+| א         | \(\aleph\)      |
+| ב         | \(\beth\)       |
+| ד         | \(\daleth\)     |
+| ג         | \(\gimel\)      |
 
 #+name: gen-latex-non-ascii-char-substitutions
 #+begin_src emacs-lisp :noweb-ref none :var latex-non-ascii-char-substitutions=latex-non-ascii-char-substitutions
@@ -11023,24 +10656,51 @@ priority of =mypyls=
   (set-lsp-priority! 'mspyls 1))
 #+end_src
 
-** PDF
+*** Auto-completion: Jedi
+
+CUSTOM: Using pyright as LSP
+
+;;#+begin_src emacs-lisp :tangle packages.el
+;;(package! company-jedi)
+;;#+end_src
+;;
+;;#+begin_src emacs-lisp :tangle yes
+;;(defun my/python-mode-hook ()
+;;  (add-to-list 'company-backends 'company-jedi))
+;;
+;;(add-hook 'python-mode-hook 'my/python-mode-hook)
+;;#+end_src
+;;
+;;** PDF
 *** MuPDF
 
 =pdf-tools= is nice, but a =mupdf=-based solution is nicer.
 
 #+begin_src emacs-lisp :tangle no
-(package! paper :recipe (:host github :repo "ymarco/paper-mode"
-                         :files ("*.el" ".so")
-                         :pre-build ("make")))
+;;(package! paper :recipe (:host github :repo "ymarco/paper-mode"
+;;                         :files ("*.el" ".so")
+;;                         :pre-build ("make")))
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
 ;; (use-package paper
-;;   ;; :mode ("\\.pdf\\'"  . paper-mode)
-;;   ;; :mode ("\\.epub\\'"  . paper-mode)
-;;   :config
-;;   (require 'evil-collection-paper)
-;;   (evil-collection-paper-setup))
+;;  :mode ("\\.pdf\\'"  . paper-mode)
+;;  :mode ("\\.epub\\'"  . paper-mode)
+;;  :config
+;;  (require 'evil-collection-paper)
+;;  (evil-collection-paper-setup))
+#+end_src
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! pdf-tools)
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(use-package pdf-view
+  :hook (pdf-tools-enabled . pdf-view-midnight-minor-mode)
+  :hook (pdf-tools-enabled . hide-mode-line-mode)
+  :config
+  (setq pdf-view-midnight-colors '("#ABB2BF" . "#282C35")))
 #+end_src
 
 *** Terminal viewing
