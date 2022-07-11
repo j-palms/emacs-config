@@ -340,7 +340,7 @@ for more info).
 It's useful to have some basic personal information
 #+begin_src emacs-lisp
 (setq user-full-name "Josua Palmstedt"
-      user-mail-address "palmstedt@posteo.de")
+      user-mail-address "zeo@posteo.de")
 #+end_src
 Apparently this is used by ~GPG~, and all sorts of other things.
 
@@ -770,7 +770,8 @@ I couldn't resist the Email and Feed modules.
 
 #+name: doom-email
 #+begin_src emacs-lisp
-(mu4e +org +gmail)
+(mu4e +org)
+
 ;;notmuch
 ;;(wanderlust +gmail)
 #+end_src
@@ -784,6 +785,11 @@ everywhere                   ; *leave* Emacs!? You must be joking.
 (rss +org)                   ; emacs as an RSS reader
 ;;twitter                    ; twitter client https://twitter.com/vnought
 #+end_src
+
+
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! mu4e :disable t)
+# #+end_src
 
 *** Visual Settings
 **** Font Face
@@ -1463,7 +1469,6 @@ I prefer the dashboard, so let's ensure that's always switched to in new frames.
 #+name: daemon initialisation
 #+begin_src emacs-lisp :tangle yes
 (defun greedily-do-daemon-setup ()
-  (interactive)
   (require 'org)
   (when (require 'mu4e nil t)
     (setq mu4e-confirm-quit t)
@@ -4495,28 +4500,28 @@ building it from source then. I needed to install these packages
 + =gmime-devel=
 + =xapian-core-devel=
 
-#+name: Install mu from source
-#+begin_src shell :eval no :tangle (if (and (file-directory-p "~/.mail") (not (executable-find "mu"))) "setup.sh" "no")
-cd ~/.local/lib/
-git clone https://github.com/djcb/mu.git
-cd ./mu
-./autogen.sh
-make
-sudo make install
-#+end_src
+# #+name: Install mu from source
+# #+begin_src shell :eval no :tangle (if (and (file-directory-p "~/.mail") (not (executable-find "mu"))) "setup.sh" "no")
+# cd ~/.local/lib/
+# git clone https://github.com/djcb/mu.git
+# cd ./mu
+# ./autogen.sh
+# make
+# sudo make install
+# #+end_src
 
-To check how my version compares to the latest published:
+# To check how my version compares to the latest published:
 
-#+begin_src shell :tangle no
-curl --silent "https://api.github.com/repos/djcb/mu/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
-mu --version | head -n 1 | sed 's/.* version //'
-#+end_src
+# #+begin_src shell :tangle no
+# curl --silent "https://api.github.com/repos/djcb/mu/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+# mu --version | head -n 1 | sed 's/.* version //'
+# #+end_src
 
 #+results:
 | 1.4.6 |
 | 1.4.6 |
 *** Sending
-SmtpMail]] seems to be the 'default' starting point, but that's not packaged for
+SmtpMail seems to be the 'default' starting point, but that's not packaged for
 me. [[https://marlam.de/msmtp/][msmtp]] is however, so I'll give that a shot. Reading around a bit (googling
 "msmtp vs sendmail" for example) almost every comparison mentioned seems to
 suggest msmtp to be a better choice. I have seen the following points raised
@@ -4528,54 +4533,54 @@ suggest msmtp to be a better choice. I have seen the following points raised
 
 The config file is [[file:~/.config/msmtp/config][~/.config/msmtp/config]].
 
-**** System hackery
-Unfortunately, I seem to have run into a [[https://bugs.archlinux.org/task/44994][bug]] present in my packaged version, so
-we'll just install the latest from source.
+# **** System hackery
+# Unfortunately, I seem to have run into a [[https://bugs.archlinux.org/task/44994][bug]] present in my packaged version, so
+# we'll just install the latest from source.
 
-For full use of the ~auth~ options, I need =GNU SASL=, which isn't packaged for me.
-I don't think I want it, but in case I do, I'll need to do this.
-#+name: Install gsasl from source
-#+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "msmtp"))) "setup.sh" "no")
-export GSASL_VERSION=1.8.1
-cd ~/.local/lib/
-curl "ftp://ftp.gnu.org/gnu/gsasl/libgsasl-$GSASL_VERSION.tar.gz" | tar xz
-curl "ftp://ftp.gnu.org/gnu/gsasl/gsasl-$GSASL_VERSION.tar.gz" | tar xz
-cd "./libgsasl-$GSASL_VERSION"
-./configure
-make
-sudo make install
-cd ..
-cd "./gsasl-$VERSION"
-./configure
-make
-sudo make install
-cd ..
-#+end_src
+# For full use of the ~auth~ options, I need =GNU SASL=, which isn't packaged for me.
+# I don't think I want it, but in case I do, I'll need to do this.
+# #+name: Install gsasl from source
+# #+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "msmtp"))) "setup.sh" "no")
+# export GSASL_VERSION=1.8.1
+# cd ~/.local/lib/
+# curl "ftp://ftp.gnu.org/gnu/gsasl/libgsasl-$GSASL_VERSION.tar.gz" | tar xz
+# curl "ftp://ftp.gnu.org/gnu/gsasl/gsasl-$GSASL_VERSION.tar.gz" | tar xz
+# cd "./libgsasl-$GSASL_VERSION"
+# ./configure
+# make
+# sudo make install
+# cd ..
+# cd "./gsasl-$VERSION"
+# ./configure
+# make
+# sudo make install
+# cd ..
+# #+end_src
 
-Now actually compile ~msmtp~.
-#+name: Install msmtp from source
-#+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "msmtp"))) "setup.sh" "no")
-cd ~/.local/lib/
-git clone https://github.com/marlam/msmtp-mirror.git ./msmtp
-cd ./msmtp
-libtoolize --force
-aclocal
-autoheader
-automake --force-missing --add-missing
-autoconf
-# if using GSASL
-# PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --with-libgsasl
-./configure
-make
-sudo make install
-#+end_src
+# Now actually compile ~msmtp~.
+# #+name: Install msmtp from source
+# #+begin_src shell :eval no :tangle (if (and (executable-find "mu") (not (executable-find "msmtp"))) "setup.sh" "no")
+# cd ~/.local/lib/
+# git clone https://github.com/marlam/msmtp-mirror.git ./msmtp
+# cd ./msmtp
+# libtoolize --force
+# aclocal
+# autoheader
+# automake --force-missing --add-missing
+# autoconf
+# # if using GSASL
+# # PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --with-libgsasl
+# ./configure
+# make
+# sudo make install
+# #+end_src
 
-If using =GSASL= (from earlier) we need to make ensure that the dynamic library in
-in the library path. We can do by adding an executable with the same name
-earlier on in my ~$PATH~.
-#+begin_src sh :tangle no :shebang "#!/bin/sh"
-LD_LIBRARY_PATH=/usr/local/lib exec /usr/local/bin/msmtp "$@"
-#+end_src
+# If using =GSASL= (from earlier) we need to make ensure that the dynamic library in
+# in the library path. We can do by adding an executable with the same name
+# earlier on in my ~$PATH~.
+# #+begin_src sh :tangle no :shebang "#!/bin/sh"
+# LD_LIBRARY_PATH=/usr/local/lib exec /usr/local/bin/msmtp "$@"
+# #+end_src
 
 *** Mu4e
 :PROPERTIES:
@@ -4601,10 +4606,14 @@ to possess a similarly strong feature set --- and modifies the mail itself (I.e.
 information is accessible without the database). =Mu4e= also seems to have a large
 user base, which tends to correlate with better support and attention.
 
-# As I installed mu4e from source, I need to add the =/usr/local/= loadpath so Mu4e has a chance of loading
+As I installed mu4e from source, I need to add the =/usr/local/= loadpath so Mu4e has a chance of loading
 # #+begin_src emacs-lisp :tangle (if (file-directory-p "/usr/local/share/emacs/site-lisp/mu4e") "yes" "no")
 # (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
 # #+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
+#+end_src
 
 # Alternatively, I may need to add the =/usr/share/= path.
 # #+begin_src emacs-lisp :tangle (if (file-directory-p "/usr/share/emacs/site-lisp/mu4e") "yes" "no")
@@ -4655,18 +4664,19 @@ few more visual tweaks, we'll tweak the headers a bit
                  (replace-regexp-in-string "\\`.*/" "" (mu4e-message-field msg :maildir))
                  '+mu4e-header--folder-colors))))))
 #+end_src
-
-We'll also use a nicer alert icon
-#+begin_src emacs-lisp
-(setq mu4e-alert-icon "/usr/share/icons/Papirus/64x64/apps/evolution.svg")
-#+end_src
+CUSTOM
+# We'll also use a nicer alert icon
+# #+begin_src emacs-lisp
+# (setq mu4e-alert-icon "/usr/share/icons/Papirus/64x64/apps/evolution.svg")
+# #+end_src
 **** Sending Mail
 Let's send emails too.
 #+begin_src emacs-lisp
 (setq sendmail-program "/usr/bin/msmtp"
-      send-mail-function #'smtpmail-send-it
+      ;;send-mail-function #'smtpmail-send-it
+      send-mail-function #'sendmail-send-it
       message-sendmail-f-is-evil t
-      message-sendmail-extra-arguments '("--read-envelope-from"); , "--read-recipients")
+      message-sendmail-extra-arguments '("-a" "default" "--read-envelope-from"); , "--read-recipients")
       message-send-mail-function #'message-send-mail-with-sendmail)
 #+end_src
 
@@ -4755,207 +4765,208 @@ We can also use this a signature,
 #+begin_src emacs-lisp
 (setq message-signature mu4e-from-name)
 #+end_src
-**** Working with the Org mailing list
-***** Adding =X-Woof= headers
 
-I'm fairly active on the Org mailing list (ML). The Org ML has a linked
-bug/patch tracker, https://updates.orgmode.org/ managed by [[https://github.com/bzg/woof][Woof]]. However, I feel
-like I spend too much time looking up what the appropriate headers are for
-updating the status of bugs and patches. What I need, is some sort of convenient
-tool. Let's write one.
+# **** Working with the Org mailing list
+# ***** Adding =X-Woof= headers
 
-First, a function that asks what I want to do and returns the appropriate =X-Woof=
-header.
-#+begin_src emacs-lisp
-(defun +mu4e-get-woof-header ()
-  (pcase (read-char
-          (format "\
-%s
-  %s Declare %s Applied %s Aborted
-%s
-  %s Confirm %s Fixed
-%s
-  %s Request %s Resolved
+# I'm fairly active on the Org mailing list (ML). The Org ML has a linked
+# bug/patch tracker, https://updates.orgmode.org/ managed by [[https://github.com/bzg/woof][Woof]]. However, I feel
+# like I spend too much time looking up what the appropriate headers are for
+# updating the status of bugs and patches. What I need, is some sort of convenient
+# tool. Let's write one.
 
-%s remove X-Woof header"
-                  (propertize "Patch" 'face 'outline-3)
-                  (propertize "p" 'face '(bold consult-key))
-                  (propertize "a" 'face '(bold consult-key))
-                  (propertize "c" 'face '(bold consult-key))
-                  (propertize "Bug" 'face 'outline-3)
-                  (propertize "b" 'face '(bold consult-key))
-                  (propertize "f" 'face '(bold consult-key))
-                  (propertize "Help" 'face 'outline-3)
-                  (propertize "h" 'face '(bold consult-key))
-                  (propertize "r" 'face '(bold consult-key))
-                  (propertize "x" 'face '(bold error))))
-    (?p "X-Woof-Patch: confirmed")
-    (?a "X-Woof-Patch: applied")
-    (?c "X-Woof-Patch: cancelled")
-    (?b "X-Woof-Bug: confirmed")
-    (?f "X-Woof-Bug: fixed")
-    (?h "X-Woof-Help: confirmed")
-    (?r "X-Woof-Help: cancelled")
-    (?x 'delete)))
-#+end_src
+# First, a function that asks what I want to do and returns the appropriate =X-Woof=
+# header.
+# #+begin_src emacs-lisp
+# (defun +mu4e-get-woof-header ()
+#   (pcase (read-char
+#           (format "\
+# %s
+#   %s Declare %s Applied %s Aborted
+# %s
+#   %s Confirm %s Fixed
+# %s
+#   %s Request %s Resolved
 
-Now we just need a function which will add such a header to a buffer
-#+begin_src emacs-lisp
-(defun +mu4e-insert-woof-header ()
-  "Insert an X-Woof header into the current message."
-  (interactive)
-  (when-let ((header (+mu4e-get-woof-header)))
-    (save-excursion
-      (goto-char (point-min))
-      (search-forward "--text follows this line--")
-      (unless (eq header 'delete)
-        (beginning-of-line)
-        (insert header "\n")
-        (forward-line -1))
-      (when (re-search-backward "^X-Woof-" nil t)
-        (kill-whole-line)))))
+# %s remove X-Woof header"
+#                   (propertize "Patch" 'face 'outline-3)
+#                   (propertize "p" 'face '(bold consult-key))
+#                   (propertize "a" 'face '(bold consult-key))
+#                   (propertize "c" 'face '(bold consult-key))
+#                   (propertize "Bug" 'face 'outline-3)
+#                   (propertize "b" 'face '(bold consult-key))
+#                   (propertize "f" 'face '(bold consult-key))
+#                   (propertize "Help" 'face 'outline-3)
+#                   (propertize "h" 'face '(bold consult-key))
+#                   (propertize "r" 'face '(bold consult-key))
+#                   (propertize "x" 'face '(bold error))))
+#     (?p "X-Woof-Patch: confirmed")
+#     (?a "X-Woof-Patch: applied")
+#     (?c "X-Woof-Patch: cancelled")
+#     (?b "X-Woof-Bug: confirmed")
+#     (?f "X-Woof-Bug: fixed")
+#     (?h "X-Woof-Help: confirmed")
+#     (?r "X-Woof-Help: cancelled")
+#     (?x 'delete)))
+# #+end_src
 
-(map! :map mu4e-compose-mode-map
-      :localleader
-      :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
+# Now we just need a function which will add such a header to a buffer
+# #+begin_src emacs-lisp
+# (defun +mu4e-insert-woof-header ()
+#   "Insert an X-Woof header into the current message."
+#   (interactive)
+#   (when-let ((header (+mu4e-get-woof-header)))
+#     (save-excursion
+#       (goto-char (point-min))
+#       (search-forward "--text follows this line--")
+#       (unless (eq header 'delete)
+#         (beginning-of-line)
+#         (insert header "\n")
+#         (forward-line -1))
+#       (when (re-search-backward "^X-Woof-" nil t)
+#         (kill-whole-line)))))
 
-(map! :map org-msg-edit-mode-map
-      :after org-msg
-      :localleader
-      :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
-#+end_src
+# (map! :map mu4e-compose-mode-map
+#       :localleader
+#       :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
 
-Lovely! That should make adding these headers a breeze.
+# (map! :map org-msg-edit-mode-map
+#       :after org-msg
+#       :localleader
+#       :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
+# #+end_src
 
-***** Patch workflow
+# Lovely! That should make adding these headers a breeze.
 
-Testing patches from the ML is currently more hassle than it needs to be. Let's
-change that.
+# ***** Patch workflow
 
-#+begin_src emacs-lisp
-(after! mu4e
-  (defvar +org-ml-target-dir "~/.emacs.d/.local/straight/repos/org-mode/")
-  (defvar +org-ml-max-age 600
-    "Maximum permissible age in seconds.")
-  (defvar +org-ml--cache-timestamp 0)
-  (defvar +org-ml--cache nil)
+# Testing patches from the ML is currently more hassle than it needs to be. Let's
+# change that.
 
-  (define-minor-mode +org-ml-patchy-mood-mode
-    "Apply patches to Org in bulk."
-    :global t
-    (let ((action (cons "apply patch to org" #'+org-ml-apply-patch)))
-      (if +org-ml-patchy-mood-mode
-          (add-to-list 'mu4e-view-actions action)
-        (setq mu4e-view-actions (delete action mu4e-view-actions)))))
+# #+begin_src emacs-lisp
+# (after! mu4e
+#   (defvar +org-ml-target-dir "~/.emacs.d/.local/straight/repos/org-mode/")
+#   (defvar +org-ml-max-age 600
+#     "Maximum permissible age in seconds.")
+#   (defvar +org-ml--cache-timestamp 0)
+#   (defvar +org-ml--cache nil)
 
-  (defun +org-ml-apply-patch (msg)
-    "Apply the patch in the current message to Org."
-    (interactive)
-    (unless msg (setq msg (mu4e-message-at-point)))
-    (with-current-buffer (get-buffer-create "*Shell: Org apply patches*")
-      (erase-buffer)
-      (let* ((default-directory +org-ml-target-dir)
-             (exit-code (call-process "git" nil t nil "am" (mu4e-message-field msg :path))))
-        (magit-refresh)
-        (when (not (= 0 exit-code))
-          (+popup/buffer)))))
+#   (define-minor-mode +org-ml-patchy-mood-mode
+#     "Apply patches to Org in bulk."
+#     :global t
+#     (let ((action (cons "apply patch to org" #'+org-ml-apply-patch)))
+#       (if +org-ml-patchy-mood-mode
+#           (add-to-list 'mu4e-view-actions action)
+#         (setq mu4e-view-actions (delete action mu4e-view-actions)))))
 
-  (defun +org-ml-current-patches ()
-    "Get the currently open patches, as a list of alists.
-Entries of the form (subject . id)."
-    (delq nil
-          (mapcar
-           (lambda (entry)
-             (unless (plist-get entry :fixed)
-               (cons
-                (format "%-8s  %s"
-                        (propertize
-                         (replace-regexp-in-string "T.*" ""
-                                                   (plist-get entry :date))
-                         'face 'font-lock-doc-face)
-                        (propertize
-                         (replace-regexp-in-string "\\[PATCH\\] ?" ""
-                                                   (plist-get entry :summary))
-                         'face 'font-lock-keyword-face))
-                (plist-get entry :id))))
-           (with-current-buffer (url-retrieve-synchronously "https://updates.orgmode.org/data/patches")
-             (goto-char url-http-end-of-headers)
-             (json-parse-buffer :object-type 'plist)))))
+#   (defun +org-ml-apply-patch (msg)
+#     "Apply the patch in the current message to Org."
+#     (interactive)
+#     (unless msg (setq msg (mu4e-message-at-point)))
+#     (with-current-buffer (get-buffer-create "*Shell: Org apply patches*")
+#       (erase-buffer)
+#       (let* ((default-directory +org-ml-target-dir)
+#              (exit-code (call-process "git" nil t nil "am" (mu4e-message-field msg :path))))
+#         (magit-refresh)
+#         (when (not (= 0 exit-code))
+#           (+popup/buffer)))))
 
-  (defun +org-ml-select-patch-thread ()
-    "Find and apply a proposed Org patch."
-    (interactive)
-    (let* ((current-workspace (+workspace-current))
-           (patches (progn
-                      (when (or (not +org-ml--cache)
-                                (> (- (float-time) +org-ml--cache-timestamp)
-                                   +org-ml-max-age))
-                        (setq +org-ml--cache (+org-ml-current-patches)
-                              +org-ml--cache-timestamp (float-time)))
-                      +org-ml--cache))
-           (msg-id (cdr (assoc (completing-read
-                                "Thread: " (mapcar #'car patches))
-                               patches))))
-      (+workspace-switch +mu4e-workspace-name)
-      (mu4e-view-message-with-message-id msg-id)
-      (unless +org-ml-patchy-mood-mode
-        (add-to-list 'mu4e-view-actions
-                     (cons "apply patch to org" #'+org-ml-transient-mu4e-action)))))
+#   (defun +org-ml-current-patches ()
+#     "Get the currently open patches, as a list of alists.
+# Entries of the form (subject . id)."
+#     (delq nil
+#           (mapcar
+#            (lambda (entry)
+#              (unless (plist-get entry :fixed)
+#                (cons
+#                 (format "%-8s  %s"
+#                         (propertize
+#                          (replace-regexp-in-string "T.*" ""
+#                                                    (plist-get entry :date))
+#                          'face 'font-lock-doc-face)
+#                         (propertize
+#                          (replace-regexp-in-string "\\[PATCH\\] ?" ""
+#                                                    (plist-get entry :summary))
+#                          'face 'font-lock-keyword-face))
+#                 (plist-get entry :id))))
+#            (with-current-buffer (url-retrieve-synchronously "https://updates.orgmode.org/data/patches")
+#              (goto-char url-http-end-of-headers)
+#              (json-parse-buffer :object-type 'plist)))))
 
-  (defun +org-ml-transient-mu4e-action (msg)
-    (setq mu4e-view-actions
-          (delete (cons "apply patch to org" #'+org-ml-transient-mu4e-action)
-                  mu4e-view-actions))
-    (+workspace/other)
-    (magit-status +org-ml-target-dir)
-    (+org-ml-apply-patch msg)))
-#+end_src
+#   (defun +org-ml-select-patch-thread ()
+#     "Find and apply a proposed Org patch."
+#     (interactive)
+#     (let* ((current-workspace (+workspace-current))
+#            (patches (progn
+#                       (when (or (not +org-ml--cache)
+#                                 (> (- (float-time) +org-ml--cache-timestamp)
+#                                    +org-ml-max-age))
+#                         (setq +org-ml--cache (+org-ml-current-patches)
+#                               +org-ml--cache-timestamp (float-time)))
+#                       +org-ml--cache))
+#            (msg-id (cdr (assoc (completing-read
+#                                 "Thread: " (mapcar #'car patches))
+#                                patches))))
+#       (+workspace-switch +mu4e-workspace-name)
+#       (mu4e-view-message-with-message-id msg-id)
+#       (unless +org-ml-patchy-mood-mode
+#         (add-to-list 'mu4e-view-actions
+#                      (cons "apply patch to org" #'+org-ml-transient-mu4e-action)))))
 
-***** Mail list archive links
+#   (defun +org-ml-transient-mu4e-action (msg)
+#     (setq mu4e-view-actions
+#           (delete (cons "apply patch to org" #'+org-ml-transient-mu4e-action)
+#                   mu4e-view-actions))
+#     (+workspace/other)
+#     (magit-status +org-ml-target-dir)
+#     (+org-ml-apply-patch msg)))
+# #+end_src
 
-The other thing which it's good to be easily able to do is grab a link to the
-current message on https://list.orgmode.org.
+# ***** Mail list archive links
 
-#+begin_src emacs-lisp
-(after! mu4e
-  (defun +mu4e-ml-message-link (msg)
-    "Copy the link to MSG on the mailing list archives."
-    (let* ((list-addr (or (mu4e-message-field msg :mailing-list)
-                          (cdar (mu4e-message-field-raw msg :list-post))
-                          (thread-last (append (mu4e-message-field msg :to)
-                                               (mu4e-message-field msg :cc))
-                            (mapcar #'last)
-                            (mapcar #'cdr)
-                            (mapcar (lambda (addr)
-                                      (when (string-match-p "emacs.*@gnu\\.org$" addr)
-                                        (replace-regexp-in-string "@" "." addr))))
-                            (delq nil)
-                            (car))))
-           (msg-url
-            (cond
-             ((string= "emacs-orgmode.gnu.org" list-addr)
-              (format "https://list.orgmode.org/%s" (mu4e-message-field msg :message-id)))
-             (t (user-error "Mailing list %s not supported" list-addr)))))
-      (message "Link %s copied to clipboard" (gui-select-text msg-url))
-      msg-url))
+# The other thing which it's good to be easily able to do is grab a link to the
+# current message on https://list.orgmode.org.
 
-  (add-to-list 'mu4e-view-actions (cons "link to message ML" #'+mu4e-ml-message-link) t))
-#+end_src
+# #+begin_src emacs-lisp
+# (after! mu4e
+#   (defun +mu4e-ml-message-link (msg)
+#     "Copy the link to MSG on the mailing list archives."
+#     (let* ((list-addr (or (mu4e-message-field msg :mailing-list)
+#                           (cdar (mu4e-message-field-raw msg :list-post))
+#                           (thread-last (append (mu4e-message-field msg :to)
+#                                                (mu4e-message-field msg :cc))
+#                             (mapcar #'last)
+#                             (mapcar #'cdr)
+#                             (mapcar (lambda (addr)
+#                                       (when (string-match-p "emacs.*@gnu\\.org$" addr)
+#                                         (replace-regexp-in-string "@" "." addr))))
+#                             (delq nil)
+#                             (car))))
+#            (msg-url
+#             (cond
+#              ((string= "emacs-orgmode.gnu.org" list-addr)
+#               (format "https://list.orgmode.org/%s" (mu4e-message-field msg :message-id)))
+#              (t (user-error "Mailing list %s not supported" list-addr)))))
+#       (message "Link %s copied to clipboard" (gui-select-text msg-url))
+#       msg-url))
 
-In a similar manner, when clicking on such a link (say when someone uses a link
-to the archive to refer to an earlier email) I'd much rather look at it in mu4e.
+#   (add-to-list 'mu4e-view-actions (cons "link to message ML" #'+mu4e-ml-message-link) t))
+# #+end_src
 
-#+begin_src emacs-lisp
-(defun +browse-url-orgmode-ml (url &optional _)
-  "Open an orgmode list url using notmuch."
-  (let ((id (and (or (string-match "^https?://orgmode\\.org/list/\\([^/]+\\)" url)
-                     (string-match "^https?://list\\.orgmode\\.org/\\([^/]+\\)" url))
-                 (match-string 1 url))))
-    (mu4e-view-message-with-message-id id)))
+# In a similar manner, when clicking on such a link (say when someone uses a link
+# to the archive to refer to an earlier email) I'd much rather look at it in mu4e.
 
-(add-to-list 'browse-url-handlers (cons "^https?://orgmode\\.org/list" #'+browse-url-orgmode-ml))
-(add-to-list 'browse-url-handlers (cons "^https?://list\\.orgmode\\.org/" #'+browse-url-orgmode-ml))
-#+end_src
+# #+begin_src emacs-lisp
+# (defun +browse-url-orgmode-ml (url &optional _)
+#   "Open an orgmode list url using notmuch."
+#   (let ((id (and (or (string-match "^https?://orgmode\\.org/list/\\([^/]+\\)" url)
+#                      (string-match "^https?://list\\.orgmode\\.org/\\([^/]+\\)" url))
+#                  (match-string 1 url))))
+#     (mu4e-view-message-with-message-id id)))
+
+# (add-to-list 'browse-url-handlers (cons "^https?://orgmode\\.org/list" #'+browse-url-orgmode-ml))
+# (add-to-list 'browse-url-handlers (cons "^https?://list\\.orgmode\\.org/" #'+browse-url-orgmode-ml))
+# #+end_src
 
 *** Org Msg
 Doom does a fantastic stuff with the defaults with this, so we only make a few
@@ -4963,7 +4974,7 @@ minor tweaks.
 #+begin_src emacs-lisp
 (setq +org-msg-accent-color "#1a5fb4"
       org-msg-greeting-fmt "\nHi%s,\n\n"
-      org-msg-signature "\n\n#+begin_signature\nAll the best,\\\\\n@@html:<b>@@Timothy@@html:</b>@@\n#+end_signature")
+      org-msg-signature "\n\n#+begin_signature\nAll the best,\\\\\n@@html:<b>@@Josua@@html:</b>@@\n#+end_signature")
 (map! :map org-msg-edit-mode-map
       :after org-msg
       :n "G" #'org-msg-goto-body)
