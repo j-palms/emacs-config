@@ -349,10 +349,10 @@ Speaking of ~GPG~, I want to use =~/.authinfo.gpg= instead of the default in
 make a difference, and I don't want to accidentally purge this file (I have done
 src_shell{rm -rf~/.emac.d~ before}. I also want to cache as much as possible, as
 my home machine is pretty safe, and my laptop is shutdown a lot.
-#+begin_src emacs-lisp
-(setq auth-sources '("~/.authinfo.gpg")
-      auth-source-cache-expiry nil) ; default is 7200 (2h)
-#+end_src
+# #+begin_src emacs-lisp
+# (setq auth-sources '("~/.authinfo.gpg")
+#       auth-source-cache-expiry nil) ; default is 7200 (2h)
+# #+end_src
 ** Better defaults
 *** Simple settings
 
@@ -3960,9 +3960,9 @@ So let's use that.
 The config was straightforward, and is located at [[file:~/.mbsyncrc][~/.mbsyncrc]].
 I'm currently successfully connecting to: Gmail, office365mail, and dovecot.
 I'm also shoving passwords in my [[file:~/.authinfo.gpg][authinfo.gpg]] and fetching them using ~PassCmd~:
-#+begin_src shell :tangle no :eval no
-gpg2 -q --for-your-eyes-only --no-tty -d ~/.authinfo.gpg | awk '/machine IMAP_SERCER login EMAIL_ADDR/ {print $NF}'
-#+end_src
+# #+begin_src shell :tangle no :eval no
+# gpg2 -q --for-your-eyes-only --no-tty -d ~/.authinfo.gpg | awk '/machine IMAP_SERCER login EMAIL_ADDR/ {print $NF}'
+# #+end_src
 
 We can run ~mbsync -a~ in a systemd service file or something, but we can do
 better than that. [[https://github.com/vsemyonoff/easymail#usage][vsemyonoff/easymail]] seems like the sort of thing we want, but
@@ -4611,14 +4611,14 @@ As I installed mu4e from source, I need to add the =/usr/local/= loadpath so Mu4
 # (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
 # #+end_src
 
-#+begin_src emacs-lisp :tangle yes
- (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
-#+end_src
+##+begin_src emacs-lisp :tangle yes
+#(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
+                ##+end_src
 
-#Alternatively, I may need to add the =/usr/share/= path.
-##+begin_src emacs-lisp :tangle (if (file-directory-p "/usr/share/emacs/site-lisp/mu4e") "yes" "no")
-#(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
-##+end_src
+Alternatively, I may need to add the =/usr/share/= path.
+#+begin_src emacs-lisp :tangle (if (file-directory-p "/usr/share/emacs/site-lisp/mu4e") "yes" "no")
+(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
+#+end_src
 
 Let's also just shove all the Elisp code here in an src_elisp{(after! ...)} block.
 #+begin_src emacs-lisp :noweb no-export :tangle yes :noweb-ref nil
