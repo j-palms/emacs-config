@@ -2804,6 +2804,33 @@ Specify a ~:branch~ to install a package from a particular branch or tag.
 #+end_src
 
 ** Convenience
+*** Auto-Compile
+
+#+call: confpkg("!Pkg auto-compile")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! auto-compile)
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(setq load-prefer-newer t)
+(package-initialize)
+(require 'auto-compile)
+(auto-compile-on-load-mode)
+(auto-compile-on-save-mode)
+
+(setq auto-compile-display-buffer nil)
+(setq auto-compile-mode-line-counter t)
+#+end_src
+
+
+*** CL deprecated
+
+#+call: confpkg("!Pkg cl")
+#+begin_src emacs-lisp :tangle yes
+(require 'cl-lib)
+#+end_src
+
 *** Avy
 
 #+call: confpkg("!Pkg avy")
@@ -2827,9 +2854,9 @@ Now let's just have this included when an ErgoDox is found via =dmesg=.
 
 #+name: avy-detect-colemak
 #+begin_src emacs-lisp :noweb no-export :noweb-ref none :noweb-prefix no
-(if (= 0 (call-process "sh" nil nil nil "-c" "dmesg | grep -q 'ErgoDox'"))
+(if (= 0 (call-process "sh" nil nil nil "-c" "dmesg | grep -q 'Kyria'"))
     (pp '<<avy-colemak-setup>>)
-  ";; Avy: Colemak layout not detected (ErgoDox not mentioned in dmesg).")
+  ";; Avy: Colemak layout not detected (Kyria not mentioned in dmesg).")
 #+end_src
 
 #+begin_src emacs-lisp :noweb no-export
