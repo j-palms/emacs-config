@@ -1710,7 +1710,7 @@ if the system doesn't have any of those fonts.
 
 #+name: detect-missing-fonts
 #+begin_src emacs-lisp :tangle no
-(defvar required-fonts '("Hack Nerd Font" "Overpass" "JuliaMono" "IBM Plex Mono" "Merriweather" "Alegreya"))
+(defvar required-fonts '("Hack Nerd Font.*" "Overpass" "JuliaMono" "IBM Plex Mono" "Merriweather" "Alegreya"))
 
 (defvar available-fonts
   (delete-dups (or (font-family-list)
@@ -2516,7 +2516,7 @@ I'd like to have just the buffer name, then if applicable the project folder
               (subst-char-in-string ?_ ?\s buffer-file-name))
            "%b"))
         (:eval
-         (when-let ((project-name (and (featurep 'projectile) (projectile-project-name))))
+         (when-let ((project-name (and (modulep 'projectile) (projectile-project-name))))
            (unless (string= "-" project-name)
              (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
 #+end_src
@@ -2853,7 +2853,7 @@ The name says it all. It's loaded and set up (a bit) by =:app everywhere=, howev
 as I develop this I want the unpinned version I have as a submodule.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! emacs-everywhere :recipe (:local-repo "lisp/emacs-everywhere"))
+(package! emacs-everywhere :recipe (:host github :repo "tecosaur/emacs-everywhere"))
 (unpin! emacs-everywhere)
 #+end_src
 
@@ -3523,7 +3523,7 @@ Sometimes pressing =TAB= is just too much.
 This makes it a breeze to take lovely screenshots.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! screenshot :recipe (:local-repo "lisp/screenshot"))
+(package! screenshot :recipe (:host github :repo "tecosaur/screenshot"))
 #+end_src
 
 #+attr_html: :class invertible :alt Example screenshot.el screenshot
@@ -5672,7 +5672,7 @@ To interface with this, we'll use a my =lexic= package.
 [[https://tecosaur.com/lfs/emacs-config/screenshots/lexic.png]]
 
 #+begin_src emacs-lisp :tangle (if (executable-find "sdcv") "packages.el" "no")
-(package! lexic :recipe (:local-repo "lisp/lexic"))
+(package! lexic :recipe (:host github :repo "tecosaur/lexic"))
 #+end_src
 
 Given that a request for a CLI is the [[https://github.com/goldendict/goldendict/issues/37][most upvoted issue]] on GitHub for
@@ -7488,7 +7488,7 @@ to make that right again, and this package makes that even easier to do.
 For glossary-type entries, there's a nice package for this I'm developing.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-glossary :recipe (:local-repo "lisp/org-glossary"))
+(package! org-glossary :recipe (:host github :repo "tecosaur/org-glossary"))
 #+end_src
 
 Other than hooking this to =org-mode=, we also want to set a collection root and
@@ -7522,7 +7522,7 @@ probably =latexdiff=. There are a few annoying steps involved here, and so I've
 written a package to streamline the process.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! orgdiff :recipe (:local-repo "lisp/orgdiff"))
+(package! orgdiff :recipe (:host github :repo "tecosaur/orgdiff"))
 #+end_src
 
 The only little annoyance is the fact that =latexdiff= uses ~#FF0000~ and ~#0000FF~ as
@@ -7556,7 +7556,7 @@ post-processing the =latexdiff= result.
 
 It's nice to be able to link to music
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-music :recipe (:local-repo "lisp/org-music"))
+(package! org-music :recipe (:host github :repo "tecosaur/org-music"))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -11189,7 +11189,7 @@ The =engrave-faces= package lets us use Emacs' font-lock for syntax highlighting
 exporting that as LaTeX commands.
 
 #+begin_src emacs-lisp :noweb-ref none :tangle packages.el
-(package! engrave-faces :recipe (:local-repo "lisp/engrave-faces"))
+(package! engrave-faces :recipe (:host github :repo "tecosaur/engrave-faces"))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -11646,7 +11646,7 @@ current Emacs theme, I was enraptured. The result is the pseudo-class ~chameleon
 which I have implemented in the package =ox-chameleon=.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! ox-chameleon :recipe (:local-repo "lisp/ox-chameleon"))
+(package! ox-chameleon :recipe (:host github :repo "tecosaur/ox-chameleon"))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -12459,7 +12459,7 @@ but more convenient, like =;=.
 This makes use of =aas= (/Auto Activating Snippets/) for CDLaTeX-like symbol input.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! laas :recipe (:local-repo "lisp/LaTeX-auto-activating-snippets"))
+(package! laas :recipe (:host github :repo "tecosaur/LaTeX-auto-activating-snippets"))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -12527,7 +12527,7 @@ sometimes I'd like to act on the textual content and so would like a plaintext v
 Thanks to src_shell{pdftotext} we have a convenient way of performing this conversion.
 I've integrated this into a little package, =pdftotext.el=.
 #+begin_src emacs-lisp :tangle (if (executable-find "pdftotext") "packages.el" "no")
-(package! pdftotext :recipe (:local-repo "lisp/pdftotext"))
+(package! pdftotext :recipe (:host github :repo "tecosaur/pdftotext.el"))
 #+end_src
 
 The output can be slightly nicer without spelling errors, and with prettier page
