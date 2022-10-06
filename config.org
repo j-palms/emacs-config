@@ -2804,32 +2804,32 @@ Specify a ~:branch~ to install a package from a particular branch or tag.
 #+end_src
 
 ** Convenience
-*** Auto-Compile
+# *** Auto-Compile
 
-#+call: confpkg("!Pkg auto-compile")
+# #+call: confpkg("!Pkg auto-compile")
 
-#+begin_src emacs-lisp :tangle packages.el
-(package! auto-compile)
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! auto-compile)
+# #+end_src
 
-#+begin_src emacs-lisp :tangle yes
-(setq load-prefer-newer t)
-(package-initialize)
-(require 'auto-compile)
-(auto-compile-on-load-mode)
-(auto-compile-on-save-mode)
+# #+begin_src emacs-lisp :tangle yes
+# (setq load-prefer-newer t)
+# (package-initialize)
+# (require 'auto-compile)
+# (auto-compile-on-load-mode)
+# (auto-compile-on-save-mode)
 
-(setq auto-compile-display-buffer nil)
-(setq auto-compile-mode-line-counter t)
-#+end_src
+# (setq auto-compile-display-buffer nil)
+# (setq auto-compile-mode-line-counter t)
+# #+end_src
 
 
-*** CL deprecated
+# *** CL deprecated
 
-#+call: confpkg("!Pkg cl")
-#+begin_src emacs-lisp :tangle yes
-(require 'cl-lib)
-#+end_src
+# #+call: confpkg("!Pkg cl")
+# #+begin_src emacs-lisp :tangle yes
+# (require 'cl-lib)
+# #+end_src
 
 *** Avy
 
