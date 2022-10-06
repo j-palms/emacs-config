@@ -8176,6 +8176,12 @@ Prevents a series of redisplays from being called (when set to an appropriate va
       (when new-request
         (run-at-time (* 1.1 mu4e-reindex-request-min-seperation) nil
                      #'mu4e-reindex-maybe)))))
+
+(setq
+  mu4e-sent-folder   "/Sent"       ;; folder for sent messages
+  mu4e-drafts-folder "/Drafts"     ;; unfinished messages
+  mu4e-trash-folder  "/Trash"      ;; trashed messages
+  mu4e-refile-folder "/Archive"))   ;; saved messages
 #+end_src
 
 **** Config transcoding & service management
@@ -9551,7 +9557,7 @@ update-mime-database ~/.local/share/mime
 #+end_src
 Then set Emacs as the default editor
 #+begin_src shell :tangle (if (string= (shell-command-to-string "xdg-mime query default text/org") "emacs-client.desktop\n") "no" "setup.sh")
-xdg-mime default emacs.desktop text/org
+xdg-mime default emacs-client.desktop text/org
 #+end_src
 
 **** Git diffs
