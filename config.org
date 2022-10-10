@@ -1329,7 +1329,7 @@ the start of the tangle process. This is done by calling =bootstrap= within the
 It's useful to have some basic personal information
 #+begin_src emacs-lisp
 (setq user-full-name "Josua Palmstedt"
-      user-mail-address "contact@tecosaur.net")
+      user-mail-address "zeo@posteo.de")
 #+end_src
 Apparently this is used by ~GPG~, and all sorts of other things.
 
