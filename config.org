@@ -113,43 +113,43 @@ applications which act like islands, but this often doesn't mirror how we
 /actually use/ our computers. Emacs, if one goes down the rabbit hole, can give
 users the power to bridge this gap.
 
-#+name: emacs-platform
-#+begin_src dot :cmd circo :file misc/emacs-platform.svg :exports none
-digraph {
-    graph [bgcolor="transparent"];
-    node  [shape="underline" penwidth="2" style="rounded,filled" fillcolor="#efefef" color="#c9c9c9" fontcolor="#000000" fontname="overpass"];
-    edge  [arrowhead=none color="#aaaaaa" penwidth="1.2"]
-    // nodes
-    "Task Managment" [color="#2ec27e"]
-    "Email" [color="#1c71d8"]
-    "Office suite" [color="#813d9c"]
-    "Code editor" [color="#f5c211"]
-    "Git client" [color="#e66100"]
-    // "News feed" [color="#c01c28"]
-    // "Personal Knowledge Base" [color="#986a44"]
+# #+name: emacs-platform
+# #+begin_src dot :cmd circo :file misc/emacs-platform.svg :exports none
+# digraph {
+#     graph [bgcolor="transparent"];
+#     node  [shape="underline" penwidth="2" style="rounded,filled" fillcolor="#efefef" color="#c9c9c9" fontcolor="#000000" fontname="overpass"];
+#     edge  [arrowhead=none color="#aaaaaa" penwidth="1.2"]
+#     // nodes
+#     "Task Managment" [color="#2ec27e"]
+#     "Email" [color="#1c71d8"]
+#     "Office suite" [color="#813d9c"]
+#     "Code editor" [color="#f5c211"]
+#     "Git client" [color="#e66100"]
+#     // "News feed" [color="#c01c28"]
+#     // "Personal Knowledge Base" [color="#986a44"]
 
-    "Task Managment" -> "Email"
-    "Task Managment" -> "Office suite"
-    "Task Managment" -> "Code editor"
-    "Task Managment" -> "Git client"
-    // "Task Managment" -> "News feed"
-    // "Task Managment" -> "Personal Knowledge Base"
+#     "Task Managment" -> "Email"
+#     "Task Managment" -> "Office suite"
+#     "Task Managment" -> "Code editor"
+#     "Task Managment" -> "Git client"
+#     // "Task Managment" -> "News feed"
+#     // "Task Managment" -> "Personal Knowledge Base"
 
-    "Email" -> "Office suite"
-    "Email" -> "Code editor"
-    "Email" -> "Git client"
-    // "Email" -> "Personal Knowledge Base"
+#     "Email" -> "Office suite"
+#     "Email" -> "Code editor"
+#     "Email" -> "Git client"
+#     // "Email" -> "Personal Knowledge Base"
 
-    "Office suite" -> "Code editor"
-    "Office suite" -> "Git client"
-    // "Office suite" -> "News feed"
-    // "Office suite" -> "Personal Knowledge Base"
+#     "Office suite" -> "Code editor"
+#     "Office suite" -> "Git client"
+#     // "Office suite" -> "News feed"
+#     // "Office suite" -> "Personal Knowledge Base"
 
-    "Code editor" -> "Git client"
+#     "Code editor" -> "Git client"
 
-    // "News feed" -> "Personal Knowledge Base"
-}
-#+end_src
+#     // "News feed" -> "Personal Knowledge Base"
+# }
+# #+end_src
 
 #+caption: Some sample workflow integrations that can be used within Emacs
 #+attr_html: :class invertible :alt Graph of possible Emacs task integrations :style max-width:min(24em,100%)
@@ -1155,7 +1155,6 @@ the function from the hook and call the =config.el= creation function.
   (remove-hook 'org-babel-tangle-finished-hook #'confpkg-tangle-finalise)
   (revert-buffer t t t)
   (confpkg-comment-out-package-statements)
-  (message "HAAAAAAAAAAAAAAAAAALLLLLLLLLOOOOOOOOOOOOO")
   (confpkg-annotate-list-dependencies)
   (confpkg-create-config)
   (confpkg-write-dependencies)
@@ -1434,6 +1433,8 @@ changes Doom makes:
   (display-battery-mode 1))                       ; it's nice to know how much power you have
 
 (global-subword-mode 1)                           ; Iterate through CamelCase words
+
+(setq display-time-format "%H:%M")
 #+end_src
 
 *** Frame sizing
@@ -5295,69 +5296,69 @@ lightened versions --- let's do that.
      (face-attribute 'default :foreground))))
 #+end_src
 
-*** Simple comment markup
-:PROPERTIES:
-:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-simple-comment-markup
-:END:
+# *** Simple comment markup
+# :PROPERTIES:
+# :header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-simple-comment-markup
+# :END:
 
-#+call: confpkg("!Pkg simple-comment-markup")
+# #+call: confpkg("!Pkg simple-comment-markup")
 
-#+RESULTS:
-#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-simple-comment-markup.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
-;;; config--pkg-simple-comment-markup.el --- Generated package (no.33) from my config -*- lexical-binding: t; -*-
-;;
-;; Copyright (C) 2022 TEC
-;;
-;; Author: TEC <https://git.tecosaur.net/tec>
-;; Maintainer: TEC <contact@tecosaur.net>
-;; Created: October 10, 2022
-;; Modified: October 10, 2022
-;; Version: 2022.10.10
-;; Homepage: https://git.tecosaur.net/tec/emacs-config
-;; Package-Requires: ((emacs "27.1"))
-;;
-;; This file is not part of GNU Emacs.
-;;
-;;; Commentary:
-;;
-;;  Generated package (no.33) from my config.
-;;
-;;  This is liable to have unstated dependencies, and reply on other bits of
-;;  state from other configuration blocks. Only use this if you know /exactly/
-;;  what you are doing.
-;;
-;;  This may function nicely as a bit of self-contained functionality, or it
-;;  might be a horrid mix of functionalities and state.
-;;
-;;  Hopefully, in future static analysis will allow this to become more
-;;  properly package-like.
-;;
-;;; Code:
+# #+RESULTS:
+# #+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-simple-comment-markup.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+# ;;; config--pkg-simple-comment-markup.el --- Generated package (no.33) from my config -*- lexical-binding: t; -*-
+# ;;
+# ;; Copyright (C) 2022 TEC
+# ;;
+# ;; Author: TEC <https://git.tecosaur.net/tec>
+# ;; Maintainer: TEC <contact@tecosaur.net>
+# ;; Created: October 10, 2022
+# ;; Modified: October 10, 2022
+# ;; Version: 2022.10.10
+# ;; Homepage: https://git.tecosaur.net/tec/emacs-config
+# ;; Package-Requires: ((emacs "27.1"))
+# ;;
+# ;; This file is not part of GNU Emacs.
+# ;;
+# ;;; Commentary:
+# ;;
+# ;;  Generated package (no.33) from my config.
+# ;;
+# ;;  This is liable to have unstated dependencies, and reply on other bits of
+# ;;  state from other configuration blocks. Only use this if you know /exactly/
+# ;;  what you are doing.
+# ;;
+# ;;  This may function nicely as a bit of self-contained functionality, or it
+# ;;  might be a horrid mix of functionalities and state.
+# ;;
+# ;;  Hopefully, in future static analysis will allow this to become more
+# ;;  properly package-like.
+# ;;
+# ;;; Code:
 
-<<config--pkg-simple-comment-markup>>
+# <<config--pkg-simple-comment-markup>>
 
-(provide 'config--pkg-simple-comment-markup)
-;;; config--pkg-simple-comment-markup.el ends here
-#+end_src
+# (provide 'config--pkg-simple-comment-markup)
+# ;;; config--pkg-simple-comment-markup.el ends here
+# #+end_src
 
-I find that every now and then I sprinkle a little markup in code comments. Of
-course, this doesn't get fortified as it's ultimately meaningless ... but it
-would be nice if it was, just slightly. Surprisingly, I couldn't find a package
-for this, so I made one.
+# I find that every now and then I sprinkle a little markup in code comments. Of
+# course, this doesn't get fortified as it's ultimately meaningless ... but it
+# would be nice if it was, just slightly. Surprisingly, I couldn't find a package
+# for this, so I made one.
 
-#+begin_src emacs-lisp :tangle packages.el
-(package! simple-comment-markup :recipe (:local-repo "lisp/simple-comment-markup"))
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! simple-comment-markup :recipe (:local-repo "lisp/simple-comment-markup"))
+# #+end_src
 
-Let's use both basic Org markup and Markdown code backticks, to cover most
-situations decently.
+# Let's use both basic Org markup and Markdown code backticks, to cover most
+# situations decently.
 
-#+begin_src emacs-lisp
-(use-package! simple-comment-markup
-  :hook (prog-mode . simple-comment-markup-mode)
-  :config
-  (setq simple-comment-markup-set '(org markdown-code)))
-#+end_src
+# #+begin_src emacs-lisp
+# (use-package! simple-comment-markup
+#   :hook (prog-mode . simple-comment-markup-mode)
+#   :config
+#   (setq simple-comment-markup-set '(org markdown-code)))
+# #+end_src
 
 *** Emojify
 :PROPERTIES:
@@ -5656,6 +5657,28 @@ modeline segment with our design.
              doom-modeline-spc)))
      (propertize display-time-string
                  'face (doom-modeline-face 'doom-modeline-time)))))
+#+end_src
+
+Prevent the modeline being cut of. TODO
+#+begin_src emacs-lisp
+;; (after! doom-modeline
+;;   (doom-modeline-def-modeline 'main
+;;     '(bar matches buffer-info remote-host buffer-position parrot selection-info)
+;;     '(misc-info minor-modes checker input-method buffer-encoding major-mode process vcs ""))) ; <-- added padding here
+(setq all-the-icons-scale-factor 1.1)
+
+;; (add-hook! 'doom-modeline-mode-hook
+;;   (let ((char-table char-width-table))
+;;     (while (setq char-table (char-table-parent char-table)))
+;;     (dolist (pair doom-modeline-rhs-icons-alist)
+;;       (let ((width 1)  ; <-- tweak this
+;;             (chars (cdr pair))
+;;             (table (make-char-table nil)))
+;;         (dolist (char chars)
+;;           (set-char-table-range table char width))
+;;         (optimize-char-table table)
+;;         (set-char-table-parent table char-table)
+;;        (setq char-width-table table)))))
 #+end_src
 
 **** PDF modeline
