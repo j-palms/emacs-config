@@ -865,8 +865,49 @@ things during tangle), let's see if we can change that.
 #+call: confpkg-quieter-output()
 
 *** Reporting load time information
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-confpkg-timings
+:END:
 
 #+call: confpkg("Confpkg timings")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-confpkg-timings.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-confpkg-timings.el --- Generated package (no.1) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.1) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-confpkg-timings>>
+
+(provide 'config-confpkg-timings)
+;;; config-confpkg-timings.el ends here
+#+end_src
 
 When generating the config we added a form to collect load-time information.
 
@@ -1114,6 +1155,7 @@ the function from the hook and call the =config.el= creation function.
   (remove-hook 'org-babel-tangle-finished-hook #'confpkg-tangle-finalise)
   (revert-buffer t t t)
   (confpkg-comment-out-package-statements)
+  (message "HAAAAAAAAAAAAAAAAAALLLLLLLLLOOOOOOOOOOOOO")
   (confpkg-annotate-list-dependencies)
   (confpkg-create-config)
   (confpkg-write-dependencies)
@@ -1259,12 +1301,53 @@ the start of the tangle process. This is done by calling =bootstrap= within the
 [[Preparation][confpkg preparation]] stage.
 
 ** Personal Information
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-personal-information
+:END:
 
 #+call: confpkg()
 
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-personal-information.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-personal-information.el --- Generated package (no.2) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.2) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-personal-information>>
+
+(provide 'config-personal-information)
+;;; config-personal-information.el ends here
+#+end_src
+
 It's useful to have some basic personal information
 #+begin_src emacs-lisp
-(setq user-full-name "TEC"
+(setq user-full-name "Josua Palmstedt"
       user-mail-address "contact@tecosaur.net")
 #+end_src
 Apparently this is used by ~GPG~, and all sorts of other things.
@@ -1280,8 +1363,49 @@ my home machine is pretty safe, and my laptop is shutdown a lot.
 #+end_src
 
 ** Better defaults
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-better-defaults
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-better-defaults.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-better-defaults.el --- Generated package (no.3) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.3) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-better-defaults>>
+
+(provide 'config-better-defaults)
+;;; config-better-defaults.el ends here
+#+end_src
 
 *** Simple settings
 
@@ -1389,8 +1513,49 @@ For some reason this + the mixed pitch hook causes issues with hydra and so I'll
 just need to resort to =SPC b o= for now.
 
 ** Doom configuration
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-doom
+:END:
 
 #+call: confpkg("Doom")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-doom.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-doom.el --- Generated package (no.4) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.4) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-doom>>
+
+(provide 'config-doom)
+;;; config-doom.el ends here
+#+end_src
 
 *** Modules
 :PROPERTIES:
@@ -1746,8 +1911,8 @@ trying out JetBrains Mono though. So far I have mixed feelings on it, some
 aspects are nice, but on others I prefer Fira.
 
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "JetBrains Mono" :size 24)
-      doom-big-font (font-spec :family "JetBrains Mono" :size 36)
+(setq doom-font (font-spec :family "Hack Nerd Font" :size 24)
+      doom-big-font (font-spec :family "Hack Nerd Font" :size 36)
       doom-variable-pitch-font (font-spec :family "Overpass" :size 26)
       doom-unicode-font (font-spec :family "JuliaMono")
       doom-serif-font (font-spec :family "IBM Plex Mono" :size 22 :weight 'light))
@@ -1765,7 +1930,7 @@ if the system doesn't have any of those fonts.
 
 #+name: detect-missing-fonts
 #+begin_src emacs-lisp :tangle no
-(defvar required-fonts '("JetBrainsMono.*" "Overpass" "JuliaMono" "IBM Plex Mono" "Merriweather" "Alegreya"))
+(defvar required-fonts '("Hack Nerd Font.*" "Overpass" "JuliaMono" "IBM Plex Mono" "Merriweather" "Alegreya"))
 
 (defvar available-fonts
   (delete-dups (or (font-family-list)
@@ -2040,12 +2205,94 @@ Let's make creating an Org buffer just that little bit easier.
 #+end_src
 
 *** Dashboard
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-dashboard
+:END:
 
 #+call: confpkg()
 
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-dashboard.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-dashboard.el --- Generated package (no.5) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.5) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-dashboard>>
+
+(provide 'config-dashboard)
+;;; config-dashboard.el ends here
+#+end_src
+
 **** A fancy splash screen
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref fancy-splash
+:END:
 
 #+call: confpkg("fancy-splash", prefix="")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/fancy-splash.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; fancy-splash.el --- Generated package (no.6) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.6) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<fancy-splash>>
+
+(provide 'fancy-splash)
+;;; fancy-splash.el ends here
+#+end_src
 
 Emacs can render an image as the splash screen, but I think we can do better
 than just a completely static image. Since, SVG images in particular are
@@ -2467,8 +2714,49 @@ Now we just need this as Doom's ASCII banner function.
 #+end_src
 
 **** Splash phrases
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref splash-phrases
+:END:
 
 #+call: confpkg("splash-phrases", prefix="")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/splash-phrases.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; splash-phrases.el --- Generated package (no.7) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.7) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<splash-phrases>>
+
+(provide 'splash-phrases)
+;;; splash-phrases.el ends here
+#+end_src
 
 Having an aesthetically pleasing image is all very well and good, but I'm aiming
 for minimal, not clinical --- it would be good to inject some fun into the
@@ -2758,8 +3046,49 @@ frame size or theme is changed.
 
 *** Editor interaction
 **** Mouse buttons
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-better-jumper-mouse
+:END:
 
 #+call: confpkg("Better jumper mouse")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-better-jumper-mouse.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-better-jumper-mouse.el --- Generated package (no.8) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.8) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-better-jumper-mouse>>
+
+(provide 'config-better-jumper-mouse)
+;;; config-better-jumper-mouse.el ends here
+#+end_src
 
 #+begin_src emacs-lisp
 (map! :n [mouse-8] #'better-jumper-jump-backward
@@ -2767,8 +3096,49 @@ frame size or theme is changed.
 #+end_src
 
 *** Window title
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-frame-title
+:END:
 
 #+call: confpkg("Frame title")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-frame-title.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-frame-title.el --- Generated package (no.9) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.9) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-frame-title>>
+
+(provide 'config-frame-title)
+;;; config-frame-title.el ends here
+#+end_src
 
 I'd like to have just the buffer name, then if applicable the project folder
 #+begin_src emacs-lisp
@@ -2791,6 +3161,9 @@ For example when I open my config file it the window will be titled =config.org 
 doom= then as soon as I make a change it will become =config.org ◉ doom=.
 
 *** Systemd daemon
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-emacs-daemon-setup
+:END:
 
 For running a systemd service for a Emacs server I have the following. =zsh -c= is
 used to ensure that =.zshenv= is loaded.
@@ -2852,6 +3225,44 @@ new Emacsclient frames start on the =*scratch*= buffer instead of the dashboard.
 I prefer the dashboard, so let's ensure that's always switched to in new frames.
 
 #+call: confpkg("Emacs daemon setup")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-emacs-daemon-setup.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-emacs-daemon-setup.el --- Generated package (no.10) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.10) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-emacs-daemon-setup>>
+
+(provide 'config-emacs-daemon-setup)
+;;; config-emacs-daemon-setup.el ends here
+#+end_src
 
 #+name: daemon initialisation
 #+begin_src emacs-lisp
@@ -3073,8 +3484,49 @@ Specify a ~:branch~ to install a package from a particular branch or tag.
 
 ** Convenience
 *** Avy
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-avy
+:END:
 
 #+call: confpkg("!Pkg avy")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-avy.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-avy.el --- Generated package (no.11) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.11) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-avy>>
+
+(provide 'config--pkg-avy)
+;;; config--pkg-avy.el ends here
+#+end_src
 
 #+begin_quote
 From the =:config default= module.
@@ -3114,16 +3566,57 @@ sounds nice to me.
 #+end_src
 
 *** Emacs Everywhere
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-emacs-everywhere
+:END:
 
 #+call: confpkg("!Pkg emacs-everywhere")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-emacs-everywhere.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-emacs-everywhere.el --- Generated package (no.12) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.12) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-emacs-everywhere>>
+
+(provide 'config--pkg-emacs-everywhere)
+;;; config--pkg-emacs-everywhere.el ends here
+#+end_src
 
 The name says it all. It's loaded and set up (a bit) by =:app everywhere=, however
 as I develop this I want the unpinned version I have as a submodule.
 
-#+begin_src emacs-lisp :tangle packages.el
-(package! emacs-everywhere :recipe (:local-repo "lisp/emacs-everywhere"))
-(unpin! emacs-everywhere)
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! emacs-everywhere :recipe (:host github :repo "tecosaur/emacs-everywhere"))
+# (unpin! emacs-everywhere)
+# #+end_src
 
 Additionally, I'm going to make some personal choices that aren't made in the
 Doom module.
@@ -3149,8 +3642,49 @@ Doom module.
 #+end_src
 
 *** Which-key
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-which-key
+:END:
 
 #+call: confpkg("!Pkg which-key")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-which-key.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-which-key.el --- Generated package (no.13) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.13) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-which-key>>
+
+(provide 'config--pkg-which-key)
+;;; config--pkg-which-key.el ends here
+#+end_src
 
 #+begin_quote
 From the =:core packages= module.
@@ -3178,8 +3712,49 @@ let's change that, and do a few other similar tweaks while we're at it.
 
 ** Tools
 *** Abbrev
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-multi-mode-abbrev
+:END:
 
 #+call: confpkg("Multi-mode abbrev")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-multi-mode-abbrev.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-multi-mode-abbrev.el --- Generated package (no.14) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.14) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-multi-mode-abbrev>>
+
+(provide 'config-multi-mode-abbrev)
+;;; config-multi-mode-abbrev.el ends here
+#+end_src
 
 Thanks to [[https://emacs.stackexchange.com/questions/45462/use-a-single-abbrev-table-for-multiple-modes/45476#45476][use a single abbrev-table for multiple modes? - Emacs Stack Exchange]] I
 have the following.
@@ -3192,8 +3767,49 @@ have the following.
 #+end_src
 
 *** Very large files
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-vlf
+:END:
 
 #+call: confpkg("!Pkg VLF")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-vlf.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-vlf.el --- Generated package (no.15) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.15) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-vlf>>
+
+(provide 'config--pkg-vlf)
+;;; config--pkg-vlf.el ends here
+#+end_src
 
 The /very large files/ mode loads large files in chunks, allowing one to open
 ridiculously large files.
@@ -3311,8 +3927,49 @@ Unfortunately, since evil-search doesn't have an analogue to
 ~isearch-wrap-function~, we can't easily add support to it.
 
 *** Eros
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-eros
+:END:
 
 #+call: confpkg("!Pkg Eros")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-eros.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-eros.el --- Generated package (no.16) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.16) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-eros>>
+
+(provide 'config--pkg-eros)
+;;; config--pkg-eros.el ends here
+#+end_src
 
 #+begin_quote
 From the =:tools eval= module.
@@ -3325,8 +3982,49 @@ could be slightly nicer though.
 #+end_src
 
 *** EVIL
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-evil
+:END:
 
 #+call: confpkg("!Pkg evil")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-evil.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-evil.el --- Generated package (no.17) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.17) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-evil>>
+
+(provide 'config--pkg-evil)
+;;; config--pkg-evil.el ends here
+#+end_src
 
 #+begin_quote
 From the =:editor evil= module.
@@ -3357,8 +4055,49 @@ the mode on startup, let's prevent installation of the package.
 #+end_src
 
 *** Consult
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-consult
+:END:
 
 #+call: confpkg("!Pkg Consult")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-consult.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-consult.el --- Generated package (no.18) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.18) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-consult>>
+
+(provide 'config--pkg-consult)
+;;; config--pkg-consult.el ends here
+#+end_src
 
 #+begin_quote
 From the =:completion vertico= module.
@@ -3374,8 +4113,49 @@ already clear, and there's no need for a different face.
 #+end_src
 
 *** Magit
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-magit
+:END:
 
 #+call: confpkg("!Pkg Magit")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-magit.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-magit.el --- Generated package (no.19) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.19) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-magit>>
+
+(provide 'config--pkg-magit)
+;;; config--pkg-magit.el ends here
+#+end_src
 
 #+begin_quote
 From the =:tools magit= module.
@@ -3500,7 +4280,7 @@ follow [[https://orgmode.org/worg/org-contribute.html#commit-messages][a certain
           (re-search-forward "^\\+\\|^-" nil t)
           (end-of-line)
           (cond
-           ((string-match-p "\\.el$" last-file)
+           ((string-match-p "\\.el$" last-file)P
             (when (re-search-backward "^\\(?:[+-]? *\\|@@[ +-\\d,]+@@ \\)(\\(?:cl-\\)?\\(?:defun\\|defvar\\|defmacro\\|defcustom\\)" temp-point t)
               (re-search-forward "\\(?:cl-\\)?\\(?:defun\\|defvar\\|defmacro\\|defcustom\\) " nil t)
               (add-to-list 'file-changes (buffer-substring-no-properties (point) (forward-symbol 1)))))
@@ -3563,8 +4343,49 @@ Unfortunately this currently seems to mess things up, which is something I'll
 want to look into later.
 
 *** Smerge
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-smerge
+:END:
 
 #+call: confpkg("!Pkg Smerge")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-smerge.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-smerge.el --- Generated package (no.20) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.20) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-smerge>>
+
+(provide 'config--pkg-smerge)
+;;; config--pkg-smerge.el ends here
+#+end_src
 
 For repeated operations, a hydra would be helpful. But I prefer transient.
 #+begin_src emacs-lisp
@@ -3598,8 +4419,49 @@ For repeated operations, a hydra would be helpful. But I prefer transient.
 #+end_src
 
 *** Company
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-company
+:END:
 
 #+call: confpkg("!Pkg Company")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-company.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-company.el --- Generated package (no.21) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.21) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-company>>
+
+(provide 'config--pkg-company)
+;;; config--pkg-company.el ends here
+#+end_src
 
 #+begin_quote
 From the =:completion company= module.
@@ -3647,8 +4509,49 @@ We then configure the dictionary we're using in [[*Ispell][Ispell]].
 #+end_src
 
 *** Projectile
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-projectile
+:END:
 
 #+call: confpkg("!Pkg Projectile")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-projectile.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-projectile.el --- Generated package (no.22) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.22) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-projectile>>
+
+(provide 'config--pkg-projectile)
+;;; config--pkg-projectile.el ends here
+#+end_src
 
 #+begin_quote
 From the =:core packages= module.
@@ -3699,8 +4602,49 @@ cd aspell6-en-custom
 #+end_src
 
 **** Configuration
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-ispell
+:END:
 
 #+call: confpkg("!Pkg Ispell")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-ispell.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-ispell.el --- Generated package (no.23) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.23) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-ispell>>
+
+(provide 'config--pkg-ispell)
+;;; config--pkg-ispell.el ends here
+#+end_src
 
 #+begin_src emacs-lisp
 (setq ispell-dictionary "en-custom")
@@ -3720,8 +4664,49 @@ nearby (also means that if I change the 'main' dictionary I keep my addition).
 #+end_src
 
 *** TRAMP
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-tramp
+:END:
 
 #+call: confpkg("TRAMP")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-tramp.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-tramp.el --- Generated package (no.24) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.24) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-tramp>>
+
+(provide 'config-tramp)
+;;; config-tramp.el ends here
+#+end_src
 
 Another lovely Emacs feature, TRAMP stands for /Transparent Remote Access,
 Multiple Protocol/. In brief, it's a lovely way to wander around outside your
@@ -3769,8 +4754,49 @@ That's no problem though, we just need to help TRAMP find them.
 #+end_src
 
 *** Auto activating snippets
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-aas
+:END:
 
 #+call: confpkg("!Pkg AAS")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-aas.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-aas.el --- Generated package (no.25) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.25) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-aas>>
+
+(provide 'config--pkg-aas)
+;;; config--pkg-aas.el ends here
+#+end_src
 
 Sometimes pressing =TAB= is just too much.
 #+begin_src emacs-lisp :tangle packages.el
@@ -3784,13 +4810,54 @@ Sometimes pressing =TAB= is just too much.
 #+end_src
 
 *** Screenshot
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-screenshot
+:END:
 
 #+call: confpkg("!Pkg Screenshot")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-screenshot.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-screenshot.el --- Generated package (no.26) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.26) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-screenshot>>
+
+(provide 'config--pkg-screenshot)
+;;; config--pkg-screenshot.el ends here
+#+end_src
 
 This makes it a breeze to take lovely screenshots.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! screenshot :recipe (:local-repo "lisp/screenshot"))
+(package! screenshot :recipe (:host github :repo "tecosaur/screenshot"))
 #+end_src
 
 #+attr_html: :class invertible :alt Example screenshot.el screenshot
@@ -3806,8 +4873,49 @@ file uploading script (which I've renamed to ~upload~).
 #+end_src
 
 *** Etrace
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-etrace
+:END:
 
 #+call: confpkg("!Pkg etrace")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-etrace.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-etrace.el --- Generated package (no.27) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.27) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-etrace>>
+
+(provide 'config--pkg-etrace)
+;;; config--pkg-etrace.el ends here
+#+end_src
 
 The /Emacs Lisp Profiler/ (ELP) does a nice job recording information, but it
 isn't the best for looking at results. =etrace= converts ELP's results to the
@@ -3826,8 +4934,49 @@ investigation.
 #+end_src
 
 *** YASnippet
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-yasnippet
+:END:
 
 #+call: confpkg("!Pkg YASnippet")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-yasnippet.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-yasnippet.el --- Generated package (no.28) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.28) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-yasnippet>>
+
+(provide 'config--pkg-yasnippet)
+;;; config--pkg-yasnippet.el ends here
+#+end_src
 
 #+begin_quote
 From the =:editor snippets= module.
@@ -3839,8 +4988,49 @@ Nested snippets are good, so let's enable that.
 #+end_src
 
 *** String inflection
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-string-inflection
+:END:
 
 #+call: confpkg("!Pkg String Inflection")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-string-inflection.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-string-inflection.el --- Generated package (no.29) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.29) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-string-inflection>>
+
+(provide 'config--pkg-string-inflection)
+;;; config--pkg-string-inflection.el ends here
+#+end_src
 
 For when you want to change the case pattern for a symbol.
 #+begin_src emacs-lisp :tangle packages.el
@@ -3878,8 +5068,49 @@ For when you want to change the case pattern for a symbol.
 #+end_src
 
 *** Smart parentheses
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-smartparens
+:END:
 
 #+call: confpkg("!Pkg SmartParens")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-smartparens.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-smartparens.el --- Generated package (no.30) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.30) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-smartparens>>
+
+(provide 'config--pkg-smartparens)
+;;; config--pkg-smartparens.el ends here
+#+end_src
 
 #+begin_quote
 From the =:core packages= module.
@@ -3894,8 +5125,49 @@ From the =:core packages= module.
 
 ** Visuals
 *** Info colours
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-info-colors
+:END:
 
 #+call: confpkg("!Pkg Info colors")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-info-colors.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-info-colors.el --- Generated package (no.31) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.31) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-info-colors>>
+
+(provide 'config--pkg-info-colors)
+;;; config--pkg-info-colors.el ends here
+#+end_src
 
 This makes manual pages nicer to look at by adding variable pitch fontification
 and colouring 🙂.
@@ -3936,8 +5208,49 @@ so I'd like to make sure we have a recent version.
 #+end_src
 
 *** Theme magic
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-theme-magic
+:END:
 
 #+call: confpkg("!Pkg Theme magic")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-theme-magic.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-theme-magic.el --- Generated package (no.32) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.32) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-theme-magic>>
+
+(provide 'config--pkg-theme-magic)
+;;; config--pkg-theme-magic.el ends here
+#+end_src
 
 With all our fancy Emacs themes, my terminal is missing out!
 #+begin_src emacs-lisp :tangle packages.el
@@ -3983,8 +5296,49 @@ lightened versions --- let's do that.
 #+end_src
 
 *** Simple comment markup
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-simple-comment-markup
+:END:
 
 #+call: confpkg("!Pkg simple-comment-markup")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-simple-comment-markup.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-simple-comment-markup.el --- Generated package (no.33) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.33) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-simple-comment-markup>>
+
+(provide 'config--pkg-simple-comment-markup)
+;;; config--pkg-simple-comment-markup.el ends here
+#+end_src
 
 I find that every now and then I sprinkle a little markup in code comments. Of
 course, this doesn't get fortified as it's ultimately meaningless ... but it
@@ -4006,8 +5360,49 @@ situations decently.
 #+end_src
 
 *** Emojify
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-emojify
+:END:
 
 #+call: confpkg("!Pkg emojify")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-emojify.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-emojify.el --- Generated package (no.34) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.34) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-emojify>>
+
+(provide 'config--pkg-emojify)
+;;; config--pkg-emojify.el ends here
+#+end_src
 
 #+begin_quote
 From the =:ui emoji= module.
@@ -4078,8 +5473,49 @@ Email and IRC.
 #+end_src
 
 *** Doom modeline
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-doom-modeline
+:END:
 
 #+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-doom-modeline.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-doom-modeline.el --- Generated package (no.35) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.35) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-doom-modeline>>
+
+(provide 'config--pkg-doom-modeline)
+;;; config--pkg-doom-modeline.el ends here
+#+end_src
 
 #+begin_quote
 From the =:ui modeline= module.
@@ -4271,8 +5707,49 @@ icon. Then we'll redefine two functions used to generate the modeline.
 #+end_src
 
 *** Keycast
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-keycast
+:END:
 
 #+call: confpkg("!Pkg Keycast")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-keycast.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-keycast.el --- Generated package (no.36) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.36) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-keycast>>
+
+(provide 'config--pkg-keycast)
+;;; config--pkg-keycast.el ends here
+#+end_src
 
 For some reason, I find myself demoing Emacs every now and then. Showing what
 keyboard stuff I'm doing on-screen seems helpful. While [[https://gitlab.com/screenkey/screenkey][screenkey]] does exist,
@@ -4308,8 +5785,49 @@ Let's just make sure this is lazy-loaded appropriately.
 #+end_src
 
 *** Screencast
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-screencast
+:END:
 
 #+call: confpkg("!Pkg Screencast")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-screencast.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-screencast.el --- Generated package (no.37) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.37) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-screencast>>
+
+(provide 'config--pkg-screencast)
+;;; config--pkg-screencast.el ends here
+#+end_src
 
 In a similar manner to [[Keycast]], [[https://gitlab.com/ambrevar/emacs-gif-screencast][gif-screencast]] may come in handy.
 #+begin_src emacs-lisp :tangle packages.el
@@ -4353,8 +5871,49 @@ theme.
 #+end_src
 
 *** Mixed pitch
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-mixed-pitch
+:END:
 
 #+call: confpkg("!Pkg mixed pitch")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-mixed-pitch.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-mixed-pitch.el --- Generated package (no.38) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.38) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-mixed-pitch>>
+
+(provide 'config--pkg-mixed-pitch)
+;;; config--pkg-mixed-pitch.el ends here
+#+end_src
 
 #+begin_quote
 From the =:ui zen= module.
@@ -4415,8 +5974,49 @@ Thankfully, it isn't to hard to add these to the ~composition-function-table~.
 #+end_src
 
 **** Variable pitch serif font
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-variable-pitch-serif-font
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-variable-pitch-serif-font.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-variable-pitch-serif-font.el --- Generated package (no.39) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.39) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-variable-pitch-serif-font>>
+
+(provide 'config-variable-pitch-serif-font)
+;;; config-variable-pitch-serif-font.el ends here
+#+end_src
 
 It would be nice if we were able to make use of a serif version of the
 =variable-pitch= face. Since this doesn't already exist, let's create it.
@@ -4440,8 +6040,49 @@ For ease of use, let's also set up an easy way of setting the ~:font~ attribute.
 #+end_src
 
 *** Marginalia
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-marginalia
+:END:
 
 #+call: confpkg("!Pkg Marginalia")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-marginalia.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-marginalia.el --- Generated package (no.40) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.40) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-marginalia>>
+
+(provide 'config--pkg-marginalia)
+;;; config--pkg-marginalia.el ends here
+#+end_src
 
 #+begin_quote
 Part of the =:completion vertico= module.
@@ -4498,8 +6139,49 @@ shadow)=, but I don't like that.
 #+end_src
 
 *** Centaur Tabs
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-centaur-tabs
+:END:
 
 #+call: confpkg("!Pkg Centaur Tabs")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-centaur-tabs.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-centaur-tabs.el --- Generated package (no.41) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.41) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-centaur-tabs>>
+
+(provide 'config--pkg-centaur-tabs)
+;;; config--pkg-centaur-tabs.el ends here
+#+end_src
 
 #+begin_quote
 From the =:ui tabs= module.
@@ -4529,8 +6211,49 @@ well somehow, so let's switch to 'P22 Underground Book'; it looks much nicer.
 #+end_src
 
 *** All the icons
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-all-the-icons
+:END:
 
 #+call: confpkg("!Pkg All the Icons")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-all-the-icons.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-all-the-icons.el --- Generated package (no.42) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.42) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-all-the-icons>>
+
+(provide 'config--pkg-all-the-icons)
+;;; config--pkg-all-the-icons.el ends here
+#+end_src
 
 #+begin_quote
 From the =:core packages= module.
@@ -4546,8 +6269,49 @@ than Objective-C. As such, it'll be switching the icon associated with =.m=.
 #+end_src
 
 *** Prettier page breaks
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-page-break-lines
+:END:
 
 #+call: confpkg("!Pkg page break lines")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-page-break-lines.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-page-break-lines.el --- Generated package (no.43) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.43) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-page-break-lines>>
+
+(provide 'config--pkg-page-break-lines)
+;;; config--pkg-page-break-lines.el ends here
+#+end_src
 
 In some files, =^L= appears as a page break character. This isn't that visually
 appealing, and Steve Purcell has been nice enough to make a package to display
@@ -4570,8 +6334,49 @@ these as horizontal rules.
 #+end_src
 
 *** Writeroom
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-writeroom
+:END:
 
 #+call: confpkg("Writeroom")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-writeroom.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-writeroom.el --- Generated package (no.44) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.44) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-writeroom>>
+
+(provide 'config-writeroom)
+;;; config-writeroom.el ends here
+#+end_src
 
 #+begin_quote
 From the =:ui zen= module.
@@ -4645,8 +6450,49 @@ tweaks. Namely:
 [[https://tecosaur.com/lfs/emacs-config/screenshots/writeroom-and-org.png]]
 
 *** Treemacs
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-treemacs
+:END:
 
 #+call: confpkg("!Pkg treemacs")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-treemacs.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-treemacs.el --- Generated package (no.45) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.45) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-treemacs>>
+
+(provide 'config--pkg-treemacs)
+;;; config--pkg-treemacs.el ends here
+#+end_src
 
 #+begin_quote
 From the =:ui treemacs= module.
@@ -4710,8 +6556,49 @@ Now, we just identify the files in question.
 
 ** Frivolities
 *** xkcd
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-xkcd
+:END:
 
 #+call: confpkg("XKCD")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-xkcd.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-xkcd.el --- Generated package (no.46) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.46) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-xkcd>>
+
+(provide 'config-xkcd)
+;;; config-xkcd.el ends here
+#+end_src
 
 XKCD comics are fun.
 #+begin_src emacs-lisp :tangle packages.el
@@ -5003,8 +6890,49 @@ SQL can be either the emacsql vector representation, or a string."
 #+end_src
 
 *** Selectric
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-selectric
+:END:
 
 #+call: confpkg("!Pkg Selectric")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-selectric.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-selectric.el --- Generated package (no.47) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.47) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-selectric>>
+
+(provide 'config--pkg-selectric)
+;;; config--pkg-selectric.el ends here
+#+end_src
 
 Every so often, you want everyone else to /know/ that you're typing, or just to
 amuse oneself. Introducing: typewriter sounds!
@@ -5018,8 +6946,49 @@ amuse oneself. Introducing: typewriter sounds!
 #+end_src
 
 *** Wttrin
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-wttrin
+:END:
 
 #+call: confpkg("!Pkg Wttrin")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-wttrin.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-wttrin.el --- Generated package (no.48) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.48) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-wttrin>>
+
+(provide 'config--pkg-wttrin)
+;;; config--pkg-wttrin.el ends here
+#+end_src
 
 Hey, let's get the weather in here while we're at it.
 Unfortunately this seems slightly unmaintained ([[https://github.com/bcbcarl/emacs-wttrin/pulls][few open bugfix PRs]]) so let's
@@ -5034,8 +7003,49 @@ roll our [[file:lisp/wttrin/wttrin.el][own version]].
 #+end_src
 
 *** Spray
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-spray
+:END:
 
 #+call: confpkg("!Pkg Spray")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-spray.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-spray.el --- Generated package (no.49) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.49) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-spray>>
+
+(provide 'config--pkg-spray)
+;;; config--pkg-spray.el ends here
+#+end_src
 
 Why not flash words on the screen. Why not --- hey, it could be fun.
 #+begin_src emacs-lisp :tangle packages.el
@@ -5072,8 +7082,49 @@ we're at it.
 #+end_src
 
 *** Elcord
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-elcord
+:END:
 
 #+call: confpkg("!Pkg Elcord")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-elcord.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-elcord.el --- Generated package (no.50) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.50) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-elcord>>
+
+(provide 'config--pkg-elcord)
+;;; config--pkg-elcord.el ends here
+#+end_src
 
 What's even the point of using Emacs unless you're constantly telling everyone
 about it?
@@ -5090,8 +7141,49 @@ about it?
 
 ** File types
 *** Systemd
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-systemd
+:END:
 
 #+call: confpkg("!Pkg Systemd")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-systemd.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-systemd.el --- Generated package (no.51) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.51) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-systemd>>
+
+(provide 'config--pkg-systemd)
+;;; config--pkg-systemd.el ends here
+#+end_src
 
 For editing systemd unit files
 #+begin_src emacs-lisp :tangle packages.el
@@ -5105,8 +7197,49 @@ For editing systemd unit files
 
 * Applications
 ** Ebooks
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-ebooks
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-ebooks.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-ebooks.el --- Generated package (no.52) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.52) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-ebooks>>
+
+(provide 'config-ebooks)
+;;; config-ebooks.el ends here
+#+end_src
 
 [[xkcd:548]]
 
@@ -5273,8 +7406,49 @@ Then, to actually read the ebooks we use =nov=.
 #+end_src
 
 ** Calculator
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-calculator
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-calculator.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-calculator.el --- Generated package (no.53) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.53) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-calculator>>
+
+(provide 'config-calculator)
+;;; config-calculator.el ends here
+#+end_src
 
 Emacs includes the venerable =calc=, which is a pretty impressive RPN (Reverse
 Polish Notation) calculator. However, we can do a bit to improve the experience.
@@ -5405,8 +7579,49 @@ panel.
 #+end_src
 
 ** IRC
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-irc
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-irc.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-irc.el --- Generated package (no.54) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.54) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-irc>>
+
+(provide 'config-irc)
+;;; config-irc.el ends here
+#+end_src
 
 =circe= is a client for IRC in Emacs (hey, isn't that a nice project
 name+acronym), and a greek enchantress who turned humans into animals.
@@ -5700,8 +7915,49 @@ Now, some actual emojis to use.
 #+end_src
 
 ** Newsfeed
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-newsfeed
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-newsfeed.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-newsfeed.el --- Generated package (no.55) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.55) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-newsfeed>>
+
+(provide 'config-newsfeed)
+;;; config-newsfeed.el ends here
+#+end_src
 
 RSS feeds are still a thing. Why not make use of them with =elfeed=.
 I really like what [[https://github.com/fuxialexander/doom-emacs-private-xfu/tree/master/modules/app/rss][fuxialexander]] has going on, but I don't think I need a custom
@@ -5931,6 +8187,13 @@ module. Let's just try to patch on the main things I like the look of.
 
 #+call: confpkg(needs="sdcv")
 
+#+RESULTS:
+nil
+nil
+nil
+nil
+nil
+
 Doom already loads =define-word=, and provides it's own definition service using
 [[https://github.com/gromnitsky/wordnut][wordnut]]. However, using an offline dictionary possess a few compelling
 advantages, namely:
@@ -5944,7 +8207,7 @@ To interface with this, we'll use a my =lexic= package.
 [[https://tecosaur.com/lfs/emacs-config/screenshots/lexic.png]]
 
 #+begin_src emacs-lisp :tangle (if (executable-find "sdcv") "packages.el" "no")
-(package! lexic :recipe (:local-repo "lisp/lexic"))
+(package! lexic :recipe (:host github :repo "tecosaur/lexic"))
 #+end_src
 
 Given that a request for a CLI is the [[https://github.com/goldendict/goldendict/issues/37][most upvoted issue]] on GitHub for
@@ -6007,8 +8270,49 @@ fi
 #+end_src
 
 ** Mail
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-mail
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-mail.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-mail.el --- Generated package (no.56) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.56) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-mail>>
+
+(provide 'config-mail)
+;;; config-mail.el ends here
+#+end_src
 
 [[xkcd:1467]]
 
@@ -7240,8 +9544,49 @@ moves the point with ~message-goto-<location>~.
 * Language configuration
 ** General
 *** File Templates
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-file-templates
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-file-templates.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-file-templates.el --- Generated package (no.57) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.57) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-file-templates>>
+
+(provide 'config-file-templates)
+;;; config-file-templates.el ends here
+#+end_src
 
 For some file types, we overwrite defaults in the [[file:./snippets][snippets]] directory, others
 need to have a template assigned.
@@ -7253,8 +9598,49 @@ need to have a template assigned.
 #+end_src
 
 ** Plaintext
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-plaintext
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-plaintext.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-plaintext.el --- Generated package (no.58) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.58) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-plaintext>>
+
+(provide 'config-plaintext)
+;;; config-plaintext.el ends here
+#+end_src
 
 *** Ansi colours
 
@@ -7476,18 +9862,23 @@ correct package statement needed.
                                    (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n"
                                            git-version)
                                    "(provide 'org-version)\n"))))))
-  (prin1-to-string
+   ;; (prin1-to-string
+   ;; `(package! org
+   ;;    :recipe (,@(cond ((and dev-key dev-pkg)
+   ;;                      (list :host nil :repo nil :local-repo (expand-file-name "straight/repos/org" doom-local-dir)))
+   ;;                     (dev-key
+   ;;                      (list :host nil :repo "tec@git.savannah.gnu.org:/srv/git/emacs/org-mode.git"
+   ;;                            :fork (list :host nil :repo "gitea@git.tecosaur.net:tec/org-mode.git" :branch "dev" :remote "tecosaur")))
+   ;;                     (t
+   ;;                      (list :host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror"
+   ;;                            :fork (list :host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur"))))
+   ;;             ,@recipe-common)
+   ;;    :pin nil)))
+
+ (prin1-to-string
    `(package! org
-      :recipe (,@(cond ((and dev-key dev-pkg)
-                        (list :host nil :repo nil :local-repo (expand-file-name "straight/repos/org" doom-local-dir)))
-                       (dev-key
-                        (list :host nil :repo "tec@git.savannah.gnu.org:/srv/git/emacs/org-mode.git"
-                              :fork (list :host nil :repo "gitea@git.tecosaur.net:tec/org-mode.git" :branch "dev" :remote "tecosaur")))
-                       (t
-                        (list :host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror"
-                              :fork (list :host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur"))))
-               ,@recipe-common)
-      :pin nil)))
+      :recipe (:repo "https://git.savannah.gnu.org/git/emacs/org-mode.git")
+      :pin "f0ff1df486917ccc60e31e5897185c904d416f46")))
 #+end_src
 
 #+begin_src emacs-lisp :tangle packages.el :noweb no-export
@@ -7501,8 +9892,49 @@ correct package statement needed.
 
 **** Visuals
 ***** Org Modern
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-modern
+:END:
 
 #+call: confpkg("!Pkg org-modern")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-modern.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-modern.el --- Generated package (no.59) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.59) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-modern>>
+
+(provide 'config--pkg-org-modern)
+;;; config--pkg-org-modern.el ends here
+#+end_src
 
 Fontifying =org-mode= buffers to be as pretty as possible is of paramount importance,
 and Minad's lovely =org-modern= goes a long way in this regard.
@@ -7596,8 +10028,49 @@ spell-check face ignore list
 #+end_src
 
 ***** Emphasis markers
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-appear
+:END:
 
 #+call: confpkg("!Pkg org-appear")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-appear.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-appear.el --- Generated package (no.60) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.60) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-appear>>
+
+(provide 'config--pkg-org-appear)
+;;; config--pkg-org-appear.el ends here
+#+end_src
 
 While ~org-hide-emphasis-markers~ is very nice, it can sometimes make edits which
 occur at the border a bit more fiddley. We can improve this situation without
@@ -7620,8 +10093,49 @@ sacrificing visual amenities with the =org-appear= package.
 #+end_src
 
 ***** Heading structure
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-ol-tree
+:END:
 
 #+call: confpkg("!Pkg org-ol-tree")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-ol-tree.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-ol-tree.el --- Generated package (no.61) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.61) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-ol-tree>>
+
+(provide 'config--pkg-org-ol-tree)
+;;; config--pkg-org-ol-tree.el ends here
+#+end_src
 
 Speaking of headlines, a nice package for viewing and managing the heading
 structure has come to my attention.
@@ -7652,8 +10166,49 @@ recognising the pgtk window system]].
 
 **** Extra functionality
 ***** Julia support
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-ob-julia
+:END:
 
 #+call: confpkg("!Pkg ob-julia")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-ob-julia.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-ob-julia.el --- Generated package (no.62) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.62) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-ob-julia>>
+
+(provide 'config--pkg-ob-julia)
+;;; config--pkg-ob-julia.el ends here
+#+end_src
 
 =ob-julia= is currently a bit borked, but there's an effort to improve this.
 #+begin_src emacs-lisp :tangle packages.el
@@ -7675,8 +10230,49 @@ recognising the pgtk window system]].
 #+end_src
 
 ***** HTTP requests
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-ob-http
+:END:
 
 #+call: confpkg("!Pkg ob-http")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-ob-http.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-ob-http.el --- Generated package (no.63) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.63) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-ob-http>>
+
+(provide 'config--pkg-ob-http)
+;;; config--pkg-ob-http.el ends here
+#+end_src
 
 I like the idea of being able to make HTTP requests with Babel.
 #+begin_src emacs-lisp :tangle packages.el
@@ -7689,8 +10285,49 @@ I like the idea of being able to make HTTP requests with Babel.
 #+end_src
 
 ***** Transclusion
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-transclusion
+:END:
 
 #+call: confpkg("!Pkg org-transclusion")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-transclusion.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-transclusion.el --- Generated package (no.64) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.64) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-transclusion>>
+
+(provide 'config--pkg-org-transclusion)
+;;; config--pkg-org-transclusion.el ends here
+#+end_src
 
 There's a really cool package in development to /transclude/ Org document content.
 #+begin_src emacs-lisp :tangle packages.el
@@ -7707,8 +10344,49 @@ There's a really cool package in development to /transclude/ Org document conten
 #+end_src
 
 ***** Heading graph
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-graph-view
+:END:
 
 #+call: confpkg("!Pkg org-graph-view")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-graph-view.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-graph-view.el --- Generated package (no.65) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.65) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-graph-view>>
+
+(provide 'config--pkg-org-graph-view)
+;;; config--pkg-org-graph-view.el ends here
+#+end_src
 
 Came across this and ... it's cool
 #+begin_src emacs-lisp :tangle packages.el
@@ -7716,8 +10394,49 @@ Came across this and ... it's cool
 #+end_src
 
 ***** Cooking recipes
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-chef
+:END:
 
 #+call: confpkg("!Pkg org-chef")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-chef.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-chef.el --- Generated package (no.66) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.66) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-chef>>
+
+(provide 'config--pkg-org-chef)
+;;; config--pkg-org-chef.el ends here
+#+end_src
 
 I *need* this in my life. It take a URL to a recipe from a common site, and
 inserts an org-ified version at point. Isn't that just great.
@@ -7733,14 +10452,54 @@ it, either by command or in a capture template.
 #+end_src
 
 ***** Importing with Pandoc
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-pandoc-import
+:END:
 
 #+call: confpkg("!Pkg org-pandoc-import")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-pandoc-import.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-pandoc-import.el --- Generated package (no.67) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.67) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-pandoc-import>>
+
+(provide 'config--pkg-org-pandoc-import)
+;;; config--pkg-org-pandoc-import.el ends here
+#+end_src
 
 Sometimes I'm given non-org files, that's very sad. Luckily Pandoc offers a way
 to make that right again, and this package makes that even easier to do.
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-pandoc-import :recipe
-  (:local-repo "lisp/org-pandoc-import" :files ("*.el" "filters" "preprocessors")))
+(package! org-pandoc-import :recipe (:host github :repo "tecosaur/org-pandoc-import" :files ("*.el" "filters" "preprocessors")))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -7749,13 +10508,54 @@ to make that right again, and this package makes that even easier to do.
 #+end_src
 
 ***** Glossaries and more
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-glossary
+:END:
 
 #+call: confpkg("!Pkg org-glossary")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-glossary.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-glossary.el --- Generated package (no.68) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.68) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-glossary>>
+
+(provide 'config--pkg-org-glossary)
+;;; config--pkg-org-glossary.el ends here
+#+end_src
 
 For glossary-type entries, there's a nice package for this I'm developing.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-glossary :recipe (:local-repo "lisp/org-glossary"))
+(package! org-glossary :recipe (:host github :repo "tecosaur/org-glossary"))
 #+end_src
 
 Other than hooking this to =org-mode=, we also want to set a collection root and
@@ -7781,15 +10581,56 @@ improve the LaTeX usage references with =cleveref='s ~\labelcpageref~ command.
 #+end_src
 
 ***** Document comparison
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-orgdiff
+:END:
 
 #+call: confpkg("!Pkg orgdiff")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-orgdiff.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-orgdiff.el --- Generated package (no.69) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.69) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-orgdiff>>
+
+(provide 'config--pkg-orgdiff)
+;;; config--pkg-orgdiff.el ends here
+#+end_src
 
 It's quite nice to compare Org files, and the richest way to compare content is
 probably =latexdiff=. There are a few annoying steps involved here, and so I've
 written a package to streamline the process.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! orgdiff :recipe (:local-repo "lisp/orgdiff"))
+(package! orgdiff :recipe (:host github :repo "tecosaur/orgdiff"))
 #+end_src
 
 The only little annoyance is the fact that =latexdiff= uses ~#FF0000~ and ~#0000FF~ as
@@ -7818,12 +10659,53 @@ post-processing the =latexdiff= result.
 #+end_src
 
 ***** Org music
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-music
+:END:
 
 #+call: confpkg("!Pkg org-music")
 
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-music.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-music.el --- Generated package (no.70) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.70) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-music>>
+
+(provide 'config--pkg-org-music)
+;;; config--pkg-org-music.el ends here
+#+end_src
+
 It's nice to be able to link to music
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-music :recipe (:local-repo "lisp/org-music"))
+(package! org-music :recipe (:host github :repo "tecosaur/org-music"))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -7836,8 +10718,49 @@ It's nice to be able to link to music
 #+end_src
 
 *** Behaviour
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-org-behaviour
+:END:
 
 #+call: confpkg("Org Behaviour", after="org")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-org-behaviour.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-org-behaviour.el --- Generated package (no.71) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.71) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-org-behaviour>>
+
+(provide 'config-org-behaviour)
+;;; config-org-behaviour.el ends here
+#+end_src
 
 [[xkcd:1319]]
 
@@ -7946,8 +10869,49 @@ Now we'll just add that under the Org mode link localleader for convenience.
 #+end_src
 
 ***** Citation
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-org-citation
+:END:
 
 #+call: confpkg("Org Citation")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-org-citation.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-org-citation.el --- Generated package (no.72) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.72) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-org-citation>>
+
+(provide 'config-org-citation)
+;;; config-org-citation.el ends here
+#+end_src
 
 #+begin_quote
 Extending the =:tools biblio= module.
@@ -8155,8 +11119,49 @@ functionality as in LaTeX. Let's try viewing possible output files with this.
 #+end_src
 
 **** Super agenda
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-super-agenda
+:END:
 
 #+call: confpkg("!Pkg Org Super Agenda")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-super-agenda.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-super-agenda.el --- Generated package (no.73) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.73) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-super-agenda>>
+
+(provide 'config--pkg-org-super-agenda)
+;;; config--pkg-org-super-agenda.el ends here
+#+end_src
 
 The agenda is nice, but a souped up version is nicer.
 #+begin_src emacs-lisp :tangle packages.el
@@ -8544,8 +11549,49 @@ no modeline.
 #+end_src
 
 **** Roam
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-roam
+:END:
 
 #+call: confpkg("!Pkg org-roam", after="org-roam")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-roam.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-roam.el --- Generated package (no.74) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.74) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-roam>>
+
+(provide 'config--pkg-org-roam)
+;;; config--pkg-org-roam.el ends here
+#+end_src
 
 ***** Basic settings
 
@@ -8581,8 +11627,49 @@ the [[*Window title][Window title]].
 #+end_src
 
 ***** Graph view
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-roam-ui
+:END:
 
 #+call: confpkg("!Pkg org-roam-ui")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-roam-ui.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-roam-ui.el --- Generated package (no.75) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.75) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-roam-ui>>
+
+(provide 'config--pkg-org-roam-ui)
+;;; config--pkg-org-roam-ui.el ends here
+#+end_src
 
 Org-roam is nice by itself, but there are so /extra/ nice packages which integrate
 with it.
@@ -9160,8 +12247,49 @@ cause issues. Let's make their failure less eventful.
 #+end_src
 
 **** Flycheck with org-lint
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-flycheck-org-lint
+:END:
 
 #+call: confpkg("Flycheck org-lint", after="org")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-flycheck-org-lint.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-flycheck-org-lint.el --- Generated package (no.76) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.76) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-flycheck-org-lint>>
+
+(provide 'config-flycheck-org-lint)
+;;; config-flycheck-org-lint.el ends here
+#+end_src
 
 Org may be simple, but that doesn't mean there's no such thing as malformed Org.
 Thankfully, malformed Org is a much less annoying affair than malformed zipped
@@ -9262,8 +12390,49 @@ much.
 #+end_src
 
 *** Visuals
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-org-visuals
+:END:
 
 #+call: confpkg("Org Visuals", after="org")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-org-visuals.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-org-visuals.el --- Generated package (no.77) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.77) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-org-visuals>>
+
+(provide 'config-org-visuals)
+;;; config-org-visuals.el ends here
+#+end_src
 
 Here I try to do two things: improve the styling of the various documents, via
 font changes etc, and also propagate colours from the current theme.
@@ -9498,8 +12667,49 @@ passed, and so we can override the background as discussed above.
 #+end_src
 
 ***** More eager rendering
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-fragtog
+:END:
 
 #+call: confpkg("!Pkg org-fragtog")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-fragtog.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-fragtog.el --- Generated package (no.78) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.78) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-fragtog>>
+
+(provide 'config--pkg-org-fragtog)
+;;; config--pkg-org-fragtog.el ends here
+#+end_src
 
 What's better than syntax-highlighted LaTeX is /rendered/ LaTeX though, and we can
 have this be performed automatically with =org-fragtog=.
@@ -9805,8 +13015,49 @@ set palette defined ( 0 '%s',\
 #+end_src
 
 *** Exporting
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-org-exports
+:END:
 
 #+call: confpkg("Org exports", after="ox")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-org-exports.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-org-exports.el --- Generated package (no.79) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.79) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-org-exports>>
+
+(provide 'config-org-exports)
+;;; config-org-exports.el ends here
+#+end_src
 
 **** General settings
 
@@ -9928,8 +13179,49 @@ can tweak ~+org-babel-mode-alist~ when exporting.
 #+end_src
 
 *** HTML Export
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-ox-html
+:END:
 
 #+call: confpkg("ox-html", after="ox-html")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-ox-html.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-ox-html.el --- Generated package (no.80) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.80) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-ox-html>>
+
+(provide 'config-ox-html)
+;;; config-ox-html.el ends here
+#+end_src
 
 I want to tweak a whole bunch of things. While I'll want my tweaks almost all
 the time, occasionally I may want to test how something turns out using a more
@@ -10676,8 +13968,49 @@ MathJax = {
 #+end_src
 
 *** LaTeX Export
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-ox-latex
+:END:
 
 #+call: confpkg("ox-latex", after="ox-latex")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-ox-latex.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-ox-latex.el --- Generated package (no.81) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.81) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-ox-latex>>
+
+(provide 'config-ox-latex)
+;;; config-ox-latex.el ends here
+#+end_src
 
 **** Compiling
 
@@ -11456,7 +14789,7 @@ The =engrave-faces= package lets us use Emacs' font-lock for syntax highlighting
 exporting that as LaTeX commands.
 
 #+begin_src emacs-lisp :noweb-ref none :tangle packages.el
-(package! engrave-faces :recipe (:local-repo "lisp/engrave-faces"))
+(package! engrave-faces :recipe (:host github :repo "tecosaur/engrave-faces"))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -11905,15 +15238,56 @@ I'd quite like to also recognise =->= and =<-=, so let's set come up with some a
 #+end_src
 
 **** Chameleon --- aka. match theme
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-ox-chameleon
+:END:
 
 #+call: confpkg("!Pkg ox-chameleon")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-ox-chameleon.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-ox-chameleon.el --- Generated package (no.82) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.82) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-ox-chameleon>>
+
+(provide 'config--pkg-ox-chameleon)
+;;; config--pkg-ox-chameleon.el ends here
+#+end_src
 
 Once I had the idea of having the look of the LaTeX document produced match the
 current Emacs theme, I was enraptured. The result is the pseudo-class ~chameleon~,
 which I have implemented in the package =ox-chameleon=.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! ox-chameleon :recipe (:local-repo "lisp/ox-chameleon"))
+(package! ox-chameleon :recipe (:host github :repo "tecosaur/ox-chameleon"))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -12055,8 +15429,49 @@ export to a PDF.
 #+end_src
 
 *** Beamer Export
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-ox-beamer
+:END:
 
 #+call: confpkg("ox-beamer", after="ox-beamer")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-ox-beamer.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-ox-beamer.el --- Generated package (no.83) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.83) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-ox-beamer>>
+
+(provide 'config-ox-beamer)
+;;; config-ox-beamer.el ends here
+#+end_src
 
 It's nice to use a different theme
 #+begin_src emacs-lisp
@@ -12106,8 +15521,49 @@ frame from ~1~ to ~2~.
 #+end_src
 
 *** Reveal export
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-re-reveal
+:END:
 
 #+call: confpkg("!Pkg org-re-reveal", after="org-re-reveal")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-org-re-reveal.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-org-re-reveal.el --- Generated package (no.84) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.84) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-org-re-reveal>>
+
+(provide 'config--pkg-org-re-reveal)
+;;; config--pkg-org-re-reveal.el ends here
+#+end_src
 
 By default reveal is rather nice, there are just a few tweaks that I consider a
 good idea.
@@ -12119,8 +15575,49 @@ good idea.
 #+end_src
 
 *** ASCII export
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-ox-ascii
+:END:
 
 #+call: confpkg("ox-ascii", after="ox-ascii")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-ox-ascii.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-ox-ascii.el --- Generated package (no.85) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.85) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-ox-ascii>>
+
+(provide 'config-ox-ascii)
+;;; config-ox-ascii.el ends here
+#+end_src
 
 To start with, why settle for ASCII when UTF-8 exists?
 #+begin_src emacs-lisp
@@ -12179,12 +15676,94 @@ information."
 #+end_src
 
 *** Markdown Export
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-ox-md
+:END:
 
 #+call: confpkg("ox-md", after="ox-md")
 
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-ox-md.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-ox-md.el --- Generated package (no.86) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.86) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-ox-md>>
+
+(provide 'config-ox-md)
+;;; config-ox-md.el ends here
+#+end_src
+
 **** GFM
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-ox-gfm
+:END:
 
 #+call: confpkg("!Pkg ox-gfm")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-ox-gfm.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-ox-gfm.el --- Generated package (no.87) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.87) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-ox-gfm>>
+
+(provide 'config--pkg-ox-gfm)
+;;; config--pkg-ox-gfm.el ends here
+#+end_src
 
 Because of the /[[https://github.com/commonmark/commonmark-spec/wiki/markdown-flavors][lovely variety in markdown implementations]]/ there isn't actually
 such a thing a standard table spec ... or standard anything really. Because
@@ -12276,8 +15855,49 @@ contextual information."
 #+end_src
 
 *** Babel
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-org-babel
+:END:
 
 #+call: confpkg("Org Babel")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-org-babel.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-org-babel.el --- Generated package (no.88) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.88) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-org-babel>>
+
+(provide 'config-org-babel)
+;;; config-org-babel.el ends here
+#+end_src
 
 Doom lazy-loads babel languages, with is lovely.
 It also pulls in [[https://github.com/astahlman/ob-async][ob-async]], which is nice, but it would be even better if it was
@@ -12327,8 +15947,49 @@ Not added when either:
 #+end_src
 
 *** ESS
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-org-ess
+:END:
 
 #+call: confpkg("Org ESS")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-org-ess.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-org-ess.el --- Generated package (no.89) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.89) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-org-ess>>
+
+(provide 'config-org-ess)
+;;; config-org-ess.el ends here
+#+end_src
 
 We don't want ~R~ evaluation to hang the editor, hence
 #+begin_src emacs-lisp
@@ -12360,8 +16021,49 @@ the language identifier, not =ess-jags=.
 #+end_src
 
 ** LaTeX
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-latex
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-latex.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-latex.el --- Generated package (no.90) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.90) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-latex>>
+
+(provide 'config-latex)
+;;; config-latex.el ends here
+#+end_src
 
 [[xkcd:1301]]
 
@@ -12720,13 +16422,55 @@ but more convenient, like =;=.
 #+end_src
 
 **** LAAS
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-laas
+:END:
 
 #+call: confpkg("!Pkg LAAS")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-laas.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-laas.el --- Generated package (no.91) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.91) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-laas>>
+
+(provide 'config--pkg-laas)
+;;; config--pkg-laas.el ends here
+#+end_src
 
 This makes use of =aas= (/Auto Activating Snippets/) for CDLaTeX-like symbol input.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! laas :recipe (:local-repo "lisp/LaTeX-auto-activating-snippets"))
+(package! laas :recipe (:host github :repo "tecosaur/LaTeX-auto-activating-snippets"
+                        :files ("*.el")))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -12786,15 +16530,56 @@ priority of =mypyls=
 #+end_src
 
 *** Terminal viewing
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-pdftotext
+:END:
 
 #+call: confpkg("!Pkg pdftotext", needs="pdftotext")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-pdftotext.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-pdftotext.el --- Generated package (no.92) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.92) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-pdftotext>>
+
+(provide 'config--pkg-pdftotext)
+;;; config--pkg-pdftotext.el ends here
+#+end_src
 
 Sometimes I'm in a terminal and I still want to see the content. Additionally,
 sometimes I'd like to act on the textual content and so would like a plaintext version.
 Thanks to src_shell{pdftotext} we have a convenient way of performing this conversion.
 I've integrated this into a little package, =pdftotext.el=.
 #+begin_src emacs-lisp :tangle (if (executable-find "pdftotext") "packages.el" "no")
-(package! pdftotext :recipe (:local-repo "lisp/pdftotext"))
+(package! pdftotext :recipe (:host github :repo "tecosaur/pdftotext.el"))
 #+end_src
 
 The output can be slightly nicer without spelling errors, and with prettier page
@@ -12824,8 +16609,49 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
 #+end_src
 
 ** R
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-r-lang
+:END:
 
 #+call: confpkg("R lang")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-r-lang.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-r-lang.el --- Generated package (no.93) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.93) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-r-lang>>
+
+(provide 'config-r-lang)
+;;; config-r-lang.el ends here
+#+end_src
 
 *** Editor Visuals
 
@@ -12856,8 +16682,49 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
 #+end_src
 
 ** Julia
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-julia
+:END:
 
 #+call: confpkg(after="julia-mode")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-julia.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-julia.el --- Generated package (no.94) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.94) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-julia>>
+
+(provide 'config-julia)
+;;; config-julia.el ends here
+#+end_src
 
 As mentioned in [[https://github.com/non-Jedi/lsp-julia/issues/35][lsp-julia#35]], =lsp-mode= seems to serve an invalid response to the
 Julia server. The pseudo-fix is rather simple at least
@@ -12885,8 +16752,49 @@ update-mime-database ~/.local/share/mime
 #+end_src
 
 ** Graphviz
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-graphviz-dot-mode
+:END:
 
 #+call: confpkg("!Pkg graphviz-dot-mode")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-graphviz-dot-mode.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-graphviz-dot-mode.el --- Generated package (no.95) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.95) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-graphviz-dot-mode>>
+
+(provide 'config--pkg-graphviz-dot-mode)
+;;; config--pkg-graphviz-dot-mode.el ends here
+#+end_src
 
 Graphviz is a nice method of visualising simple graphs, based on plaintext
 =.dot= / =.gv= files.
@@ -12908,8 +16816,49 @@ Graphviz is a nice method of visualising simple graphs, based on plaintext
 #+end_src
 
 ** Markdown
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config-markdown
+:END:
 
 #+call: confpkg()
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config-markdown.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config-markdown.el --- Generated package (no.96) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.96) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config-markdown>>
+
+(provide 'config-markdown)
+;;; config-markdown.el ends here
+#+end_src
 
 Most of the time when I write markdown, it's going into some app/website which
 will do it's own line wrapping, hence we /only/ want to use visual line wrapping. No hard stuff.
@@ -12935,8 +16884,49 @@ sixth greyed out. Since the sixth level is so small, I'll turn up the boldness a
 #+end_src
 
 ** Beancount
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-beancount
+:END:
 
 #+call: confpkg("!Pkg Beancount")
+
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-beancount.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-beancount.el --- Generated package (no.97) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.97) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
+
+<<config--pkg-beancount>>
+
+(provide 'config--pkg-beancount)
+;;; config--pkg-beancount.el ends here
+#+end_src
 
 There are a number of rather compelling advantages to [[https://plaintextaccounting.org/][plain text accounting]],
 with [[https://www.ledger-cli.org/][ledger]] being the most obvious example. However, [[https://github.com/beancount/beancount][beancount]], a more recent
