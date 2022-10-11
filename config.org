@@ -3458,10 +3458,10 @@ sounds nice to me.
 The name says it all. It's loaded and set up (a bit) by =:app everywhere=, however
 as I develop this I want the unpinned version I have as a submodule.
 
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! emacs-everywhere :recipe (:host github :repo "tecosaur/emacs-everywhere"))
-# (unpin! emacs-everywhere)
-# #+end_src
+#+begin_src emacs-lisp :tangle packages.el
+(package! emacs-everywhere :recipe (:host github :repo "tecosaur/emacs-everywhere"))
+(unpin! emacs-everywhere)
+#+end_src
 
 Additionally, I'm going to make some personal choices that aren't made in the
 Doom module.
@@ -9013,7 +9013,7 @@ We also want to define ~mu4e-compose-from-mailto~.
 
 It would also be nice to change the name pre-filled in =From:= when drafting.
 #+begin_src emacs-lisp
-(defvar mu4e-from-name "Timothy"
+(defvar mu4e-from-name "Josua"
   "Name used in \"From:\" template.")
 (defadvice! mu4e~draft-from-construct-renamed (orig-fn)
   "Wrap `mu4e~draft-from-construct-renamed' to change the name."
@@ -9047,7 +9047,7 @@ I've got a few extra addresses I'd like ~+mu4e-set-from-address-h~ to be aware o
                         (lambda (alias)
                           (replace-regexp-in-string
                            "\\`\\(.*\\)@" alias primary-address t t 1))
-                        '("contact" "timothy")))))))
+                        '("contact" "josua")))))))
 
 (add-transient-hook! 'mu4e-compose-pre-hook
   (+mu4e-update-personal-addresses))
@@ -9301,7 +9301,7 @@ namely:
 
 #+begin_src emacs-lisp
 (defun +mu4e-compose-org-ml-setup ()
-  (when (string-match-p "\\`orgmode@" user-mail-address)
+  (when (string-match-p "\\`zeo@" user-mail-address)
     (goto-char (point-min))
     (save-restriction
       (mail-narrow-to-head)
@@ -9340,8 +9340,8 @@ Now let's set up that signature.
 #+begin_src emacs-lisp
 (defvar +mu4e-org-ml-signature
   (cons
-   "All the best,
-Timothy
+   "Viele Grüße,
+Josua
 
 -- \
 Timothy (‘tecosaur’/‘TEC’), Org mode contributor.
@@ -9349,8 +9349,8 @@ Learn more about Org mode at <https://orgmode.org/>.
 Support Org development at <https://liberapay.com/org-mode>,
 or support my work at <https://liberapay.com/tec>.
 "
-   "All the best,\\\\
-@@html:<b>@@Timothy@@html:</b>@@
+   "Viele Grüße,\\\\
+@@html:<b>@@Josua@@html:</b>@@
 
 -\u200b- \\\\
 Timothy (‘tecosaur’/‘TEC’), Org mode contributor.\\\\
@@ -9374,8 +9374,8 @@ minor tweaks. First, some stylistic things:
 
 #+begin_src emacs-lisp
 (setq +org-msg-accent-color "#1a5fb4"
-      org-msg-greeting-fmt "\nHi%s,\n\n"
-      org-msg-signature "\n\n#+begin_signature\nAll the best,\\\\\n@@html:<b>@@Timothy@@html:</b>@@\n#+end_signature")
+      org-msg-greeting-fmt "\nHallo%s,\n\n"
+      org-msg-signature "\n\n#+begin_signature\nViele Grüße,\\\\\n@@html:<b>@@Josua@@html:</b>@@\n#+end_signature")
 #+end_src
 
 Now, it would be nice to easily jump to and between the ends of the message
