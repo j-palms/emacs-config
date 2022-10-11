@@ -9674,7 +9674,7 @@ correct package statement needed.
  (prin1-to-string
    `(package! org
       :recipe (:repo "https://git.savannah.gnu.org/git/emacs/org-mode.git")
-      :pin "f0ff1df486917ccc60e31e5897185c904d416f46")))
+      :pin "e8a797e1437d7aef2ce414694d2b642683f79976")))
 #+end_src
 
 #+begin_src emacs-lisp :tangle packages.el :noweb no-export
