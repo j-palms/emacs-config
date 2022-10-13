@@ -1714,8 +1714,11 @@ vterm                        ; the best terminal emulation in Emacs
 
 #+name: doom-checkers
 #+begin_src emacs-lisp
-syntax                       ; tasing you for every semicolon you forget
-(:if (executable-find "aspell") spell) ; tasing you for misspelling mispelling
+(syntax                      ; tasing you for every semicolon you forget
+ +flyspell
+ +hunspell
+ +everywhere)
+;;(:if (executable-find "aspell") spell) ; tasing you for misspelling mispelling
 grammar                      ; tasing grammar mistake every you make
 #+end_src
 
@@ -3545,7 +3548,8 @@ home-row for jumping. Very convenient ... except I'm using Colemak.
 #+begin_src emacs-lisp :noweb-ref none
 (after! avy
   ;; home row priorities: 8 6 4 5 - - 1 2 3 7
-  (setq avy-keys '(?n ?e ?i ?s ?t ?r ?i ?a)))
+  ;;(setq avy-keys '(?n ?e ?i ?s ?t ?r ?i ?a)))
+  (setq avy-keys '(?a ?r ?s ?t ?n ?e ?i ?o)))
 #+end_src
 
 Now let's just have this included when an ErgoDox is found via =dmesg=.
@@ -3558,7 +3562,8 @@ Now let's just have this included when an ErgoDox is found via =dmesg=.
 #+end_src
 
 #+begin_src emacs-lisp :noweb no-export
-<<avy-detect-colemak()>>
+;;<<avy-detect-colemak()>>
+<<avy-colemak-setup>>
 #+end_src
 
 *** Rotate (window management)
@@ -3630,7 +3635,8 @@ Doom module.
 (use-package! emacs-everywhere
   :if (daemonp)
   :config
-  (require 'spell-fu)
+  ;;(require 'spell-fu)
+  (require 'flyspell)
   (setq emacs-everywhere-major-mode-function #'org-mode
         emacs-everywhere-frame-name-format "Edit ∷ %s — %s")
   (defadvice! emacs-everywhere-raise-frame ()
@@ -4651,9 +4657,9 @@ cd aspell6-en-custom
 ;;; config--pkg-ispell.el ends here
 #+end_src
 
-#+begin_src emacs-lisp
-(setq ispell-dictionary "en-custom")
-#+end_src
+# #+begin_src emacs-lisp
+# (setq ispell-dictionary "en-custom")
+# #+end_src
 
 Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
 ~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
@@ -4667,6 +4673,57 @@ nearby (also means that if I change the 'main' dictionary I keep my addition).
 (setq ispell-personal-dictionary
       (expand-file-name "misc/ispell_personal" doom-private-dir))
 #+end_src
+
+# #+begin_src emacs-lisp :tangle yes
+# (let ((langs '("deutsch" "english")))
+#   (defvar lang-ring (make-ring (length langs))
+#     "List of Ispell dictionaries you can switch to using ‘cycle-ispell-languages’.")
+#   (dolist (elem langs) (ring-insert lang-ring elem)))
+
+# (defun cycle-ispell-languages ()
+#   "Switch to the next Ispell dictionary in ‘lang-ring’."
+#   (interactive)
+#   (let ((lang (ring-ref lang-ring -1)))
+#     (ring-insert lang-ring lang)
+#     (ispell-change-dictionary lang)))
+# (global-set-key [f10] #'cycle-ispell-languages) ; replaces ‘menu-bar-open’.
+# #+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(after! ispell
+    ;; Configure `LANG`, otherwise ispell.el cannot find a 'default
+    ;; dictionary' even though multiple dictionaries will be configured
+    ;; in next line.
+    (setenv "LANG" "en_US.UTF-8")
+    (setq ispell-program-name "hunspell")
+    ;; Configure German, Swiss German, and two variants of English.
+    (setq ispell-dictionary "de_DE,en_US")
+    ;; ispell-set-spellchecker-params has to be called
+    ;; before ispell-hunspell-add-multi-dic will work
+    (ispell-set-spellchecker-params)
+    (ispell-hunspell-add-multi-dic "de_DE,en_US")
+    ;; For saving words to the personal dictionary, don't infer it from
+    ;; the locale, otherwise it would save to ~/.hunspell_de_DE.
+
+    ;; The personal dictionary file has to exist, otherwise hunspell will
+    ;; silently not use it.
+    (unless (file-exists-p ispell-personal-dictionary)
+      (write-region "" nil ispell-personal-dictionary nil 0)))
+#+end_src
+
+#     #+begin_src emacs-lisp :tangle yes
+# (add-hook 'spell-fu-mode-hook
+#   (lambda ()
+#     (spell-fu-dictionary-add (expand-file-name "deutsch"))))
+#     ;;(spell-fu-dictionary-add (expand-file-name""spell-fu-get-ispell "en"))))
+#     ;;(setq-default custom-file (expand-file-name ".custom.el" doom-private-dir))
+#     ;;(spell-fu-dictionary-add (spell-fu-get-ispell "de_DE"))))
+#     ;; (spell-fu-dictionary-add
+#     ;;   (spell-fu-get-personal-dictionary "de-personal" "/home/user/.aspell.de.pws"))
+#     ;; (spell-fu-dictionary-add
+#     ;;   (spell-fu-get-personal-dictionary "fr-personal" "/home/user/.aspell.fr.pws"))))
+# #+end_src
+
 
 *** TRAMP
 :PROPERTIES:
@@ -10063,7 +10120,7 @@ Since =org-modern='s tag face supplants Org's tag face, we need to adjust the
 spell-check face ignore list
 
 #+begin_src emacs-lisp
-(after! spell-fu
+(after! flyspell
   (cl-pushnew 'org-modern-tag (alist-get 'org-mode +spell-excluded-faces-alist)))
 #+end_src
 
@@ -16639,7 +16696,7 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
   :config
   (unless (display-graphic-p) (after! pdf-tools (pdftotext-install)))
   ;; For prettyness
-  (add-hook 'pdftotext-mode-hook #'spell-fu-mode-disable)
+  (add-hook 'pdftotext-mode-hook #'flyspell-mode-disable)
   (add-hook 'pdftotext-mode-hook (lambda () (page-break-lines-mode 1)))
   ;; I have no idea why this is needed
   (map! :map pdftotext-mode-map
@@ -17001,3 +17058,7 @@ Of course, there's an Emacs mode for this.
         :n "TAB" #'beancount-align-to-previous-number
         :i "RET" (cmd! (newline-and-indent) (beancount-align-to-previous-number))))
 #+end_src
+
+# Local Variables:
+# eval: (flyspell-mode -1)
+# End:
