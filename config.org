@@ -4740,7 +4740,13 @@ nearby (also means that if I change the 'main' dictionary I keep my addition).
 #     ;;   (spell-fu-get-personal-dictionary "fr-personal" "/home/user/.aspell.fr.pws"))))
 # #+end_src
 
+*** ace-window
 
+#+call: confpkg("!Pkg ace-window")
+
+#+begin_src emacs-lisp
+(setq aw-keys '(?t ?s ?n ?e ?r ?a ?i ?o ?l))
+#+end_src
 *** TRAMP
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle no :noweb-ref config-tramp
