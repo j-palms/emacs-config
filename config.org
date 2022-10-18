@@ -4119,11 +4119,11 @@ follow [[https://orgmode.org/worg/org-contribute.html#commit-messages][a certain
            ((string-match-p "\\.el$" last-file)P
             (when (re-search-backward "^\\(?:[+-]? *\\|@@[ +-\\d,]+@@ \\)(\\(?:cl-\\)?\\(?:defun\\|defvar\\|defmacro\\|defcustom\\)" temp-point t)
               (re-search-forward "\\(?:cl-\\)?\\(?:defun\\|defvar\\|defmacro\\|defcustom\\) " nil t)
-              (add-to-list 'file-changes (buffer-substring-no-properties (point) (forward-symbol 1)))))
+              (cl-pushnew 'file-changes (buffer-substring-no-properties (point) (forward-symbol 1)))))
            ((string-match-p "\\.org$" last-file)
             (when (re-search-backward "^[+-]\\*+ \\|^@@[ +-\\d,]+@@ \\*+ " temp-point t)
               (re-search-forward "@@ \\*+ " nil t)
-              (add-to-list 'file-changes (buffer-substring-no-properties (point) (line-end-position)))))))))
+              (cl-pushnew 'file-changes (buffer-substring-no-properties (point) (line-end-position)))))))))
     (push (list last-file file-changes) change-data)
     (setq change-data (delete '(nil nil) change-data))
     (concat
@@ -12364,91 +12364,91 @@ Flycheck doesn't currently support Org, and there's aren't any packages to do so
 Surely this is what the clipboard was invented for? With that said, let's
 regurgitate the code, cross our fingers, and hope it works.
 
-#+begin_src emacs-lisp
-(defconst flycheck-org-lint-form
-  (flycheck-prepare-emacs-lisp-form
-    (require 'org)
-    (require 'org-attach)
-    (let ((source (car command-line-args-left))
-          (process-default-directory default-directory))
-      (with-temp-buffer
-        (insert-file-contents source 'visit)
-        (setq buffer-file-name source)
-        (setq default-directory process-default-directory)
-        (delay-mode-hooks (org-mode))
-        (setq delayed-mode-hooks nil)
-        (dolist (err (org-lint))
-          (let ((inf (cl-second err)))
-            (princ (elt inf 0))
-            (princ ": ")
-            (princ (elt inf 2))
-            (terpri)))))))
+# #+begin_src emacs-lisp
+# (defconst flycheck-org-lint-form
+#   (flycheck-prepare-emacs-lisp-form
+#     (require 'org)
+#     (require 'org-attach)
+#     (let ((source (car command-line-args-left))
+#           (process-default-directory default-directory))
+#       (with-temp-buffer
+#         (insert-file-contents source 'visit)
+#         (setq buffer-file-name source)
+#         (setq default-directory process-default-directory)
+#         (delay-mode-hooks (org-mode))
+#         (setq delayed-mode-hooks nil)
+#         (dolist (err (org-lint))
+#           (let ((inf (cl-second err)))
+#             (princ (elt inf 0))
+#             (princ ": ")
+#             (princ (elt inf 2))
+#             (terpri)))))))
 
-(defconst flycheck-org-lint-variables
-  '(org-directory
-    org-id-locations
-    org-id-locations-file
-    org-attach-id-dir
-    org-attach-use-inheritance
-    org-attach-id-to-path-function-list
-    org-link-parameters)
-  "Variables inherited by the org-lint subprocess.")
+# (defconst flycheck-org-lint-variables
+#   '(org-directory
+#     org-id-locations
+#     org-id-locations-file
+#     org-attach-id-dir
+#     org-attach-use-inheritance
+#     org-attach-id-to-path-function-list
+#     org-link-parameters)
+#   "Variables inherited by the org-lint subprocess.")
 
-(defun flycheck-org-lint-variables-form ()
-  (require 'org-attach)  ; Needed to make variables available
-  `(progn
-     ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
-                (seq-filter #'boundp flycheck-org-lint-variables))))
+# (defun flycheck-org-lint-variables-form ()
+#   (require 'org-attach)  ; Needed to make variables available
+#   `(progn
+#      ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
+#                 (seq-filter #'boundp flycheck-org-lint-variables))))
 
-(eval ; To preveant eager macro expansion form loading flycheck early.
- '(flycheck-define-checker org-lint
-   "Org buffer checker using `org-lint'."
-   :command ("emacs" (eval flycheck-emacs-args)
-             "--eval" (eval (concat "(add-to-list 'load-path \""
-                                    (file-name-directory (locate-library "org"))
-                                    "\")"))
-             "--eval" (eval (flycheck-sexp-to-string
-                             (flycheck-org-lint-variables-form)))
-             "--eval" (eval (flycheck-sexp-to-string
-                             (flycheck-org-lint-customisations-form)))
-             "--eval" (eval flycheck-org-lint-form)
-             "--" source)
-   :error-patterns
-   ((error line-start line ": " (message) line-end))
-   :modes org-mode))
-#+end_src
+# (eval ; To preveant eager macro expansion form loading flycheck early.
+#  '(flycheck-define-checker org-lint
+#    "Org buffer checker using `org-lint'."
+#    :command ("emacs" (eval flycheck-emacs-args)
+#              "--eval" (eval (concat "(add-to-list 'load-path \""
+#                                     (file-name-directory (locate-library "org"))
+#                                     "\")"))
+#              "--eval" (eval (flycheck-sexp-to-string
+#                              (flycheck-org-lint-variables-form)))
+#              "--eval" (eval (flycheck-sexp-to-string
+#                              (flycheck-org-lint-customisations-form)))
+#              "--eval" (eval flycheck-org-lint-form)
+#              "--" source)
+#    :error-patterns
+#    ((error line-start line ": " (message) line-end))
+#    :modes org-mode))
+# #+end_src
 
-Turns out it almost works. Running =M-x flycheck-verify-setup= after running that
-snippet produces the following:
-#+begin_example
-The following syntax checkers are not registered:
-  - org-lint
-Try adding these syntax checkers to `flycheck-checkers'.
-#+end_example
+# Turns out it almost works. Running =M-x flycheck-verify-setup= after running that
+# snippet produces the following:
+# #+begin_example
+# The following syntax checkers are not registered:
+#   - org-lint
+# Try adding these syntax checkers to `flycheck-checkers'.
+# #+end_example
 
-Well that's very nice and helpful. We'll just do that 🙂.
-#+begin_src emacs-lisp
-(add-to-list 'flycheck-checkers 'org-lint)
-#+end_src
+# Well that's very nice and helpful. We'll just do that 🙂.
+# #+begin_src emacs-lisp
+# (add-to-list 'flycheck-checkers 'org-lint)
+# #+end_src
 
-It was missing custom link types, but that's easily fixed just by adding
-~org-link-parameters~ to ~flycheck-org-lint-variables~.
+# It was missing custom link types, but that's easily fixed just by adding
+# ~org-link-parameters~ to ~flycheck-org-lint-variables~.
 
-One remaining little annoyance is that it reports extra =#+options= that I've
-added to Org as errors. So we need to tell ~org-lint~ about them without having it
-load my whole config. Code duplication isn't great, but at least this isn't
-much.
+# One remaining little annoyance is that it reports extra =#+options= that I've
+# added to Org as errors. So we need to tell ~org-lint~ about them without having it
+# load my whole config. Code duplication isn't great, but at least this isn't
+# much.
 
-#+name: org-syntax-modifications
-#+begin_src emacs-lisp :tangle no
-(defun flycheck-org-lint-customisations-form ()
-  `(progn
-     (require 'ox)
-     (cl-pushnew '(:latex-cover-page nil "coverpage" nil)
-                 (org-export-backend-options (org-export-get-backend 'latex)))
-     (cl-pushnew '(:latex-font-set nil "fontset" nil)
-                 (org-export-backend-options (org-export-get-backend 'latex)))))
-#+end_src
+# #+name: org-syntax-modifications
+# #+begin_src emacs-lisp :tangle no
+# (defun flycheck-org-lint-customisations-form ()
+#   `(progn
+#      (require 'ox)
+#      (cl-pushnew '(:latex-cover-page nil "coverpage" nil)
+#                  (org-export-backend-options (org-export-get-backend 'latex)))
+#      (cl-pushnew '(:latex-font-set nil "fontset" nil)
+#                  (org-export-backend-options (org-export-get-backend 'latex)))))
+# #+end_src
 
 *** Visuals
 :PROPERTIES:
