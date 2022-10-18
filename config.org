@@ -65,7 +65,7 @@ TLDR; it's great.
 
 Now I've discovered the wonders of literate programming, and am becoming more
 settled by the day. This is both my config, and a cautionary tale (just replace
-"Linux" with "Emacs" in the comic below).
+"Linux" with "Emacs" in the comic below). stupid:w
 
 [[xkcd:456]]
 
