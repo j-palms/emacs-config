@@ -10880,7 +10880,7 @@ It's nice to be able to link to music
 **** Tweaking defaults
 
 #+begin_src emacs-lisp
-(setq org-directory "~/.org"               ; Let's put files here.
+(setq org-directory "~/org"               ; Let's put files here.
       org-use-property-inheritance t       ; It's convenient to have properties inherited.
       org-log-done 'time                   ; Having the time a item is done sounds convenient.
       org-list-allow-alphabetical t        ; Have a. A. a) A) list bullets.
@@ -11712,22 +11712,29 @@ The agenda is nice, but a souped up version is nicer.
         "d e" #'org-gtd-engage
         "d p" #'org-gtd-process-inbox
         "d n" #'org-gtd-show-all-next
-        "d s" #'org-gtd-show-stuck-projects)
+        "d s" #'org-gtd-show-stuck-projects
+        "d a" #'org-gtd-archive-completed-items)
   (map! :map org-gtd-process-map
         "C-c c" #'org-gtd-choose))
 #+end_src
 
 #+begin_src emacs-lisp
 ;; (setq org-capture-templates
-;;       `(("i" "Inbox" entry  (file "gtd/inbox.org")
-;;          ,(concat "* TODO %?\n"
-;;                   "/Entered on/ %U"))
-;;         ("s" "Slipbox" entry  (file "notes/inbox.org")
+;;       `(("s" "Slipbox" entry  (file "notes/inbox.org")
 ;;          "* %?\n")))
 
-(setq org-capture-templates
-      `(("s" "Slipbox" entry  (file "notes/inbox.org")
-         "* %?\n")))
+(defun josua/set-org-capture-templates ()
+  (interactive)
+  (setq org-capture-templates
+      `(("i" "Inbox" entry  (file "gtd/inbox.org")
+         ,(concat "* %?\n"
+                  "/Entered on/ %U"))
+        ("s" "Slipbox" entry  (file "notes/inbox.org")
+         "* %?\n"))))
+
+(josua/set-org-capture-templates)
+
+(map! "C-c C" #'org-capture)
 
 (defun jethro/org-capture-inbox ()
   (interactive)
