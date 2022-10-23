@@ -1263,7 +1263,8 @@ configuration.
     (insert
      ";; -*- no-byte-compile: t; -*-\n\n"
      (pp (quote
-          <<org-pkg-statement()>>
+          ;;<<org-pkg-statement()>>
+          "9.6"
           )))
     (write-region nil nil "packages.el")))
 
