@@ -9941,39 +9941,39 @@ correct package statement needed.
 
 #+name: org-pkg-statement
 #+begin_src emacs-lisp :noweb-ref none
-(or (require 'doom (expand-file-name "lisp/doom.el"
-                                     (or (bound-and-true-p doom-emacs-dir)
-                                         user-emacs-directory)))
-    (setq doom-local-dir
-          (expand-file-name ".local/" (or (bound-and-true-p doom-emacs-dir)
-                                          user-emacs-directory))))
-(let ((dev-key (and (file-exists-p "~/.ssh/id_ed25519.pub")
-                    (= 0 (shell-command "cat ~/.ssh/id_ed25519.pub | grep -q AAAAC3NzaC1lZDI1NTE5AAAAIOZZqcJOLdN+QFHKyW8ST2zz750+8TdvO9IT5geXpQVt"))))
-      (dev-pkg (let ((default-directory (expand-file-name "straight/repos/org" doom-local-dir)))
-                 (and (file-exists-p default-directory)
-                      (string= "gitea@git.tecosaur.net:tec/org-mode.git\n" (shell-command-to-string "git remote get-url tecosaur")))))
-      (recipe-common '(:files (:defaults "etc")
-                       :build t
-                       :pre-build
-                       (with-temp-file "org-version.el"
-                         (let ((version
-                                (version-to-list
-                                 (string-trim
-                                  (with-temp-buffer
-                                    (call-process "git" nil t nil
-                                                  "describe" "--match" "release*" "--abbrev=0" "HEAD")
-                                    (buffer-string))
-                                  "release_")))
-                               (git-version (string-trim
-                                             (with-temp-buffer
-                                               (call-process "git" nil t nil
-                                                             "rev-parse" "--short" "HEAD")
-                                               (buffer-string)))))
-                           (insert (format "(defun org-release () \"The release version of Org.\" \"%d.%d.0\")\n"
-                                           (car version) (1+ (cadr version))) ; Development version = MAJOR.(1+MINOR).0
-                                   (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n"
-                                           git-version)
-                                   "(provide 'org-version)\n"))))))
+;; (or (require 'doom (expand-file-name "lisp/doom.el"
+;;                                      (or (bound-and-true-p doom-emacs-dir)
+;;                                          user-emacs-directory)))
+;;     (setq doom-local-dir
+;;           (expand-file-name ".local/" (or (bound-and-true-p doom-emacs-dir)
+;;                                           user-emacs-directory))))
+;; (let ((dev-key (and (file-exists-p "~/.ssh/id_ed25519.pub")
+;;                     (= 0 (shell-command "cat ~/.ssh/id_ed25519.pub | grep -q AAAAC3NzaC1lZDI1NTE5AAAAIOZZqcJOLdN+QFHKyW8ST2zz750+8TdvO9IT5geXpQVt"))))
+;;       (dev-pkg (let ((default-directory (expand-file-name "straight/repos/org" doom-local-dir)))
+;;                  (and (file-exists-p default-directory)
+;;                       (string= "gitea@git.tecosaur.net:tec/org-mode.git\n" (shell-command-to-string "git remote get-url tecosaur")))))
+;;       (recipe-common '(:files (:defaults "etc")
+;;                        :build t
+;;                        :pre-build
+;;                        (with-temp-file "org-version.el"
+;;                          (let ((version
+;;                                 (version-to-list
+;;                                  (string-trim
+;;                                   (with-temp-buffer
+;;                                     (call-process "git" nil t nil
+;;                                                   "describe" "--match" "release*" "--abbrev=0" "HEAD")
+;;                                     (buffer-string))
+;;                                   "release_")))
+;;                                (git-version (string-trim
+;;                                              (with-temp-buffer
+;;                                                (call-process "git" nil t nil
+;;                                                              "rev-parse" "--short" "HEAD")
+;;                                                (buffer-string)))))
+;;                            (insert (format "(defun org-release () \"The release version of Org.\" \"%d.%d.0\")\n"
+;;                                            (car version) (1+ (cadr version))) ; Development version = MAJOR.(1+MINOR).0
+;;                                    (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n"
+;;                                            git-version)
+;;                                    "(provide 'org-version)\n"))))))
    ;; (prin1-to-string
    ;; `(package! org
    ;;    :recipe (,@(cond ((and dev-key dev-pkg)
@@ -9988,19 +9988,19 @@ correct package statement needed.
    ;;    :pin nil)))
 
  (prin1-to-string
-   `(package! org
-      :recipe (:repo "https://git.savannah.gnu.org/git/emacs/org-mode.git")
-      :pin "e8a797e1437d7aef2ce414694d2b642683f79976")))
+   `(package! org))
+      ;; :recipe (:repo "https://git.savannah.gnu.org/git/emacs/org-mode.git")
+      ;; :pin "e8a797e1437d7aef2ce414694d2b642683f79976")))
 #+end_src
 
-#+begin_src emacs-lisp :tangle packages.el :noweb no-export
-<<org-pkg-statement()>>
-(unpin! org) ; there be bugs
-(package! org-contrib
-  :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
-           :files ("lisp/*.el"))
-  :pin "c6aef31ccfc7c4418c3b51e98f7c3bd8e255f5e6")
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el :noweb no-export
+# <<org-pkg-statement()>>
+# (unpin! org) ; there be bugs
+# (package! org-contrib
+#   :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
+#            :files ("lisp/*.el"))
+#   :pin "c6aef31ccfc7c4418c3b51e98f7c3bd8e255f5e6")
+# #+end_src
 
 **** Visuals
 ***** Org Modern
@@ -11297,9 +11297,18 @@ The agenda is nice, but a souped up version is nicer.
       org-agenda-block-separator nil
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
       org-agenda-compact-blocks t)
-
+(setq org-agenda-files (list "~/org/gtd/inbox.org"
+                             "~/org/gtd/org-gtd-tasks.org"))
 (setq org-agenda-custom-commands
-      '(("o" "Overview"
+      '(("g" "Scheduled today and all NEXT items...."
+         ((agenda "" ((org-agenda-span 'week)
+                      (org-agenda-start-day nil)))
+          (todo "NEXT" ((org-agenda-overriding-header "NEXT items")))
+          (todo "WAIT" ((org-agenda-todo-ignore-with-date t)
+                    (org-agenda-overriding-header "Blocked items")))
+          (search "* " ((org-agenda-overriding-header "Inbox")
+                   (org-agenda-files '("~/org/gtd/inbox.org"))))))
+        ("o" "Overview"
          ((agenda "" ((org-agenda-span 'day)
                       (org-super-agenda-groups
                        '((:name "Today"
@@ -11728,6 +11737,9 @@ The agenda is nice, but a souped up version is nicer.
   (setq org-capture-templates
       `(("i" "Inbox" entry  (file "gtd/inbox.org")
          ,(concat "* %?\n"
+                 ;;":PROPERTIES:\n"
+                 ;;":CATEGORY: %\1 %\\1 \n"
+                 ;;":END:\n"
                   "/Entered on/ %U"))
         ("s" "Slipbox" entry  (file "notes/inbox.org")
          "* %?\n"))))
