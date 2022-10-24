@@ -19,15 +19,9 @@
 [submodule "orgdiff"]
 	path = lisp/orgdiff
 	url = https://github.com/tecosaur/orgdiff.git
-[submodule "ob-julia"]
-	path = lisp/ob-julia
-	url = https://github.com/nico202/ob-julia.git
 [submodule "org-glossary"]
 	path = lisp/org-glossary
 	url = https://github.com/tecosaur/org-glossary.git
 [submodule "ox-pluto"]
 	path = lisp/ox-pluto
 	url = https://github.com/tecosaur/ox-pluto.git
-[submodule "simple-comment-markup"]
-	path = lisp/simple-comment-markup
-	url = https://git.tecosaur.net/tec/simple-comment-markup.git
