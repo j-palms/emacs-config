@@ -5147,69 +5147,69 @@ lightened versions --- let's do that.
      (face-attribute 'default :foreground))))
 #+end_src
 
-# *** Simple comment markup
-# :PROPERTIES:
-# :header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-simple-comment-markup
-# :END:
+*** Simple comment markup
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-simple-comment-markup
+:END:
 
-# #+call: confpkg("!Pkg simple-comment-markup")
+#+call: confpkg("!Pkg simple-comment-markup")
 
-# #+RESULTS:
-# #+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-simple-comment-markup.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
-# ;;; config--pkg-simple-comment-markup.el --- Generated package (no.33) from my config -*- lexical-binding: t; -*-
-# ;;
-# ;; Copyright (C) 2022 TEC
-# ;;
-# ;; Author: TEC <https://git.tecosaur.net/tec>
-# ;; Maintainer: TEC <contact@tecosaur.net>
-# ;; Created: October 10, 2022
-# ;; Modified: October 10, 2022
-# ;; Version: 2022.10.10
-# ;; Homepage: https://git.tecosaur.net/tec/emacs-config
-# ;; Package-Requires: ((emacs "27.1"))
-# ;;
-# ;; This file is not part of GNU Emacs.
-# ;;
-# ;;; Commentary:
-# ;;
-# ;;  Generated package (no.33) from my config.
-# ;;
-# ;;  This is liable to have unstated dependencies, and reply on other bits of
-# ;;  state from other configuration blocks. Only use this if you know /exactly/
-# ;;  what you are doing.
-# ;;
-# ;;  This may function nicely as a bit of self-contained functionality, or it
-# ;;  might be a horrid mix of functionalities and state.
-# ;;
-# ;;  Hopefully, in future static analysis will allow this to become more
-# ;;  properly package-like.
-# ;;
-# ;;; Code:
+#+RESULTS:
+#+begin_src emacs-lisp :tangle /home/josn/.config/doom/subconf/config--pkg-simple-comment-markup.el :mkdirp yes :noweb no-export :noweb-ref none :comments no
+;;; config--pkg-simple-comment-markup.el --- Generated package (no.33) from my config -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2022 TEC
+;;
+;; Author: TEC <https://git.tecosaur.net/tec>
+;; Maintainer: TEC <contact@tecosaur.net>
+;; Created: October 10, 2022
+;; Modified: October 10, 2022
+;; Version: 2022.10.10
+;; Homepage: https://git.tecosaur.net/tec/emacs-config
+;; Package-Requires: ((emacs "27.1"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Generated package (no.33) from my config.
+;;
+;;  This is liable to have unstated dependencies, and reply on other bits of
+;;  state from other configuration blocks. Only use this if you know /exactly/
+;;  what you are doing.
+;;
+;;  This may function nicely as a bit of self-contained functionality, or it
+;;  might be a horrid mix of functionalities and state.
+;;
+;;  Hopefully, in future static analysis will allow this to become more
+;;  properly package-like.
+;;
+;;; Code:
 
-# <<config--pkg-simple-comment-markup>>
+<<config--pkg-simple-comment-markup>>
 
-# (provide 'config--pkg-simple-comment-markup)
-# ;;; config--pkg-simple-comment-markup.el ends here
-# #+end_src
+(provide 'config--pkg-simple-comment-markup)
+;;; config--pkg-simple-comment-markup.el ends here
+#+end_src
 
-# I find that every now and then I sprinkle a little markup in code comments. Of
-# course, this doesn't get fortified as it's ultimately meaningless ... but it
-# would be nice if it was, just slightly. Surprisingly, I couldn't find a package
-# for this, so I made one.
+I find that every now and then I sprinkle a little markup in code comments. Of
+course, this doesn't get fortified as it's ultimately meaningless ... but it
+would be nice if it was, just slightly. Surprisingly, I couldn't find a package
+for this, so I made one.
 
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! simple-comment-markup :recipe (:local-repo "lisp/simple-comment-markup"))
-# #+end_src
+#+begin_src emacs-lisp :tangle packages.el
+(package! simple-comment-markup :recipe (:repo "https://git.tecosaur.net/tec/simple-comment-markup.git"))
+#+end_src
 
-# Let's use both basic Org markup and Markdown code backticks, to cover most
-# situations decently.
+Let's use both basic Org markup and Markdown code backticks, to cover most
+situations decently.
 
-# #+begin_src emacs-lisp
-# (use-package! simple-comment-markup
-#   :hook (prog-mode . simple-comment-markup-mode)
-#   :config
-#   (setq simple-comment-markup-set '(org markdown-code)))
-# #+end_src
+#+begin_src emacs-lisp
+(use-package! simple-comment-markup
+  :hook (prog-mode . simple-comment-markup-mode)
+  :config
+  (setq simple-comment-markup-set '(org markdown-code)))
+#+end_src
 
 *** Emojify
 :PROPERTIES:
@@ -10094,7 +10094,7 @@ recognising the pgtk window system]].
 
 =ob-julia= is currently a bit borked, but there's an effort to improve this.
 #+begin_src emacs-lisp :tangle packages.el
-(package! ob-julia :recipe (:local-repo "lisp/ob-julia" :files ("*.el" "julia")))
+(package! ob-julia :recipe (:host github :repo "nico202/ob-julia" :files ("*.el" "julia")))
 #+end_src
 
 #+begin_src emacs-lisp
