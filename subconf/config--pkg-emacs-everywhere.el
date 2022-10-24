@@ -26,12 +26,6 @@
 ;;  Hopefully, in future static analysis will allow this to become more
 ;;  properly package-like.
 ;;
-;;  Package statement:
-;;   (package! emacs-everywhere :recipe (:host github :repo "tecosaur/emacs-everywhere"))
-;;
-;;  Package statement:
-;;   (unpin! emacs-everywhere)
-;;
 ;;; Code:
 
 (use-package! emacs-everywhere
