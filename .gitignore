@@ -13,3 +13,4 @@ setup.sh
 !publish/config.html
 
 !.github
+subconf/
