@@ -3627,10 +3627,10 @@ sounds nice to me.
 The name says it all. It's loaded and set up (a bit) by =:app everywhere=, however
 as I develop this I want the unpinned version I have as a submodule.
 
-#+begin_src emacs-lisp :tangle packages.el
-(package! emacs-everywhere :recipe (:host github :repo "tecosaur/emacs-everywhere"))
-(unpin! emacs-everywhere)
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! emacs-everywhere :recipe (:host github :repo "tecosaur/emacs-everywhere"))
+# (unpin! emacs-everywhere)
+# #+end_src
 
 Additionally, I'm going to make some personal choices that aren't made in the
 Doom module.
