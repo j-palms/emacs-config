@@ -9144,7 +9144,7 @@ few more visual tweaks, we'll tweak the headers a bit
       mu4e-index-cleanup t)
 
 (add-to-list 'mu4e-bookmarks
-             '(:name "Yesterday's messages" :query "date:2d..1d" :key ?y) t)
+             '(:name "Yesterday's messages" :query "date:2d..8h" :key ?y) t)
 
 (defvar +mu4e-header--folder-colors nil)
 (appendq! mu4e-header-info-custom
