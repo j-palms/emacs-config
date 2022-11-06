@@ -1410,6 +1410,7 @@ changes Doom makes:
       display-time-format "%H:%M"
       display-time-default-load-average nil)      ; I don't think I've ever found this useful
 
+(drag-stuff-global-mode 1)
 (display-time-mode 1)                             ; Enable time in the mode-line
 
 ;; (unless (string-match-p "^Power N/A" (battery))   ; On laptops...
@@ -3546,6 +3547,22 @@ let's change that, and do a few other similar tweaks while we're at it.
 
 #+attr_html: :class invertible :alt Whichkey triggered on an evil motion
 [[https://tecosaur.com/lfs/emacs-config/screenshots/whichkey-evil.png]]
+
+*** Drag-stuff
+
+#+call: confpkg("!Pkg drag-stuff")
+
+#+begin_quote
+From the =:config default= module.
+#+end_quote
+
+#+begin_src emacs-lisp
+(after! drag-stuff
+  (map! "<C-M-up>"    #'drag-stuff-up
+        "<C-M-down>"  #'drag-stuff-down
+        "<C-M-left>"  #'drag-stuff-left
+        "<C-M-right>" #'drag-stuff-right))
+#+end_src
 
 ** Tools
 *** Abbrev
