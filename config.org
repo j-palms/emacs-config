@@ -11075,6 +11075,7 @@ functionality as in LaTeX. Let's try viewing possible output files with this.
 **** Super agenda
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle no :noweb-ref config--pkg-org-super-agenda
+:ID:       1f493dac-4ef6-41ba-b355-3deda25ce98c
 :END:
 
 #+call: confpkg("!Pkg Org Super Agenda")
@@ -11140,15 +11141,78 @@ The agenda is nice, but a souped up version is nicer.
       org-agenda-compact-blocks t)
 (setq org-agenda-files (list "~/org/gtd/inbox.org"
                              "~/org/gtd/org-gtd-tasks.org"))
+
+(defvar prot-org-custom-daily-agenda
+  ;; NOTE 2021-12-08: Specifying a match like the following does not
+  ;; work.
+  ;;
+  ;; tags-todo "+PRIORITY=\"A\""
+  ;;
+  ;; So we match everything and then skip entries with
+  ;; `org-agenda-skip-function'.
+  `((tags-todo "*"
+     ((org-agenda-skip-function '(org-agenda-skip-if nil '(timestamp)))
+      (org-agenda-skip-function
+       `(org-agenda-skip-entry-if
+         'notregexp ,(format "\\[#%s\\]" (char-to-string org-priority-highest))))
+      (org-agenda-block-separator nil)
+      (org-agenda-overriding-header "🤔 Important tasks without a date\n")))
+    (agenda "" ((org-agenda-time-grid nil)
+                (org-agenda-start-on-weekday nil)
+                (org-agenda-span 1)
+                (org-agenda-show-all-dates nil)
+                (org-scheduled-past-days 365)
+                ;; Excludes today's scheduled items
+                (org-scheduled-delay-days 1)
+                (org-agenda-block-separator nil)
+                (org-agenda-entry-types '(:scheduled))
+                (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
+                (org-agenda-format-date "")
+                (org-agenda-overriding-header "\n📚 Pending scheduled tasks")))
+    (agenda "" ((org-agenda-span 1)
+                (org-deadline-warning-days 0)
+                (org-agenda-block-separator nil)
+                (org-scheduled-past-days 0)
+                ;; We don't need the `org-agenda-date-today'
+                ;; highlight because that only has a practical
+                ;; utility in multi-day views.
+                (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
+                (org-agenda-format-date "%A %-e %B %Y")
+                (org-agenda-overriding-header "\n📌 Today's agenda\n")))
+    (agenda "" ((org-agenda-start-on-weekday nil)
+                (org-agenda-start-day nil)
+                (org-agenda-start-day "+1d")
+                (org-agenda-span 3)
+                (org-deadline-warning-days 0)
+                (org-agenda-block-separator nil)
+                (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                (org-agenda-overriding-header "\n⏰ Next three days\n")))
+    (agenda "" ((org-agenda-time-grid nil)
+                (org-agenda-start-on-weekday nil)
+                ;; We don't want to replicate the previous section's
+                ;; three days, so we start counting from the day after.
+                (org-agenda-start-day "+4d")
+                (org-agenda-span 14)
+                (org-agenda-show-all-dates nil)
+                (org-deadline-warning-days 0)
+                (org-agenda-block-separator nil)
+                (org-agenda-entry-types '(:deadline))
+                (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                (org-agenda-overriding-header "\n🕘 Upcoming deadlines (+14d)\n"))))
+  "Custom agenda for use in `org-agenda-custom-commands'.")
+
 (setq org-agenda-custom-commands
-      '(("g" "Scheduled today and all NEXT items...."
+      '(("f" "Daily agenda and top priority tasks"
+         ((agenda "" ((org-agenda-overriding-header "testestest")))))
+        ("g" "Scheduled today and all NEXT items...."
          ((agenda "" ((org-agenda-span 'week)
                       (org-agenda-start-day nil)))
           (todo "NEXT" ((org-agenda-overriding-header "NEXT items")))
           (todo "WAIT" ((org-agenda-todo-ignore-with-date t)
-                    (org-agenda-overriding-header "Blocked items")))
+                        (org-agenda-overriding-header "Blocked items")))
           (search "* " ((org-agenda-overriding-header "Inbox")
-                   (org-agenda-files '("~/org/gtd/inbox.org"))))))
+                        (org-agenda-files '("~/org/gtd/inbox.org"))))))
         ("o" "Overview"
          ((agenda "" ((org-agenda-span 'day)
                       (org-super-agenda-groups
@@ -11157,56 +11221,62 @@ The agenda is nice, but a souped up version is nicer.
                           :date today
                           :todo "TODAY"
                           :scheduled today
-                          :order 1)))))
-          (alltodo "" ((org-agenda-overriding-header "")
-                       (org-super-agenda-groups
-                        '((:name "Next to do"
-                           :todo "NEXT"
-                           :order 1)
-                          (:name "Important"
-                           :tag "Important"
-                           :priority "A"
-                           :order 6)
-                          (:name "Due Today"
-                           :deadline today
-                           :order 2)
-                          (:name "Due Soon"
-                           :deadline future
-                           :order 8)
-                          (:name "Overdue"
+                          :order 1)))
+                      ))
+          (agenda "" ((org-agenda-span 3)
+                      (org-agenda-overriding-header "\n⏰ Next three days\n")
+                      (org-super-agenda-groups
+                       '((:name "Next 3 days"
+                          :time-grid t
+                          :order 2)))
+                      ))
+          (alltodo "" ((org-super-agenda-groups
+                        '((:name "overdue"
                            :deadline past
                            :face error
-                           :order 7)
-                          (:name "Assignments"
-                           :tag "Assignment"
+                           :order 1)
+                          (:name "due today"
+                           :deadline today
+                           :order 2)
+                          (:name "due soon"
+                           :deadline future
+                           :order 3)
+                          (:name "important"
+                           :priority "A"
+                           :order 4)
+                          (:name "next to do"
+                           :todo "NEXT"
+                           :order 5)
+                          (:name "assignments"
+                           :tag "assignment"
                            :order 10)
-                          (:name "Issues"
-                           :tag "Issue"
+                          (:name "issues"
+                           :tag "issue"
                            :order 12)
-                          (:name "Emacs"
-                           :tag "Emacs"
+                          (:name "emacs"
+                           :tag "emacs"
                            :order 13)
-                          (:name "Projects"
-                           :tag "Project"
+                          (:name "projects"
+                           :tag "project"
                            :order 14)
-                          (:name "Research"
-                           :tag "Research"
+                          (:name "research"
+                           :tag "research"
                            :order 15)
-                          (:name "To read"
-                           :tag "Read"
+                          (:name "to read"
+                           :tag "read"
                            :order 30)
-                          (:name "Waiting"
-                           :todo "WAITING"
+                          (:name "waiting"
+                           :todo "waiting"
                            :order 20)
-                          (:name "University"
+                          (:name "university"
                            :tag "uni"
                            :order 32)
-                          (:name "Trivial"
-                           :priority<= "E"
-                           :tag ("Trivial" "Unimportant")
-                           :todo ("SOMEDAY" )
+                          (:name "trivial"
+                           :priority<= "e"
+                           :tag ("trivial" "unimportant")
+                           :todo ("someday" )
                            :order 90)
-                          (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+                          (:discard (:tag ("chore" "routine" "daily")))))))))))
 #+end_src
 
 # **** Capture
