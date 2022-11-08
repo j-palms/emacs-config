@@ -1,27 +1,12 @@
-[submodule "org-pandoc-import"]
-	path = lisp/org-pandoc-import
-	url = https://github.com/tecosaur/org-pandoc-import.git
 [submodule "authinfo-color-mode"]
 	path = lisp/authinfo-color-mode
 	url = https://github.com/tecosaur/authinfo-color-mode.git
-[submodule "screenshot"]
-	path = lisp/screenshot
-	url = https://github.com/tecosaur/screenshot.git
-[submodule "engrave-faces"]
-	path = lisp/engrave-faces
-	url = https://github.com/tecosaur/engrave-faces.git
-[submodule "ox-chameleon"]
-	path = lisp/ox-chameleon
-	url = https://github.com/tecosaur/ox-chameleon.git
 [submodule "pdftotext"]
 	path = lisp/pdftotext
 	url = https://github.com/tecosaur/pdftotext.el.git
 [submodule "orgdiff"]
 	path = lisp/orgdiff
 	url = https://github.com/tecosaur/orgdiff.git
-[submodule "org-glossary"]
-	path = lisp/org-glossary
-	url = https://github.com/tecosaur/org-glossary.git
 [submodule "ox-pluto"]
 	path = lisp/ox-pluto
 	url = https://github.com/tecosaur/ox-pluto.git
