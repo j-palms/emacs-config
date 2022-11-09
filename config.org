@@ -11373,39 +11373,59 @@ The agenda is nice, but a souped up version is nicer.
           (search "* " ((org-agenda-overriding-header "Inbox")
                         (org-agenda-files '("~/org/gtd/inbox.org"))))))
         ("o" "Overview"
-         ((agenda "" ((org-agenda-span 'day)
-                      (org-super-agenda-groups
-                       '((:name "Today"
-                          :time-grid t
-                          :date today
-                          :todo "TODAY"
-                          :scheduled today
-                          :order 1)))
-                      ))
-          (agenda "" ((org-agenda-span 3)
-                      (org-agenda-overriding-header "\n⏰ Next three days\n")
+         (
+          ;; (agenda "" ((org-agenda-span 'day)
+          ;;             (org-super-agenda-groups
+          ;;              '((:name "Today"
+          ;;                 :time-grid t
+          ;;                 :date today
+          ;;                 :todo "TODAY"
+          ;;                 :scheduled today
+          ;;                 :order 1)))
+          ;;             ))
+          (agenda "" (
+                      (org-agenda-overriding-header "Next three days")
+                      (org-agenda-span 'week)
                       (org-super-agenda-groups
                        '((:name "Next 3 days"
                           :time-grid t
-                          :order 2)))
+                          :order 1)
+                         (:name "Habits"
+                          :habit t
+                          :order 2)
+                         (:name "overdue"
+                          :deadline past
+                          :face error
+                          :order 3)
+                         (:name ""
+                          :scheduled past
+                          :order 4)
+                         (:name "due soon"
+                          :deadline future
+                          :order 5)))
                       ))
-          (alltodo "" ((org-super-agenda-groups
-                        '((:name "overdue"
-                           :deadline past
-                           :face error
-                           :order 1)
-                          (:name "due today"
-                           :deadline today
-                           :order 2)
-                          (:name "due soon"
-                           :deadline future
-                           :order 3)
-                          (:name "important"
-                           :priority "A"
-                           :order 4)
+          (alltodo "" ((org-agenda-overriding-header "TODO-Items")
+                       (org-super-agenda-groups
+                        '(
+                          ;; (:name "overdue"
+                          ;;  :deadline past
+                          ;;  :face error
+                          ;;  :order 1)
+                          ;; (:name "due today"
+                          ;;  :deadline today
+                          ;;  :order 2)
+                          ;; (:name "due soon"
+                          ;;  :deadline future
+                          ;;  :order 3)
+                          ;; (:name "important"
+                          ;;  :priority "A"
+                          ;;  :order 4)
+                          ;; (:name "Habits"
+                          ;;  :habit t
+                          ;;  :order 5)
                           (:name "next to do"
                            :todo "NEXT"
-                           :order 5)
+                           :order 6)
                           (:name "assignments"
                            :tag "assignment"
                            :order 10)
@@ -11435,7 +11455,8 @@ The agenda is nice, but a souped up version is nicer.
                            :tag ("trivial" "unimportant")
                            :todo ("someday" )
                            :order 90)
-                          (:discard (:tag ("chore" "routine" "daily")))))))))))
+                          (:discard (:tag ("chore" "routine" "daily")))))))
+          ))))
 #+end_src
 
 # **** Capture
