@@ -11384,11 +11384,19 @@ The agenda is nice, but a souped up version is nicer.
           ;;                 :order 1)))
           ;;             ))
           (agenda "" (
-                      (org-agenda-overriding-header "Next three days")
-                      (org-agenda-span 'week)
+                      ;;(org-agenda-overriding-header "Next three days")
+                      (org-agenda-start-day nil)
+                      (org-agenda-span 2)
                       (org-super-agenda-groups
-                       '((:name "Next 3 days"
+                       '(
+                         ;; (:name "Next 3 days"
+                         ;;  :time-grid t
+                         ;;  :order 1)
+                         (:name ""
                           :time-grid t
+                          :date today
+                          :todo "TODAY"
+                          :scheduled today
                           :order 1)
                          (:name "Habits"
                           :habit t
@@ -11402,8 +11410,15 @@ The agenda is nice, but a souped up version is nicer.
                           :order 4)
                          (:name "due soon"
                           :deadline future
-                          :order 5)))
+                          :order 5)
+                         (:name "Tomorrow"
+                          :date tomorrow
+                          :scheduled tomorrow
+                          :order 6)))
                       ))
+          ;; (agenda "" (
+          ;;             (org-agenda-start-day nil)
+          ;;             (org-agenda-span 1)))
           (alltodo "" ((org-agenda-overriding-header "TODO-Items")
                        (org-super-agenda-groups
                         '(
