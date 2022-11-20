@@ -7,6 +7,7 @@
 #+date: @@html:<!--@@{{{git-rev}}}@@html:-->@@@@latex:\\\Large\bfseries@@ {{{modification-time(%Y-%m-%d, t)}}} @@latex:\\\normalsize\mdseries@@{{{modification-time(%H:%M, t)}}} @@latex:\acr{\lowercase{@@{{{timezone}}}@@latex:}}\iffalse@@, {{{git-rev}}}@@latex:\fi@@
 #+macro: timezone (eval (substring (shell-command-to-string "date +%Z") 0 -1))
 #+macro: git-rev (eval (format "@@html:<a href=\"https://github.com/tecosaur/emacs-config/commit/%1$s\" style=\"text-decoration: none\"><code style=\"padding: 0; color: var(--text-light); font-size: inherit; opacity: 0.7\">%1$s</code></a>@@@@latex:\\href{https://github.com/tecosaur/emacs-config/commit/%1$s}{\\normalsize\\texttt{%1$s}}@@" (substring (shell-command-to-string "git rev-parse --short HEAD") 0 -1)))
+
 #+html_head: <link rel='shortcut icon' type='image/png' href='https://www.gnu.org/software/emacs/favicon.png'>
 #+property: header-args:emacs-lisp
 #+property: header-args:elisp :results replace :exports code
@@ -2308,7 +2309,7 @@ splash screen to something more minimal I switched to just using the /E/.
   "Directory in which to look for splash image templates.")
 
 (defvar fancy-splash-image-template
-  (expand-file-name "emacs-e-template.svg" fancy-splash-image-directory)
+  (expand-file-name "monkey-surprised-template.svg" fancy-splash-image-directory)
   "Default template svg used for the splash image.
 Colours are substituted as per `fancy-splash-template-colours'.")
 #+end_src
@@ -3261,6 +3262,7 @@ I prefer the dashboard, so let's ensure that's always switched to in new frames.
 #+name: daemon initialisation
 #+begin_src emacs-lisp
 (defun greedily-do-daemon-setup ()
+  (interactive)
   (require 'org)
   (when (require 'mu4e nil t)
     (setq mu4e-confirm-quit t)
@@ -8068,6 +8070,10 @@ module. Let's just try to patch on the main things I like the look of.
 *** Keybindings
 
 #+begin_src emacs-lisp
+(map! :leader
+      :prefix "o"
+      :desc "elfeed" "e" #'elfeed)
+
 (map! :map elfeed-search-mode-map
       :after elfeed-search
       [remap kill-this-buffer] "q"
@@ -8115,12 +8121,23 @@ module. Let's just try to patch on the main things I like the look of.
   (push 'elfeed-search-mode evil-snipe-disabled-modes))
 #+end_src
 
+*** Elfeed-org
+
+#+begin_src emacs-lisp
+(use-package! elfeed-org
+  :config
+  (setq rmh-elfeed-org-files (list "~/org/elfeed.org")))
+#+end_src
+
 *** Visual enhancements
 
 #+begin_src emacs-lisp
 (after! elfeed
 
-  (elfeed-org)
+  (use-package! elfeed-org
+    :config
+    (setq rmh-elfeed-org-files (list "~/org/elfeed.org")))
+
   (use-package! elfeed-link)
 
   (setq elfeed-search-filter "@1-week-ago +unread"
@@ -8284,7 +8301,7 @@ module. Let's just try to patch on the main things I like the look of.
 
 ** Dictionary
 
-#+call: confpkg(needs="sdcv")
+#+call: confpkg()
 
 #+RESULTS:
 nil
@@ -8318,6 +8335,9 @@ painless switch.
 We start off by loading =lexic=, then we'll integrate it into pre-existing
 definition functionality (like ~+lookup/dictionary-definition~).
 #+begin_src emacs-lisp
+(map! :desc "lexic"
+      "C-c l" #'lexic-search)
+
 (use-package! lexic
   :commands lexic-search lexic-list-dictionary
   :config
@@ -9295,9 +9315,9 @@ account-specific sent directory, not the catch-all.
                 (save-restriction
                   (mail-narrow-to-head)
                   (mail-fetch-field "from")))))
-    (if (and from (string-match-p "@tecosaur\\.net>?\\'" from))
-        "/tecosaur-net/Sent"
-      "/sent")))
+    (if (and from (string-match-p "@posteo\\.de>?\\'" from))
+        "/posteo-de/Sent"
+      "/Sent")))
 (setq mu4e-sent-folder #'+mu4e-account-sent-folder)
 #+end_src
 
@@ -11940,7 +11960,6 @@ The agenda is nice, but a souped up version is nicer.
         :desc "org-roam-show-graph" "g" #'org-roam-show-graph
         :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
         :desc "org-roam-capture" "c" #'org-roam-capture)
-
   (setq org-roam-directory (file-truename "~/org/notes/")
         ;;org-roam-database-connector 'sqlite-builtin
         org-roam-db-gc-threshold most-positive-fixnum
@@ -11992,7 +12011,7 @@ The agenda is nice, but a souped up version is nicer.
 
   (require 'citar)
   (defun jethro/org-roam-node-from-cite (keys-entries)
-    (interactive (list (citar-select-ref :multiple nil :rebuild-cache t)))
+    (interactive (list (citar-select-ref)))
     (let ((title (citar--format-entry-no-widths (cdr keys-entries)
                                                 "${author editor} :: ${title}")))
       (org-roam-capture- :templates
