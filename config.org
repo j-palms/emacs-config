@@ -1801,7 +1801,7 @@ nix                          ; I hereby declare "nix geht mehr!"
  +jupyter                    ; ipython/jupyter support for babel
  +pandoc                     ; export-with-pandoc support
  +gnuplot                    ; who doesn't like pretty pictures
- ;;+pomodoro                 ; be fruitful with the tomato technique
+ +pomodoro                 ; be fruitful with the tomato technique
  +present                    ; using org-mode for presentations
  +roam2)                     ; wander around notes
 ;;php                        ; perl's insecure younger brother
@@ -1855,7 +1855,7 @@ I couldn't resist the Email and Feed modules.
 
 #+name: doom-app
 #+begin_src emacs-lisp
-;;calendar                   ; A dated approach to timetabling
+calendar                   ; A dated approach to timetabling
 ;;emms                       ; Multimedia in Emacs is music to my ears
 everywhere                   ; *leave* Emacs!? You must be joking.
 irc                          ; how neckbeards socialize
@@ -5207,6 +5207,26 @@ From the =:core packages= module.
  "<<" ">>"
  :actions '(insert))
 #+end_src
+
+*** PDF-tools
+
+#+call: confpkg("!Pkg pdf-tools")
+
+# #+begin_src emacs-lisp
+# (use-package! pdf-view
+#   :hook (pdf-tools-enabled . pdf-view-midnight-minor-mode)
+#   :hook (pdf-tools-enabled . hide-mode-line-mode)
+#   :config
+#   (setq pdf-view-midnight-colors '("#ABB2BF" . "#282C35")))
+# #+end_src
+
+# #+begin_src emacs-lisp
+# (use-package! pdf-tools
+#    :defer t
+#    :config
+#        (pdf-tools-install)
+#        (setq-default pdf-view-display-size 'fit-page)
+# #+end_src
 
 ** Visuals
 *** Info colours
@@ -11057,6 +11077,14 @@ package I'll grab for prettier in-buffer citations.
 
 #+begin_src emacs-lisp :tangle packages.el
 (package! org-cite-csl-activate :recipe (:host github :repo "andras-simonyi/org-cite-csl-activate") :pin "9e68d9204469c674f49a20bdf7ea85da4f4bf720")
+
+;; (package! org-roam-bibtex)
+
+;; ;; When using org-roam via the `+roam` flag
+;; (unpin! org-roam)
+
+;; ;; When using bibtex-completion via the `biblio` module
+;; (unpin! bibtex-completion helm-bibtex ivy-bibtex)
 #+end_src
 
 In particular, by setting ~org-cite-csl-activate-use-document-style~, we can have
@@ -11105,7 +11133,10 @@ with =citar=, and make the symbols a bit prettier.
   (setq citar-symbols
         `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
           (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " "))))
+          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+
+  (setq citar-notes-paths org-roam-directory); List of directories for reference nodes
+  (setq citar-at-point-function 'embark-act))           ; Use `embark'
 #+end_src
 
 We can also make the Zotero CSL styles available to use.
@@ -11164,6 +11195,15 @@ be nice to have a function to convert =org-ref= citations to =org-cite= forms.
                                  (cdr (assoc (match-string 1) cite-conversions))
                                  (match-string 2))))))))
 #+end_src
+
+***** org-roam-bibtex
+
+# #+begin_src emacs-lisp
+# (use-package! org-roam-bibtex
+#   :after org-roam
+#   :config
+#   (require 'org-ref)) ; optional: if using Org-ref v2 or v3 citation links
+# #+end_src
 
 ***** cdlatex
 
@@ -11975,22 +12015,22 @@ The agenda is nice, but a souped up version is nicer.
   (add-hook 'org-roam-mode-hook #'turn-on-visual-line-mode)
 
   (setq org-roam-capture-templates
-        '(("m" "main" plain
+        '(("n" "notes" plain
            "\n%?"
-           :if-new (file+head "main/${slug}.org"
+           :if-new (file+head "notes/${slug}.org"
                               "#+title: ${title}\n")
            :immediate-finish t
-           :unnarrowed t)
-          ("r" "reference" plain "\n%?"
-           :if-new
-           (file+head "reference/${slug}.org" "#+title: ${title}\n")
-           :immediate-finish t
-           :unnarrowed t)
-          ("a" "article" plain "\n%?"
-           :if-new
-           (file+head "articles/${slug}.org" "#+title: ${title}\n#+filetags: :article:\n")
-           :immediate-finish t
            :unnarrowed t)))
+          ;; ("r" "reference" plain "\n%?"
+          ;;  :if-new
+          ;;  (file+head "reference/${slug}.org" "#+title: ${title}\n")
+          ;;  :immediate-finish t
+          ;;  :unnarrowed t)
+          ;; ("a" "article" plain "\n%?"
+          ;;  :if-new
+          ;;  (file+head "articles/${slug}.org" "#+title: ${title}\n#+filetags: :article:\n")
+          ;;  :immediate-finish t
+          ;;  :unnarrowed t)))
 
   (defun jethro/tag-new-node-as-draft ()
     (org-roam-tag-add '("draft")))
@@ -12007,25 +12047,26 @@ The agenda is nice, but a souped up version is nicer.
       (error "")))
 
   (setq org-roam-node-display-template
-        (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+        (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag))))
 
-  (require 'citar)
-  (defun jethro/org-roam-node-from-cite (keys-entries)
-    (interactive (list (citar-select-ref)))
-    (let ((title (citar--format-entry-no-widths (cdr keys-entries)
-                                                "${author editor} :: ${title}")))
-      (org-roam-capture- :templates
-                         '(("r" "reference" plain "%?" :if-new
-                            (file+head "reference/${citekey}.org"
-                                       ":PROPERTIES:
-:ROAM_REFS: [cite:@${citekey}]
-:END:
-,#+title: ${title}\n")
-                            :immediate-finish t
-                            :unnarrowed t))
-                         :info (list :citekey (car keys-entries))
-                         :node (org-roam-node-create :title title)
-                         :props '(:finalize find-file)))))
+  ;; (require 'citar)
+
+  ;; (defun jethro/org-roam-node-from-cite (keys-entries)
+  ;;   (interactive (list (citar-select-ref)))
+  ;;   (let ((title (citar-format--entry(cdr keys-entries) "${author editor} :: ${title}")))
+  ;;     (org-roam-capture-
+  ;;      :templates
+  ;;      '(("r" "reference" plain "%?" :if-new
+  ;;         (file+head "reference/${citekey}.org"
+  ;;                    ":PROPERTIES:
+  ;;                    :ROAM_REFS: [cite:@${citekey}]
+  ;;                    :END:
+  ;;                    #+title: ${title}\n")
+  ;;      :immediate-finish t
+  ;;      :unnarrowed t))
+  ;;      :info (list :citekey (car keys-entries))
+  ;;      :node (org-roam-node-create :title title)
+  ;;      :props '(:finalize find-file)))))
 #+end_src
 ***** Modeline file name
 
@@ -17016,7 +17057,7 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
   :config
   (unless (display-graphic-p) (after! pdf-tools (pdftotext-install)))
   ;; For prettyness
-  (add-hook 'pdftotext-mode-hook #'flyspell-mode-disable)
+  ;;(add-hook 'pdftotext-mode-hook #'flyspell-mode-disable)   
   (add-hook 'pdftotext-mode-hook (lambda () (page-break-lines-mode 1)))
   ;; I have no idea why this is needed
   (map! :map pdftotext-mode-map
