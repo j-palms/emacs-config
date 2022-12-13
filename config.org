@@ -1315,8 +1315,8 @@ the start of the tangle process. This is done by calling =bootstrap= within the
 
 It's useful to have some basic personal information
 #+begin_src emacs-lisp
-(setq user-full-name "TEC"
-      user-mail-address "contact@tecosaur.net")
+(setq user-full-name "Josua Palmstedt"
+      user-mail-address "josua.palmstedt@tricera.energy")
 #+end_src
 Apparently this is used by ~GPG~, and all sorts of other things.
 
@@ -5214,7 +5214,7 @@ something through Emacs?
 (use-package! calibredb
   :commands calibredb
   :config
-  (setq calibredb-root-dir "~/Desktop/TEC/Other/Ebooks"
+  (setq calibredb-root-dir "~/books"
         calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
   (map! :map calibredb-show-mode-map
         :ne "?" #'calibredb-entry-dispatch
@@ -8584,16 +8584,17 @@ I'll just set this to be within =Organisation= folder for now, in the future it
 could be worth seeing if I could hook this up to a [[https://nextcloud.com/][Nextcloud]] instance.
 
 #+begin_src emacs-lisp
-(setq org-roam-directory "~/Desktop/TEC/Organisation/Roam/")
+(setq org-roam-directory "~/notes/")
 #+end_src
 
-That said, if the directory doesn't exist we likely don't want to be using roam.
-Since we don't want to trigger errors (which will happen as soon as roam tries
-to initialise), let's not load roam.
+# That said, if the directory doesn't exist we likely don't want to be using roam.
+# Since we don't want to trigger errors (which will happen as soon as roam tries
+# to initialise), let's not load roam.
 
-#+begin_src emacs-lisp :noweb-ref none :tangle (if (file-exists-p "~/Desktop/TEC/Organisation/Roam/") "no" "packages.el")
-(package! org-roam :disable t)
-#+end_src
+# #+begin_src emacs-lisp :noweb-ref none :tangle (if (file-exists-p "~/Desktop/TEC/Organisation/Roam/") "no" "packages.el")
+# (package! org-roam :disable t)
+# #+end_src
+# COMOUT
 
 ***** Modeline file name
 
