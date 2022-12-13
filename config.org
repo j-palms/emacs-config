@@ -1608,7 +1608,7 @@ vterm                        ; the best terminal emulation in Emacs
 #+name: doom-checkers
 #+begin_src emacs-lisp
 syntax                       ; tasing you for every semicolon you forget
-(:if (executable-find "aspell") spell) ; tasing you for misspelling mispelling
+;;(:if (executable-find "aspell") spell) ; tasing you for misspelling mispelling
 grammar                      ; tasing grammar mistake every you make
 #+end_src
 
@@ -3243,7 +3243,7 @@ Doom module.
 (use-package! emacs-everywhere
   :if (daemonp)
   :config
-  (require 'spell-fu)
+  ;;(require 'spell-fu)
   (setq emacs-everywhere-major-mode-function #'org-mode
         emacs-everywhere-frame-name-format "Edit ∷ %s — %s")
   (defadvice! emacs-everywhere-raise-frame ()
@@ -3744,7 +3744,7 @@ let's improve that memory.
     markdown-mode
     gfm-mode)
   '(:seperate
-    company-ispell
+    ;;company-ispell
     company-files
     company-yasnippet))
 #+end_src
@@ -3776,59 +3776,59 @@ add package src directories to projectile. This isn't desirable in my opinion.
   (or (mapcar (lambda (p) (s-starts-with-p p filepath)) projectile-ignored-projects)))
 #+end_src
 
-*** Ispell
-**** Downloading dictionaries
+# *** Ispell
+# **** Downloading dictionaries
 
-Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
-the following configuration
-- size :: 80 (huge)
-- spellings :: British(-ise) and Australian
-- spelling variants level :: 0
-- diacritics :: keep
-- extra lists :: hacker, roman numerals
+# Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
+# the following configuration
+# - size :: 80 (huge)
+# - spellings :: British(-ise) and Australian
+# - spelling variants level :: 0
+# - diacritics :: keep
+# - extra lists :: hacker, roman numerals
 
-***** Hunspell
+# ***** Hunspell
 
-#+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
-cd /tmp
-curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
-unzip "hunspell-en-custom.zip"
+# #+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
+# cd /tmp
+# curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
+# unzip "hunspell-en-custom.zip"
 
-sudo chown root:root en-custom.*
-sudo mv en-custom.{aff,dic} /usr/share/myspell/
-#+end_src
+# sudo chown root:root en-custom.*
+# sudo mv en-custom.{aff,dic} /usr/share/myspell/
+# #+end_src
 
-***** Aspell
+# ***** Aspell
 
-#+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
-cd /tmp
-curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
-tar -xjf "aspell6-en-custom.tar.bz2"
+# #+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
+# cd /tmp
+# curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
+# tar -xjf "aspell6-en-custom.tar.bz2"
 
-cd aspell6-en-custom
-./configure && make && sudo make install
-#+end_src
+# cd aspell6-en-custom
+# ./configure && make && sudo make install
+# #+end_src
 
-**** Configuration
+# **** Configuration
 
-#+call: confpkg("!Pkg Ispell")
+# #+call: confpkg("!Pkg Ispell")
 
-#+begin_src emacs-lisp
-(setq ispell-dictionary "en-custom")
-#+end_src
+# #+begin_src emacs-lisp
+# (setq ispell-dictionary "en-custom")
+# #+end_src
 
-Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
-~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
-~ispell-alternate-dictionary~, which at the moment maps to a plaintext version of
-the above.
+# Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
+# ~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
+# ~ispell-alternate-dictionary~, which at the moment maps to a plaintext version of
+# the above.
 
-It seems reasonable to want to keep an eye on my personal dict, let's have it
-nearby (also means that if I change the 'main' dictionary I keep my addition).
+# It seems reasonable to want to keep an eye on my personal dict, let's have it
+# nearby (also means that if I change the 'main' dictionary I keep my addition).
 
-#+begin_src emacs-lisp
-(setq ispell-personal-dictionary
-      (expand-file-name "misc/ispell_personal" doom-private-dir))
-#+end_src
+# #+begin_src emacs-lisp
+# (setq ispell-personal-dictionary
+#       (expand-file-name "misc/ispell_personal" doom-private-dir))
+# #+end_src
 
 *** TRAMP
 
@@ -7658,13 +7658,14 @@ and Minad's lovely =org-modern= goes a long way in this regard.
   (custom-set-faces! '(org-modern-statistics :inherit org-checkbox-statistics-todo)))
 #+end_src
 
-Since =org-modern='s tag face supplants Org's tag face, we need to adjust the
-spell-check face ignore list
+# Since =org-modern='s tag face supplants Org's tag face, we need to adjust the
+# spell-check face ignore list
 
-#+begin_src emacs-lisp
-(after! spell-fu
-  (cl-pushnew 'org-modern-tag (alist-get 'org-mode +spell-excluded-faces-alist)))
-#+end_src
+# #+begin_src emacs-lisp
+# (after! spell-fu
+#   (cl-pushnew 'org-modern-tag (alist-get 'org-mode +spell-excluded-faces-alist)))
+# #+end_src
+# COMOUT
 
 ***** Emphasis markers
 
@@ -13249,7 +13250,7 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
   :config
   (unless (display-graphic-p) (after! pdf-tools (pdftotext-install)))
   ;; For prettyness
-  (add-hook 'pdftotext-mode-hook #'spell-fu-mode-disable)
+  ;;(add-hook 'pdftotext-mode-hook #'spell-fu-mode-disable)
   (add-hook 'pdftotext-mode-hook (lambda () (page-break-lines-mode 1)))
   ;; I have no idea why this is needed
   (map! :map pdftotext-mode-map
