@@ -1698,7 +1698,7 @@ nix                          ; I hereby declare "nix geht mehr!"
  +jupyter                    ; ipython/jupyter support for babel
  +pandoc                     ; export-with-pandoc support
  +gnuplot                    ; who doesn't like pretty pictures
- ;;+pomodoro                 ; be fruitful with the tomato technique
+ +pomodoro                 ; be fruitful with the tomato technique
  +present                    ; using org-mode for presentations
  +roam2)                     ; wander around notes
 ;;php                        ; perl's insecure younger brother
@@ -1745,7 +1745,7 @@ I couldn't resist the Email and Feed modules.
 
 #+name: doom-email
 #+begin_src emacs-lisp
-(:if (executable-find "mu") (mu4e +org))
+;;(:if (executable-find "mu") (mu4e +org))
 ;;notmuch
 ;;(wanderlust +gmail)
 #+end_src
@@ -1755,7 +1755,7 @@ I couldn't resist the Email and Feed modules.
 ;;calendar                   ; A dated approach to timetabling
 ;;emms                       ; Multimedia in Emacs is music to my ears
 everywhere                   ; *leave* Emacs!? You must be joking.
-irc                          ; how neckbeards socialize
+;;irc                          ; how neckbeards socialize
 (rss +org)                   ; emacs as an RSS reader
 ;;twitter                    ; twitter client https://twitter.com/vnought
 #+end_src
