@@ -7925,15 +7925,15 @@ It's nice to be able to link to music
 **** Tweaking defaults
 
 #+begin_src emacs-lisp
-(setq org-directory (expand-file-name "org" (xdg-data-home)) ; Let's put files here.
+(setq org-directory "~/org"               ; Let's put files here.
       org-agenda-files (list org-directory)                  ; Seems like the obvious place.
-      org-use-property-inheritance t                         ; It's convenient to have properties inherited.
-      org-log-done 'time                                     ; Having the time a item is done sounds convenient.
-      org-list-allow-alphabetical t                          ; Have a. A. a) A) list bullets.
-      org-catch-invisible-edits 'smart                       ; Try not to accidently do weird stuff in invisible regions.
-      org-export-with-sub-superscripts '{}                   ; Don't treat lone _ / ^ as sub/superscripts, require _{} / ^{}.
-      org-export-allow-bind-keywords t                       ; Bind keywords can be handy
-      org-image-actual-width '(0.9))                         ; Make the in-buffer display closer to the exported result..
+      org-use-property-inheritance t       ; It's convenient to have properties inherited.
+      org-log-done 'time                   ; Having the time a item is done sounds convenient.
+      org-list-allow-alphabetical t        ; Have a. A. a) A) list bullets.
+      org-catch-invisible-edits 'smart     ; Try not to accidently do weird stuff in invisible regions.
+      org-export-with-sub-superscripts '{} ; Don't treat lone _ / ^ as sub/superscripts, require _{} / ^{}.
+      org-export-allow-bind-keywords t     ; Bind keywords can be handy
+      org-image-actual-width '(0.9))       ; Make the in-buffer display closer to the exported result..
 #+end_src
 I also like the src_elisp{:comments} header-argument, so let's make that a
 default.
@@ -8646,7 +8646,7 @@ no modeline.
         :desc "org-roam-show-graph" "g" #'org-roam-show-graph
         :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
         :desc "org-roam-capture" "c" #'org-roam-capture)
-  (setq org-roam-directory (file-truename "~/org/notes/")
+  (setq org-roam-directory (file-truename "~/org/notes")
         ;;org-roam-database-connector 'sqlite-builtin
         org-roam-db-gc-threshold most-positive-fixnum
         org-id-link-to-org-use-id t)
@@ -8663,7 +8663,7 @@ no modeline.
   (setq org-roam-capture-templates
         '(("n" "notes" plain
            "\n%?"
-           :if-new (file+head "notes/${slug}.org"
+           :if-new (file+head "${slug}.org"
                               "#+title: ${title}\n")
            :immediate-finish t
            :unnarrowed t)))
