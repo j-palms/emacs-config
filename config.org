@@ -7916,7 +7916,7 @@ It's nice to be able to link to music
 **** Tweaking defaults
 
 #+begin_src emacs-lisp
-(setq org-directory "~/.org"               ; Let's put files here.
+(setq org-directory "~/org"               ; Let's put files here.
       org-use-property-inheritance t       ; It's convenient to have properties inherited.
       org-log-done 'time                   ; Having the time a item is done sounds convenient.
       org-list-allow-alphabetical t        ; Have a. A. a) A) list bullets.
@@ -8635,7 +8635,7 @@ no modeline.
         :desc "org-roam-show-graph" "g" #'org-roam-show-graph
         :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
         :desc "org-roam-capture" "c" #'org-roam-capture)
-  (setq org-roam-directory (file-truename "~/org/notes/")
+  (setq org-roam-directory (file-truename "~/org/notes")
         ;;org-roam-database-connector 'sqlite-builtin
         org-roam-db-gc-threshold most-positive-fixnum
         org-id-link-to-org-use-id t)
@@ -8652,7 +8652,7 @@ no modeline.
   (setq org-roam-capture-templates
         '(("n" "notes" plain
            "\n%?"
-           :if-new (file+head "notes/${slug}.org"
+           :if-new (file+head "${slug}.org"
                               "#+title: ${title}\n")
            :immediate-finish t
            :unnarrowed t)))
