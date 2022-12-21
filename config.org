@@ -3777,6 +3777,7 @@ Looking at documentation via =SPC h f= and =SPC h v= and looking at the source c
 add package src directories to projectile. This isn't desirable in my opinion.
 
 #+begin_src emacs-lisp
+(setq projectile-project-search-path '("~/code/"))
 (setq projectile-ignored-projects
       (list "~/" "/tmp" (expand-file-name "straight/repos" doom-local-dir)))
 (defun projectile-ignored-project-function (filepath)
