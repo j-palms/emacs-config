@@ -4005,1194 +4005,1194 @@ From the =:core packages= module.
  :actions '(insert))
 #+end_src
 
-# ** Visuals
-# *** Info colours
-
-# #+call: confpkg("!Pkg Info colors")
-
-# This makes manual pages nicer to look at by adding variable pitch fontification
-# and colouring 🙂.
-
-# #+attr_html: :class invertible :style width:80% :alt Example info-colours page.
-# [[https://tecosaur.com/lfs/emacs-config/screenshots/info-colours.png]]
-
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! info-colors :pin "2e237c301ba62f0e0286a27c1abe48c4c8441143")
-# #+end_src
-
-# To use this we'll just hook it into =Info=.
-
-# #+begin_src emacs-lisp
-# (use-package! info-colors
-#   :commands (info-colors-fontify-node))
-
-# (add-hook 'Info-selection-hook 'info-colors-fontify-node)
-# #+end_src
-
-# #+attr_html: :class invertible :alt Example colourised info page
-# [[https://tecosaur.com/lfs/emacs-config/screenshots/info-coloured.png]]
-
-# *** Modus themes
-
-# Proteolas did a lovely job with the Modus themes, so much so that they were
-# welcomed into Emacs 28. However, he is also rather attentive with updates, and
-# so I'd like to make sure we have a recent version.
-
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! modus-themes :pin "18dd2457d233859ad4d102d797d6744525177ac4")
-# #+end_src
+** Visuals
+*** Info colours
+
+#+call: confpkg("!Pkg Info colors")
+
+This makes manual pages nicer to look at by adding variable pitch fontification
+and colouring 🙂.
+
+#+attr_html: :class invertible :style width:80% :alt Example info-colours page.
+[[https://tecosaur.com/lfs/emacs-config/screenshots/info-colours.png]]
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! info-colors :pin "2e237c301ba62f0e0286a27c1abe48c4c8441143")
+#+end_src
+
+To use this we'll just hook it into =Info=.
+
+#+begin_src emacs-lisp
+(use-package! info-colors
+  :commands (info-colors-fontify-node))
+
+(add-hook 'Info-selection-hook 'info-colors-fontify-node)
+#+end_src
+
+#+attr_html: :class invertible :alt Example colourised info page
+[[https://tecosaur.com/lfs/emacs-config/screenshots/info-coloured.png]]
+
+*** Modus themes
+
+Proteolas did a lovely job with the Modus themes, so much so that they were
+welcomed into Emacs 28. However, he is also rather attentive with updates, and
+so I'd like to make sure we have a recent version.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! modus-themes :pin "18dd2457d233859ad4d102d797d6744525177ac4")
+#+end_src
 
-# *** Spacemacs themes
-
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! spacemacs-theme :pin "1ec73d68b0f120f92538d9a329a3a46e32f74510")
-# #+end_src
-
-# *** Theme magic
-
-# #+call: confpkg("!Pkg Theme magic")
-
-# With all our fancy Emacs themes, my terminal is missing out!
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! theme-magic :pin "844c4311bd26ebafd4b6a1d72ddcc65d87f074e3")
-# #+end_src
-
-# This operates using =pywal=, which is present in some repositories, but most
-# reliably installed with =pip=.
-# #+begin_src shell :eval no :tangle (if (executable-find "wal") "no" "setup.sh")
-# sudo python3 -m pip install pywal
-# #+end_src
-
-# Theme magic takes a look at a number of faces, the saturation levels, and colour
-# differences to try to cleverly pick eight colours to use. However, it uses the
-# same colours for the light variants, and doesn't always make the best picks.
-# Since we're using =doom-themes=, our life is a little easier and we can use the
-# colour utilities from Doom themes to easily grab sensible colours and generate
-# lightened versions --- let's do that.
-
-# #+begin_src emacs-lisp
-# (use-package! theme-magic
-#   :commands theme-magic-from-emacs
-#   :config
-#   (defadvice! theme-magic--auto-extract-16-doom-colors ()
-#     :override #'theme-magic--auto-extract-16-colors
-#     (list
-#      (face-attribute 'default :background)
-#      (doom-color 'error)
-#      (doom-color 'success)
-#      (doom-color 'type)
-#      (doom-color 'keywords)
-#      (doom-color 'constants)
-#      (doom-color 'functions)
-#      (face-attribute 'default :foreground)
-#      (face-attribute 'shadow :foreground)
-#      (doom-blend 'base8 'error 0.1)
-#      (doom-blend 'base8 'success 0.1)
-#      (doom-blend 'base8 'type 0.1)
-#      (doom-blend 'base8 'keywords 0.1)
-#      (doom-blend 'base8 'constants 0.1)
-#      (doom-blend 'base8 'functions 0.1)
-#      (face-attribute 'default :foreground))))
-# #+end_src
-
-# *** Simple comment markup
-
-# #+call: confpkg("!Pkg simple-comment-markup")
-
-# I find that every now and then I sprinkle a little markup in code comments. Of
-# course, this doesn't get fortified as it's ultimately meaningless ... but it
-# would be nice if it was, just slightly. Surprisingly, I couldn't find a package
-# for this, so I made one.
-
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! simple-comment-markup :recipe (:local-repo "lisp/simple-comment-markup"))
-# #+end_src
-
-# Let's use both basic Org markup and Markdown code backticks, to cover most
-# situations decently.
-
-# #+begin_src emacs-lisp
-# (use-package! simple-comment-markup
-#   :hook (prog-mode . simple-comment-markup-mode)
-#   :config
-#   (setq simple-comment-markup-set '(org markdown-code)))
-# #+end_src
-
-# *** Emojify
-
-# #+call: confpkg("!Pkg emojify")
-
-# #+begin_quote
-# From the =:ui emoji= module.
-# #+end_quote
-
-
-# For starters, twitter's emojis look nicer than emoji-one.
-# Other than that, this is pretty great OOTB 😀.
-
-# #+begin_src emacs-lisp
-# (setq emojify-emoji-set "twemoji-v2")
-# #+end_src
-
-# One minor annoyance is the use of emojis over the default character
-# when the default is actually preferred. This occurs with overlay symbols I use
-# in Org mode, such as checkbox state, and a few other miscellaneous cases.
-
-# We can accommodate our preferences by deleting those entries from the emoji hash
-# table
-
-# #+begin_src emacs-lisp
-# (defvar emojify-disabled-emojis
-#   '(;; Org
-#     "◼" "☑" "☸" "⚙" "⏩" "⏪" "⬆" "⬇" "❓" "↔"
-#     ;; Terminal powerline
-#     "✔"
-#     ;; Box drawing
-#     "▶" "◀"
-#     ;; I just want to see this as text
-#     "©" "™")
-#   "Characters that should never be affected by `emojify-mode'.")
-
-# (defadvice! emojify-delete-from-data ()
-#   "Ensure `emojify-disabled-emojis' don't appear in `emojify-emojis'."
-#   :after #'emojify-set-emoji-data
-#   (dolist (emoji emojify-disabled-emojis)
-#     (remhash emoji emojify-emojis)))
-# #+end_src
-
-# Now, it would be good to have a minor mode which allowed you to type ascii/gh
-# emojis and get them converted to unicode. Let's make one.
-# #+begin_src emacs-lisp
-# (defun emojify--replace-text-with-emoji (orig-fn emoji text buffer start end &optional target)
-#   "Modify `emojify--propertize-text-for-emoji' to replace ascii/github emoticons with unicode emojis, on the fly."
-#   (if (or (not emoticon-to-emoji) (= 1 (length text)))
-#       (funcall orig-fn emoji text buffer start end target)
-#     (delete-region start end)
-#     (insert (ht-get emoji "unicode"))))
-
-# (define-minor-mode emoticon-to-emoji
-#   "Write ascii/gh emojis, and have them converted to unicode live."
-#   :global nil
-#   :init-value nil
-#   (if emoticon-to-emoji
-#       (progn
-#         (setq-local emojify-emoji-styles '(ascii github unicode))
-#         (advice-add 'emojify--propertize-text-for-emoji :around #'emojify--replace-text-with-emoji)
-#         (unless emojify-mode
-#           (emojify-turn-on-emojify-mode)))
-#     (setq-local emojify-emoji-styles (default-value 'emojify-emoji-styles))
-#     (advice-remove 'emojify--propertize-text-for-emoji #'emojify--replace-text-with-emoji)))
-# #+end_src
-
-# This new minor mode of ours will be nice for messages, so let's hook it in for
-# Email and IRC.
-# #+begin_src emacs-lisp
-# (add-hook! '(mu4e-compose-mode org-msg-edit-mode circe-channel-mode) (emoticon-to-emoji 1))
-# #+end_src
-
-# *** Doom modeline
-
-# #+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
-
-# #+begin_quote
-# From the =:ui modeline= module.
-# #+end_quote
-
-# **** Modified buffer colour
-
-# The modeline is very nice and pretty, however I have a few niggles with the
-# defaults. For starters, by default ~red~ text is used to indicate an unsaved file.
-# This makes me feel like something's gone /wrong/, so let's tone that down to
-# orange.
-
-# #+begin_src emacs-lisp
-# (custom-set-faces!
-#   '(doom-modeline-buffer-modified :foreground "orange"))
-# #+end_src
-
-# **** Height
-
-# The default size (=25=) makes for a rather narrow mode line. To me, the modeline
-# feels a bit comfier if we give it a bit more space. I find =45= adds roughly a
-# third of the line height as padding above and below.
-
-# #+begin_src emacs-lisp
-# (setq doom-modeline-height 45)
-# #+end_src
-
-# **** File encoding
-
-# While we're modifying the modeline, when we have the default file encoding (=LF
-# UTF-8=), it really isn't worth noting in the modeline. So, why not conditionally
-# hide it?
-
-# #+begin_src emacs-lisp
-# (defun doom-modeline-conditional-buffer-encoding ()
-#   "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
-#   (setq-local doom-modeline-buffer-encoding
-#               (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
-#                                  '(coding-category-undecided coding-category-utf-8))
-#                            (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
-#                 t)))
-
-# (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
-# #+end_src
-
-# **** Time
-
-# Moving onto the modeline segments, there's a calendar icon showed next to the
-# current time, which I'm not a fan of. Let's replace that by redefining the
-# segment. Instead of the calendar, it would be much nicer to have an updating
-# analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
-
-# First, we'll need a way to produce svg clocks on-demand.
-
-# #+begin_src emacs-lisp
-# (defvar micro-clock-hour-hand-ratio 0.45
-#   "Length of the hour hand as a proportion of the radius.")
-# (defvar micro-clock-minute-hand-ratio 0.7
-#   "Length of the minute hand as a proportion of the radius.")
-
-# (defun micro-clock-svg (hour minute radius color)
-#   "Construct an SVG clock showing the time HOUR:MINUTE.
-# The clock will be of the specified RADIUS and COLOR."
-#   (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-#                    micro-clock-hour-hand-ratio))
-#         (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-#                    micro-clock-hour-hand-ratio))
-#         (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
-#                      micro-clock-minute-hand-ratio))
-#         (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
-#                      micro-clock-minute-hand-ratio))
-#         (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
-#     (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
-#     (svg-circle svg radius radius 1 :fill color :stroke "none")
-#     (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
-#               :stroke-width 2)
-#     (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
-#               :stroke-width 1.5)
-#     svg))
-# #+end_src
-
-# With that out the way, we need to figure out how to integrate this into the
-# modeline. For the most part this was fairly easy, the tricky part was getting
-# the alignment right. I tried using the =(raise FACTOR)= display property, but that
-# doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
-# descriptors]] though, I came across the =:ascent= property, which looked rather
-# promising. By setting =:ascent center= the image is centred relative to the text,
-# which is exactly what we need. With that sorted, we just add some caching and
-# the obvious customisations and we've got modeline-appropriate clock generation!
-
-# #+begin_src emacs-lisp
-# (require 'svg)
-
-# (defvar +doom-modeline-micro-clock-minute-resolution 1
-#   "The clock will be updated every this many minutes, truncating.")
-# (defvar +doom-modeline-micro-clock-inverse-size 4.8
-#   "The size of the clock, as an inverse proportion to the mode line height.")
-
-# (defvar +doom-modeline-micro-clock--cache nil)
-
-# (defvar +doom-modeline-clock-text-format "%c")
-
-# (defun +doom-modeline--clock-text (&optional _window _object _pos)
-#   (format-time-string +doom-modeline-clock-text-format))
-
-# (defun +doom-modeline-micro-clock ()
-#   "Return a string containing an current analogue clock."
-#   (cdr
-#    (if (equal (truncate (float-time)
-#                         (* +doom-modeline-micro-clock-minute-resolution 60))
-#               (car +doom-modeline-micro-clock--cache))
-#        +doom-modeline-micro-clock--cache
-#      (setq +doom-modeline-micro-clock--cache
-#            (cons (truncate (float-time)
-#                            (* +doom-modeline-micro-clock-minute-resolution 60))
-#                  (with-temp-buffer
-#                    (svg-insert-image
-#                     (micro-clock-svg
-#                      (string-to-number (format-time-string "%-I")) ; hour
-#                      (* (truncate (string-to-number (format-time-string "%-M"))
-#                                   +doom-modeline-micro-clock-minute-resolution)
-#                         +doom-modeline-micro-clock-minute-resolution) ; minute
-#                      (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
-#                      "currentColor"))
-#                    (propertize
-#                     " "
-#                     'display
-#                     (append (get-text-property 0 'display (buffer-string))
-#                             '(:ascent center))
-#                     'face 'doom-modeline-time
-#                     'help-echo #'+doom-modeline--clock-text)))))))
-# #+end_src
-
-# With clock generation sorted out, all that's to be done is replacing the =time=
-# modeline segment with our design.
-
-# #+begin_src emacs-lisp
-# (doom-modeline-def-segment time
-#   (when (and doom-modeline-time
-#              (bound-and-true-p display-time-mode)
-#              (not doom-modeline--limited-width-p))
-#     (concat
-#      doom-modeline-spc
-#      (when doom-modeline-time-icon
-#        (concat
-#         (+doom-modeline-micro-clock)
-#         (and (or doom-modeline-icon doom-modeline-unicode-fallback)
-#              doom-modeline-spc)))
-#      (propertize display-time-string
-#                  'face (doom-modeline-face 'doom-modeline-time)))))
-# #+end_src
-
-# **** PDF modeline
-
-# I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
-# however the response was basically "put your preferences in your personal
-# config, the current default is sensible" --- so here we are.
-
-# First up I'm going to want a segment for just the buffer file name, and a PDF
-# icon. Then we'll redefine two functions used to generate the modeline.
-
-# #+begin_src emacs-lisp
-# (doom-modeline-def-segment buffer-name
-#   "Display the current buffer's name, without any other information."
-#   (concat
-#    doom-modeline-spc
-#    (doom-modeline--buffer-name)))
-
-# (doom-modeline-def-segment pdf-icon
-#   "PDF icon from all-the-icons."
-#   (concat
-#    doom-modeline-spc
-#    (doom-modeline-icon 'octicon "file-pdf" nil nil
-#                        :face (if (doom-modeline--active)
-#                                  'all-the-icons-red
-#                                'mode-line-inactive)
-#                        :v-adjust 0.02)))
-
-# (defun doom-modeline-update-pdf-pages ()
-#   "Update PDF pages."
-#   (setq doom-modeline--pdf-pages
-#         (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
-#               (total-page-str (number-to-string (pdf-cache-number-of-pages))))
-#           (concat
-#            (propertize
-#             (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
-#                     " P" current-page-str)
-#             'face 'mode-line)
-#            (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
-
-# (doom-modeline-def-segment pdf-pages
-#   "Display PDF pages."
-#   (if (doom-modeline--active) doom-modeline--pdf-pages
-#     (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
-
-# (doom-modeline-def-modeline 'pdf
-#   '(bar window-number pdf-pages pdf-icon buffer-name)
-#   '(misc-info matches major-mode process vcs))
-# #+end_src
-
-# *** Keycast
-
-# #+call: confpkg("!Pkg Keycast")
-
-# For some reason, I find myself demoing Emacs every now and then. Showing what
-# keyboard stuff I'm doing on-screen seems helpful. While [[https://gitlab.com/screenkey/screenkey][screenkey]] does exist,
-# having something that doesn't cover up screen content is nice.
-
-# #+attr_html: :class invertible :alt Screenshot of Keycast-mode in action
-# [[https://tecosaur.com/lfs/emacs-config/screenshots/keycast.png]]
-
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! keycast :pin "72d9add8ba16e0cae8cfcff7fc050fa75e493b4e")
-# #+end_src
-
-# Let's just make sure this is lazy-loaded appropriately.
-# #+begin_src emacs-lisp
-# (use-package! keycast
-#   :commands keycast-mode
-#   :config
-#   (define-minor-mode keycast-mode
-#     "Show current command and its key binding in the mode line."
-#     :global t
-#     (if keycast-mode
-#         (progn
-#           (add-hook 'pre-command-hook 'keycast--update t)
-#           (add-to-list 'global-mode-string '("" mode-line-keycast " ")))
-#       (remove-hook 'pre-command-hook 'keycast--update)
-#       (setq global-mode-string (remove '("" mode-line-keycast " ") global-mode-string))))
-#   (custom-set-faces!
-#     '(keycast-command :inherit doom-modeline-debug
-#                       :height 0.9)
-#     '(keycast-key :inherit custom-modified
-#                   :height 1.1
-#                   :weight bold)))
-# #+end_src
-
-# *** Screencast
-
-# #+call: confpkg("!Pkg Screencast")
-
-# In a similar manner to [[Keycast]], [[https://gitlab.com/ambrevar/emacs-gif-screencast][gif-screencast]] may come in handy.
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! gif-screencast :pin "adec408e6adab2e8e057fe0ad828749f473bfb83")
-# #+end_src
-
-# We can lazy load this using the start/stop commands.
-
-# I initially installed ~scrot~ for this, since it was the default capture program.
-# However it raised ~glib error: Saving to file ... failed~ each time it was run.
-# Google didn't reveal any easy fixed, so I switched to [[https://github.com/naelstrof/maim][maim]]. We now need to pass
-# it the window ID. This doesn't change throughout the lifetime of an emacs
-# instance, so as long as a single window is used ~xdotool getactivewindow~ will
-# give a satisfactory result.
-
-# It seems that when new colours appear, that tends to make ~gifsicle~ introduce
-# artefacts. To avoid this we pre-populate the colour map using the current doom
-# theme.
-# #+begin_src emacs-lisp
-# (use-package! gif-screencast
-#   :commands gif-screencast-mode
-#   :config
-#   (map! :map gif-screencast-mode-map
-#         :g "<f8>" #'gif-screencast-toggle-pause
-#         :g "<f9>" #'gif-screencast-stop)
-#   (setq gif-screencast-program "maim"
-#         gif-screencast-args `("--quality" "3" "-i" ,(string-trim-right
-#                                                      (shell-command-to-string
-#                                                       "xdotool getactivewindow")))
-#         gif-screencast-optimize-args '("--batch" "--optimize=3" "--usecolormap=/tmp/doom-color-theme"))
-#   (defun gif-screencast-write-colormap ()
-#     (f-write-text
-#      (replace-regexp-in-string
-#       "\n+" "\n"
-#       (mapconcat (lambda (c) (if (listp (cdr c))
-#                                  (cadr c))) doom-themes--colors "\n"))
-#      'utf-8
-#      "/tmp/doom-color-theme" ))
-#   (gif-screencast-write-colormap)
-#   (add-hook 'doom-load-theme-hook #'gif-screencast-write-colormap))
-# #+end_src
-
-# *** Mixed pitch
-
-# #+call: confpkg("!Pkg mixed pitch")
-
-# #+begin_quote
-# From the =:ui zen= module.
-# #+end_quote
-
-# We'd like to use mixed pitch in certain modes. If we simply add a hook, when
-# directly opening a file with (a new) Emacs =mixed-pitch-mode= runs before UI
-# initialisation, which is problematic. To resolve this, we create a hook that
-# runs after UI initialisation and both
-# + conditionally enables =mixed-pitch-mode=
-# + sets up the mixed pitch hooks
-
-# #+begin_src emacs-lisp
-# (defvar mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
-#   "Modes that `mixed-pitch-mode' should be enabled in, but only after UI initialisation.")
-# (defun init-mixed-pitch-h ()
-#   "Hook `mixed-pitch-mode' into each mode in `mixed-pitch-modes'.
-# Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
-#   (when (memq major-mode mixed-pitch-modes)
-#     (mixed-pitch-mode 1))
-#   (dolist (hook mixed-pitch-modes)
-#     (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
-# (add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
-# #+end_src
-
-# As mixed pitch uses the variable =mixed-pitch-face=, we can create a new function
-# to apply mixed pitch with a serif face instead of the default (see the
-# subsequent face definition). This was created for writeroom mode.
-
-# #+begin_src emacs-lisp
-# (autoload #'mixed-pitch-serif-mode "mixed-pitch"
-#   "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
-
-# (setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
-
-# (after! mixed-pitch
-#   (setq mixed-pitch-set-height t)
-#   (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
-#   (defun mixed-pitch-serif-mode (&optional arg)
-#     "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
-#     (interactive)
-#     (let ((mixed-pitch-face 'variable-pitch-serif))
-#       (mixed-pitch-mode (or arg 'toggle)))))
-# #+end_src
-
-# Now, as Harfbuzz is currently used in Emacs, we'll be missing out on the
-# following Alegreya ligatures:
-# #+begin_center
-# ff /ff/ ffi /ffi/ ffj /ffj/ ffl /ffl/
-# fft /fft/ fi /fi/ fj /fj/ ft /ft/
-# Th /Th/
-# #+end_center
-
-# Thankfully, it isn't to hard to add these to the ~composition-function-table~.
-# #+begin_src emacs-lisp
-# (set-char-table-range composition-function-table ?f '(["\\(?:ff?[fijlt]\\)" 0 font-shape-gstring]))
-# (set-char-table-range composition-function-table ?T '(["\\(?:Th\\)" 0 font-shape-gstring]))
-# #+end_src
-
-# **** Variable pitch serif font
-
-# #+call: confpkg()
-
-# It would be nice if we were able to make use of a serif version of the
-# =variable-pitch= face. Since this doesn't already exist, let's create it.
-
-# #+begin_src emacs-lisp
-# (defface variable-pitch-serif
-#     '((t (:family "serif")))
-#     "A variable-pitch face with serifs."
-#     :group 'basic-faces)
-# #+end_src
-
-# For ease of use, let's also set up an easy way of setting the ~:font~ attribute.
-
-# #+begin_src emacs-lisp
-# (defcustom variable-pitch-serif-font (font-spec :family "serif")
-#   "The font face used for `variable-pitch-serif'."
-#   :group 'basic-faces
-#   :set (lambda (symbol value)
-#          (set-face-attribute 'variable-pitch-serif nil :font value)
-#          (set-default-toplevel-value symbol value)))
-# #+end_src
-
-# *** Marginalia
-
-# #+call: confpkg("!Pkg Marginalia")
-
-# #+begin_quote
-# Part of the =:completion vertico= module.
-# #+end_quote
-
-# Marginalia is nice, but the file metadata annotations are a little too plain.
-# Specifically, I have these gripes
-# + File attributes would be nicer if coloured
-# + I don't care about the user/group information if the user/group is me
-# + When a file time is recent, a relative age (e.g. =2h ago=) is more useful than
-#   the date
-# + An indication of file fatness would be nice
-
-# Thanks to the ~marginalia-annotator-registry~, we don't have to advise, we can
-# just add a new =file= annotator.
-
-# Another small thing is the face used for docstrings. At the moment it's =(italic
-# shadow)=, but I don't like that.
-
-# #+begin_src emacs-lisp
-# (after! marginalia
-#   (setq marginalia-censor-variables nil)
-
-#   (defadvice! +marginalia--anotate-local-file-colorful (cand)
-#     "Just a more colourful version of `marginalia--anotate-local-file'."
-#     :override #'marginalia--annotate-local-file
-#     (when-let (attrs (file-attributes (substitute-in-file-name
-#                                        (marginalia--full-candidate cand))
-#                                       'integer))
-#       (marginalia--fields
-#        ((marginalia--file-owner attrs)
-#         :width 12 :face 'marginalia-file-owner)
-#        ((marginalia--file-modes attrs))
-#        ((+marginalia-file-size-colorful (file-attribute-size attrs))
-#         :width 7)
-#        ((+marginalia--time-colorful (file-attribute-modification-time attrs))
-#         :width 12))))
-
-#   (defun +marginalia--time-colorful (time)
-#     (let* ((seconds (float-time (time-subtract (current-time) time)))
-#            (color (doom-blend
-#                    (face-attribute 'marginalia-date :foreground nil t)
-#                    (face-attribute 'marginalia-documentation :foreground nil t)
-#                    (/ 1.0 (log (+ 3 (/ (+ 1 seconds) 345600.0)))))))
-#       ;; 1 - log(3 + 1/(days + 1)) % grey
-#       (propertize (marginalia--time time) 'face (list :foreground color))))
-
-#   (defun +marginalia-file-size-colorful (size)
-#     (let* ((size-index (/ (log10 (+ 1 size)) 7.0))
-#            (color (if (< size-index 10000000) ; 10m
-#                       (doom-blend 'orange 'green size-index)
-#                     (doom-blend 'red 'orange (- size-index 1)))))
-#       (propertize (file-size-human-readable size) 'face (list :foreground color)))))
-# #+end_src
-
-# *** Centaur Tabs
-
-# #+call: confpkg("!Pkg Centaur Tabs")
-
-# #+begin_quote
-# From the =:ui tabs= module.
-# #+end_quote
-
-# We want to make the tabs a nice, comfy size (~36~), with icons. The modifier
-# marker is nice, but the particular default Unicode one causes a lag spike, so
-# let's just switch to an ~o~, which still looks decent but doesn't cause any
-# issues.
-# An 'active-bar' is nice, so let's have one of those. If we have it ~under~ needs us to
-# turn on ~x-underline-at-decent~ though. For some reason this didn't seem to work
-# inside the src_elisp{(after! ... )} block ¯\_(ツ)_/¯.
-# Then let's change the font to a sans serif, but the default one doesn't fit too
-# well somehow, so let's switch to 'P22 Underground Book'; it looks much nicer.
-
-# #+begin_src emacs-lisp
-# (after! centaur-tabs
-#   (centaur-tabs-mode -1)
-#   (setq centaur-tabs-height 36
-#         centaur-tabs-set-icons t
-#         centaur-tabs-modified-marker "o"
-#         centaur-tabs-close-button "×"
-#         centaur-tabs-set-bar 'above
-#         centaur-tabs-gray-out-icons 'buffer)
-#   (centaur-tabs-change-fonts "P22 Underground Book" 160))
-# ;; (setq x-underline-at-descent-line t)
-# #+end_src
-
-# *** All the icons
-
-# #+call: confpkg("!Pkg All the Icons")
-
-# #+begin_quote
-# From the =:core packages= module.
-# #+end_quote
-
-# =all-the-icons= does a generally great job giving file names icons. One minor
-# niggle I have is that when /I/ open a =.m= file, it's much more likely to be Matlab
-# than Objective-C. As such, it'll be switching the icon associated with =.m=.
-# #+begin_src emacs-lisp
-# (after! all-the-icons
-#   (setcdr (assoc "m" all-the-icons-extension-icon-alist)
-#           (cdr (assoc "matlab" all-the-icons-extension-icon-alist))))
-# #+end_src
-
-# *** Prettier page breaks
-
-# #+call: confpkg("!Pkg page break lines")
-
-# In some files, =^L= appears as a page break character. This isn't that visually
-# appealing, and Steve Purcell has been nice enough to make a package to display
-# these as horizontal rules.
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! page-break-lines :recipe (:host github :repo "purcell/page-break-lines")
-#   :pin "79eca86e0634ac68af862e15c8a236c37f446dcd")
-# #+end_src
-
-# #+begin_src emacs-lisp
-# (use-package! page-break-lines
-#   :commands page-break-lines-mode
-#   :init
-#   (autoload 'turn-on-page-break-lines-mode "page-break-lines")
-#   :config
-#   (setq page-break-lines-max-width fill-column)
-#   (map! :prefix "g"
-#         :desc "Prev page break" :nv "[" #'backward-page
-#         :desc "Next page break" :nv "]" #'forward-page))
-# #+end_src
-
-# *** Writeroom
-
-# #+call: confpkg("Writeroom")
-
-# #+begin_quote
-# From the =:ui zen= module.
-# #+end_quote
-
-# For starters, I think Doom is a bit over-zealous when zooming in
-# #+begin_src emacs-lisp
-# (setq +zen-text-scale 0.8)
-# #+end_src
-
-# Then, when using Org it would be nice to make a number of other aesthetic
-# tweaks. Namely:
-# + Use a serifed variable-pitch font
-# + Hiding headline leading stars
-# + Using fleurons as headline bullets
-# + Hiding line numbers
-# + Removing outline indentation
-# + Centring the text
-
-# #+begin_src emacs-lisp
-# (defvar +zen-serif-p t
-#   "Whether to use a serifed font with `mixed-pitch-mode'.")
-# (defvar +zen-org-starhide t
-#   "The value `org-modern-hide-stars' is set to.")
-
-# (after! writeroom-mode
-#   (defvar-local +zen--original-org-indent-mode-p nil)
-#   (defvar-local +zen--original-mixed-pitch-mode-p nil)
-#   (defun +zen-enable-mixed-pitch-mode-h ()
-#     "Enable `mixed-pitch-mode' when in `+zen-mixed-pitch-modes'."
-#     (when (apply #'derived-mode-p +zen-mixed-pitch-modes)
-#       (if writeroom-mode
-#           (progn
-#             (setq +zen--original-mixed-pitch-mode-p mixed-pitch-mode)
-#             (funcall (if +zen-serif-p #'mixed-pitch-serif-mode #'mixed-pitch-mode) 1))
-#         (funcall #'mixed-pitch-mode (if +zen--original-mixed-pitch-mode-p 1 -1)))))
-#   (defun +zen-prose-org-h ()
-#     "Reformat the current Org buffer appearance for prose."
-#     (when (eq major-mode 'org-mode)
-#       (setq display-line-numbers nil
-#             visual-fill-column-width 60
-#             org-adapt-indentation nil)
-#       (when (featurep 'org-modern)
-#         (setq-local org-modern-star '("🙘" "🙙" "🙚" "🙛")
-#                     ;; org-modern-star '("🙐" "🙑" "🙒" "🙓" "🙔" "🙕" "🙖" "🙗")
-#                     org-modern-hide-stars +zen-org-starhide)
-#         (org-modern-mode -1)
-#         (org-modern-mode 1))
-#       (setq
-#        +zen--original-org-indent-mode-p org-indent-mode)
-#       (org-indent-mode -1)))
-#   (defun +zen-nonprose-org-h ()
-#     "Reverse the effect of `+zen-prose-org'."
-#     (when (eq major-mode 'org-mode)
-#       (when (bound-and-true-p org-modern-mode)
-#         (org-modern-mode -1)
-#         (org-modern-mode 1))
-#       (when +zen--original-org-indent-mode-p (org-indent-mode 1))))
-#   (pushnew! writeroom--local-variables
-#             'display-line-numbers
-#             'visual-fill-column-width
-#             'org-adapt-indentation
-#             'org-modern-mode
-#             'org-modern-star
-#             'org-modern-hide-stars)
-#   (add-hook 'writeroom-mode-enable-hook #'+zen-prose-org-h)
-#   (add-hook 'writeroom-mode-disable-hook #'+zen-nonprose-org-h))
-# #+end_src
-
-# #+attr_html: :class invertible :alt Writeroom applied to an Org file
-# [[https://tecosaur.com/lfs/emacs-config/screenshots/writeroom-and-org.png]]
-
-# *** Treemacs
-
-# #+call: confpkg("!Pkg treemacs")
-
-# #+begin_quote
-# From the =:ui treemacs= module.
-# #+end_quote
-
-# Quite often there are superfluous files I'm not that interested in. There's no
-# good reason for them to take up space. Let's add a mechanism to ignore them.
-# #+begin_src emacs-lisp
-# (after! treemacs
-#   (defvar treemacs-file-ignore-extensions '()
-#     "File extension which `treemacs-ignore-filter' will ensure are ignored")
-#   (defvar treemacs-file-ignore-globs '()
-#     "Globs which will are transformed to `treemacs-file-ignore-regexps' which `treemacs-ignore-filter' will ensure are ignored")
-#   (defvar treemacs-file-ignore-regexps '()
-#     "RegExps to be tested to ignore files, generated from `treeemacs-file-ignore-globs'")
-#   (defun treemacs-file-ignore-generate-regexps ()
-#     "Generate `treemacs-file-ignore-regexps' from `treemacs-file-ignore-globs'"
-#     (setq treemacs-file-ignore-regexps (mapcar 'dired-glob-regexp treemacs-file-ignore-globs)))
-#   (if (equal treemacs-file-ignore-globs '()) nil (treemacs-file-ignore-generate-regexps))
-#   (defun treemacs-ignore-filter (file full-path)
-#     "Ignore files specified by `treemacs-file-ignore-extensions', and `treemacs-file-ignore-regexps'"
-#     (or (member (file-name-extension file) treemacs-file-ignore-extensions)
-#         (let ((ignore-file nil))
-#           (dolist (regexp treemacs-file-ignore-regexps ignore-file)
-#             (setq ignore-file (or ignore-file (if (string-match-p regexp full-path) t nil)))))))
-#   (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-filter))
-# #+end_src
-
-# Now, we just identify the files in question.
-# #+begin_src emacs-lisp
-# (setq treemacs-file-ignore-extensions
-#       '(;; LaTeX
-#         "aux"
-#         "ptc"
-#         "fdb_latexmk"
-#         "fls"
-#         "synctex.gz"
-#         "toc"
-#         ;; LaTeX - glossary
-#         "glg"
-#         "glo"
-#         "gls"
-#         "glsdefs"
-#         "ist"
-#         "acn"
-#         "acr"
-#         "alg"
-#         ;; LaTeX - pgfplots
-#         "mw"
-#         ;; LaTeX - pdfx
-#         "pdfa.xmpi"
-#         ))
-# (setq treemacs-file-ignore-globs
-#       '(;; LaTeX
-#         "*/_minted-*"
-#         ;; AucTeX
-#         "*/.auctex-auto"
-#         "*/_region_.log"
-#         "*/_region_.tex"))
-# #+end_src
-
-# ** Frivolities
-# *** xkcd
-
-# #+call: confpkg("XKCD")
-
-# XKCD comics are fun.
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! xkcd :pin "80011da2e7def8f65233d4e0d790ca60d287081d")
-# #+end_src
-
-# We want to set this up so it loads nicely in [[*Extra links][Extra links]].
-# #+begin_src emacs-lisp
-# (use-package! xkcd
-#   :commands (xkcd-get-json
-#              xkcd-download xkcd-get
-#              ;; now for funcs from my extension of this pkg
-#              +xkcd-find-and-copy +xkcd-find-and-view
-#              +xkcd-fetch-info +xkcd-select)
-#   :config
-#   (setq xkcd-cache-dir (expand-file-name "xkcd/" doom-cache-dir)
-#         xkcd-cache-latest (concat xkcd-cache-dir "latest"))
-#   (unless (file-exists-p xkcd-cache-dir)
-#     (make-directory xkcd-cache-dir))
-#   (after! evil-snipe
-#     (add-to-list 'evil-snipe-disabled-modes 'xkcd-mode))
-#   :general (:states 'normal
-#             :keymaps 'xkcd-mode-map
-#             "<right>" #'xkcd-next
-#             "n"       #'xkcd-next ; evil-ish
-#             "<left>"  #'xkcd-prev
-#             "N"       #'xkcd-prev ; evil-ish
-#             "r"       #'xkcd-rand
-#             "a"       #'xkcd-rand ; because image-rotate can interfere
-#             "t"       #'xkcd-alt-text
-#             "q"       #'xkcd-kill-buffer
-#             "o"       #'xkcd-open-browser
-#             "e"       #'xkcd-open-explanation-browser
-#             ;; extras
-#             "s"       #'+xkcd-find-and-view
-#             "/"       #'+xkcd-find-and-view
-#             "y"       #'+xkcd-copy))
-# #+end_src
-
-# Let's also extend the functionality a whole bunch.
-# #+begin_src emacs-lisp
-# (after! xkcd
-#   (require 'emacsql-sqlite)
-
-#   (defun +xkcd-select ()
-#     "Prompt the user for an xkcd using `completing-read' and `+xkcd-select-format'. Return the xkcd number or nil"
-#     (let* (prompt-lines
-#            (-dummy (maphash (lambda (key xkcd-info)
-#                               (push (+xkcd-select-format xkcd-info) prompt-lines))
-#                             +xkcd-stored-info))
-#            (num (completing-read (format "xkcd (%s): " xkcd-latest) prompt-lines)))
-#       (if (equal "" num) xkcd-latest
-#         (string-to-number (replace-regexp-in-string "\\([0-9]+\\).*" "\\1" num)))))
-
-#   (defun +xkcd-select-format (xkcd-info)
-#     "Creates each completing-read line from an xkcd info plist. Must start with the xkcd number"
-#     (format "%-4s  %-30s %s"
-#             (propertize (number-to-string (plist-get xkcd-info :num))
-#                         'face 'counsel-key-binding)
-#             (plist-get xkcd-info :title)
-#             (propertize (plist-get xkcd-info :alt)
-#                         'face '(variable-pitch font-lock-comment-face))))
-
-#   (defun +xkcd-fetch-info (&optional num)
-#     "Fetch the parsed json info for comic NUM. Fetches latest when omitted or 0"
-#     (require 'xkcd)
-#     (when (or (not num) (= num 0))
-#       (+xkcd-check-latest)
-#       (setq num xkcd-latest))
-#     (let ((res (or (gethash num +xkcd-stored-info)
-#                    (puthash num (+xkcd-db-read num) +xkcd-stored-info))))
-#       (unless res
-#         (+xkcd-db-write
-#          (let* ((url (format "https://xkcd.com/%d/info.0.json" num))
-#                 (json-assoc
-#                  (if (gethash num +xkcd-stored-info)
-#                      (gethash num +xkcd-stored-info)
-#                    (json-read-from-string (xkcd-get-json url num)))))
-#            json-assoc))
-#         (setq res (+xkcd-db-read num)))
-#       res))
-
-#   ;; since we've done this, we may as well go one little step further
-#   (defun +xkcd-find-and-copy ()
-#     "Prompt for an xkcd using `+xkcd-select' and copy url to clipboard"
-#     (interactive)
-#     (+xkcd-copy (+xkcd-select)))
-
-#   (defun +xkcd-copy (&optional num)
-#     "Copy a url to xkcd NUM to the clipboard"
-#     (interactive "i")
-#     (let ((num (or num xkcd-cur)))
-#       (gui-select-text (format "https://xkcd.com/%d" num))
-#       (message "xkcd.com/%d copied to clipboard" num)))
-
-#   (defun +xkcd-find-and-view ()
-#     "Prompt for an xkcd using `+xkcd-select' and view it"
-#     (interactive)
-#     (xkcd-get (+xkcd-select))
-#     (switch-to-buffer "*xkcd*"))
-
-#   (defvar +xkcd-latest-max-age (* 60 60) ; 1 hour
-#     "Time after which xkcd-latest should be refreshed, in seconds")
-
-#   ;; initialise `xkcd-latest' and `+xkcd-stored-info' with latest xkcd
-#   (add-transient-hook! '+xkcd-select
-#     (require 'xkcd)
-#     (+xkcd-fetch-info xkcd-latest)
-#     (setq +xkcd-stored-info (+xkcd-db-read-all)))
-
-#   (add-transient-hook! '+xkcd-fetch-info
-#     (xkcd-update-latest))
-
-#   (defun +xkcd-check-latest ()
-#     "Use value in `xkcd-cache-latest' as long as it isn't older thabn `+xkcd-latest-max-age'"
-#     (unless (and (file-exists-p xkcd-cache-latest)
-#                  (< (- (time-to-seconds (current-time))
-#                        (time-to-seconds (file-attribute-modification-time (file-attributes xkcd-cache-latest))))
-#                     +xkcd-latest-max-age))
-#       (let* ((out (xkcd-get-json "http://xkcd.com/info.0.json" 0))
-#              (json-assoc (json-read-from-string out))
-#              (latest (cdr (assoc 'num json-assoc))))
-#         (when (/= xkcd-latest latest)
-#           (+xkcd-db-write json-assoc)
-#           (with-current-buffer (find-file xkcd-cache-latest)
-#             (setq xkcd-latest latest)
-#             (erase-buffer)
-#             (insert (number-to-string latest))
-#             (save-buffer)
-#             (kill-buffer (current-buffer)))))
-#       (shell-command (format "touch %s" xkcd-cache-latest))))
-
-#   (defvar +xkcd-stored-info (make-hash-table :test 'eql)
-#     "Basic info on downloaded xkcds, in the form of a hashtable")
-
-#   (defadvice! xkcd-get-json--and-cache (url &optional num)
-#     "Fetch the Json coming from URL.
-# If the file NUM.json exists, use it instead.
-# If NUM is 0, always download from URL.
-# The return value is a string."
-#     :override #'xkcd-get-json
-#     (let* ((file (format "%s%d.json" xkcd-cache-dir num))
-#            (cached (and (file-exists-p file) (not (eq num 0))))
-#            (out (with-current-buffer (if cached
-#                                          (find-file file)
-#                                        (url-retrieve-synchronously url))
-#                   (goto-char (point-min))
-#                   (unless cached (re-search-forward "^$"))
-#                   (prog1
-#                       (buffer-substring-no-properties (point) (point-max))
-#                     (kill-buffer (current-buffer))))))
-#       (unless (or cached (eq num 0))
-#         (xkcd-cache-json num out))
-#       out))
-
-#   (defadvice! +xkcd-get (num)
-#     "Get the xkcd number NUM."
-#     :override 'xkcd-get
-#     (interactive "nEnter comic number: ")
-#     (xkcd-update-latest)
-#     (get-buffer-create "*xkcd*")
-#     (switch-to-buffer "*xkcd*")
-#     (xkcd-mode)
-#     (let (buffer-read-only)
-#       (erase-buffer)
-#       (setq xkcd-cur num)
-#       (let* ((xkcd-data (+xkcd-fetch-info num))
-#              (num (plist-get xkcd-data :num))
-#              (img (plist-get xkcd-data :img))
-#              (safe-title (plist-get xkcd-data :safe-title))
-#              (alt (plist-get xkcd-data :alt))
-#              title file)
-#         (message "Getting comic...")
-#         (setq file (xkcd-download img num))
-#         (setq title (format "%d: %s" num safe-title))
-#         (insert (propertize title
-#                             'face 'outline-1))
-#         (center-line)
-#         (insert "\n")
-#         (xkcd-insert-image file num)
-#         (if (eq xkcd-cur 0)
-#             (setq xkcd-cur num))
-#         (setq xkcd-alt alt)
-#         (message "%s" title))))
-
-#   (defconst +xkcd-db--sqlite-available-p
-#     (with-demoted-errors "+org-xkcd initialization: %S"
-#       (emacsql-sqlite-ensure-binary)
-#       t))
-
-#   (defvar +xkcd-db--connection (make-hash-table :test #'equal)
-#     "Database connection to +org-xkcd database.")
-
-#   (defun +xkcd-db--get ()
-#     "Return the sqlite db file."
-#     (expand-file-name "xkcd.db" xkcd-cache-dir))
-
-#   (defun +xkcd-db--get-connection ()
-#     "Return the database connection, if any."
-#     (gethash (file-truename xkcd-cache-dir)
-#              +xkcd-db--connection))
-
-#   (defconst +xkcd-db--table-schema
-#     '((xkcds
-#        [(num integer :unique :primary-key)
-#         (year        :not-null)
-#         (month       :not-null)
-#         (link        :not-null)
-#         (news        :not-null)
-#         (safe_title  :not-null)
-#         (title       :not-null)
-#         (transcript  :not-null)
-#         (alt         :not-null)
-#         (img         :not-null)])))
-
-#   (defun +xkcd-db--init (db)
-#     "Initialize database DB with the correct schema and user version."
-#     (emacsql-with-transaction db
-#       (pcase-dolist (`(,table . ,schema) +xkcd-db--table-schema)
-#         (emacsql db [:create-table $i1 $S2] table schema))))
-
-#   (defun +xkcd-db ()
-#     "Entrypoint to the +org-xkcd sqlite database.
-# Initializes and stores the database, and the database connection.
-# Performs a database upgrade when required."
-#     (unless (and (+xkcd-db--get-connection)
-#                  (emacsql-live-p (+xkcd-db--get-connection)))
-#       (let* ((db-file (+xkcd-db--get))
-#              (init-db (not (file-exists-p db-file))))
-#         (make-directory (file-name-directory db-file) t)
-#         (let ((conn (emacsql-sqlite db-file)))
-#           (set-process-query-on-exit-flag (emacsql-process conn) nil)
-#           (puthash (file-truename xkcd-cache-dir)
-#                    conn
-#                    +xkcd-db--connection)
-#           (when init-db
-#             (+xkcd-db--init conn)))))
-#     (+xkcd-db--get-connection))
-
-#   (defun +xkcd-db-query (sql &rest args)
-#     "Run SQL query on +org-xkcd database with ARGS.
-# SQL can be either the emacsql vector representation, or a string."
-#     (if  (stringp sql)
-#         (emacsql (+xkcd-db) (apply #'format sql args))
-#       (apply #'emacsql (+xkcd-db) sql args)))
-
-#   (defun +xkcd-db-read (num)
-#     (when-let ((res
-#                 (car (+xkcd-db-query [:select * :from xkcds
-#                                       :where (= num $s1)]
-#                                      num
-#                                      :limit 1))))
-#       (+xkcd-db-list-to-plist res)))
-
-#   (defun +xkcd-db-read-all ()
-#     (let ((xkcd-table (make-hash-table :test 'eql :size 4000)))
-#       (mapcar (lambda (xkcd-info-list)
-#                 (puthash (car xkcd-info-list) (+xkcd-db-list-to-plist xkcd-info-list) xkcd-table))
-#               (+xkcd-db-query [:select * :from xkcds]))
-#       xkcd-table))
-
-#   (defun +xkcd-db-list-to-plist (xkcd-datalist)
-#     `(:num ,(nth 0 xkcd-datalist)
-#       :year ,(nth 1 xkcd-datalist)
-#       :month ,(nth 2 xkcd-datalist)
-#       :link ,(nth 3 xkcd-datalist)
-#       :news ,(nth 4 xkcd-datalist)
-#       :safe-title ,(nth 5 xkcd-datalist)
-#       :title ,(nth 6 xkcd-datalist)
-#       :transcript ,(nth 7 xkcd-datalist)
-#       :alt ,(nth 8 xkcd-datalist)
-#       :img ,(nth 9 xkcd-datalist)))
-
-#   (defun +xkcd-db-write (data)
-#     (+xkcd-db-query [:insert-into xkcds
-#                      :values $v1]
-#                     (list (vector
-#                            (cdr (assoc 'num        data))
-#                            (cdr (assoc 'year       data))
-#                            (cdr (assoc 'month      data))
-#                            (cdr (assoc 'link       data))
-#                            (cdr (assoc 'news       data))
-#                            (cdr (assoc 'safe_title data))
-#                            (cdr (assoc 'title      data))
-#                            (cdr (assoc 'transcript data))
-#                            (cdr (assoc 'alt        data))
-#                            (cdr (assoc 'img        data))
-#                            )))))
-# #+end_src
-
-# *** Selectric
-
-# #+call: confpkg("!Pkg Selectric")
-
-# Every so often, you want everyone else to /know/ that you're typing, or just to
-# amuse oneself. Introducing: typewriter sounds!
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! selectric-mode :pin "1840de71f7414b7cd6ce425747c8e26a413233aa")
-# #+end_src
-
-# #+begin_src emacs-lisp
-# (use-package! selectic-mode
-#   :commands selectic-mode)
-# #+end_src
-
-# *** Wttrin
-
-# #+call: confpkg("!Pkg Wttrin")
-
-# Hey, let's get the weather in here while we're at it.
-# Unfortunately this seems slightly unmaintained ([[https://github.com/bcbcarl/emacs-wttrin/pulls][few open bugfix PRs]]) so let's
-# roll our [[file:lisp/wttrin/wttrin.el][own version]].
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! wttrin :recipe (:local-repo "lisp/wttrin"))
-# #+end_src
-
-# #+begin_src emacs-lisp
-# (use-package! wttrin
-#   :commands wttrin)
-# #+end_src
-
-# *** Spray
-
-# #+call: confpkg("!Pkg Spray")
-
-# Why not flash words on the screen. Why not --- hey, it could be fun.
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! spray :pin "74d9dcfa2e8b38f96a43de9ab0eb13364300cb46")
-# #+end_src
-
-# It would be nice if Spray's default speed suited me better, and the keybindings
-# worked in evil mode. Let's do that and make the display slightly nicer while
-# we're at it.
-
-# #+begin_src emacs-lisp
-# (use-package! spray
-#   :commands spray-mode
-#   :config
-#   (setq spray-wpm 600
-#         spray-height 800)
-#   (defun spray-mode-hide-cursor ()
-#     "Hide or unhide the cursor as is appropriate."
-#     (if spray-mode
-#         (setq-local spray--last-evil-cursor-state evil-normal-state-cursor
-#                     evil-normal-state-cursor '(nil))
-#       (setq-local evil-normal-state-cursor spray--last-evil-cursor-state)))
-#   (add-hook 'spray-mode-hook #'spray-mode-hide-cursor)
-#   (map! :map spray-mode-map
-#         "<return>" #'spray-start/stop
-#         "f" #'spray-faster
-#         "s" #'spray-slower
-#         "t" #'spray-time
-#         "<right>" #'spray-forward-word
-#         "h" #'spray-forward-word
-#         "<left>" #'spray-backward-word
-#         "l" #'spray-backward-word
-#         "q" #'spray-quit))
-# #+end_src
+*** Spacemacs themes
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! spacemacs-theme :pin "1ec73d68b0f120f92538d9a329a3a46e32f74510")
+#+end_src
+
+*** Theme magic
+
+#+call: confpkg("!Pkg Theme magic")
+
+With all our fancy Emacs themes, my terminal is missing out!
+#+begin_src emacs-lisp :tangle packages.el
+(package! theme-magic :pin "844c4311bd26ebafd4b6a1d72ddcc65d87f074e3")
+#+end_src
+
+This operates using =pywal=, which is present in some repositories, but most
+reliably installed with =pip=.
+#+begin_src shell :eval no :tangle (if (executable-find "wal") "no" "setup.sh")
+sudo python3 -m pip install pywal
+#+end_src
+
+Theme magic takes a look at a number of faces, the saturation levels, and colour
+differences to try to cleverly pick eight colours to use. However, it uses the
+same colours for the light variants, and doesn't always make the best picks.
+Since we're using =doom-themes=, our life is a little easier and we can use the
+colour utilities from Doom themes to easily grab sensible colours and generate
+lightened versions --- let's do that.
+
+#+begin_src emacs-lisp
+(use-package! theme-magic
+  :commands theme-magic-from-emacs
+  :config
+  (defadvice! theme-magic--auto-extract-16-doom-colors ()
+    :override #'theme-magic--auto-extract-16-colors
+    (list
+     (face-attribute 'default :background)
+     (doom-color 'error)
+     (doom-color 'success)
+     (doom-color 'type)
+     (doom-color 'keywords)
+     (doom-color 'constants)
+     (doom-color 'functions)
+     (face-attribute 'default :foreground)
+     (face-attribute 'shadow :foreground)
+     (doom-blend 'base8 'error 0.1)
+     (doom-blend 'base8 'success 0.1)
+     (doom-blend 'base8 'type 0.1)
+     (doom-blend 'base8 'keywords 0.1)
+     (doom-blend 'base8 'constants 0.1)
+     (doom-blend 'base8 'functions 0.1)
+     (face-attribute 'default :foreground))))
+#+end_src
+
+*** Simple comment markup
+
+#+call: confpkg("!Pkg simple-comment-markup")
+
+I find that every now and then I sprinkle a little markup in code comments. Of
+course, this doesn't get fortified as it's ultimately meaningless ... but it
+would be nice if it was, just slightly. Surprisingly, I couldn't find a package
+for this, so I made one.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! simple-comment-markup :recipe (:local-repo "lisp/simple-comment-markup"))
+#+end_src
+
+Let's use both basic Org markup and Markdown code backticks, to cover most
+situations decently.
+
+#+begin_src emacs-lisp
+(use-package! simple-comment-markup
+  :hook (prog-mode . simple-comment-markup-mode)
+  :config
+  (setq simple-comment-markup-set '(org markdown-code)))
+#+end_src
+
+*** Emojify
+
+#+call: confpkg("!Pkg emojify")
+
+#+begin_quote
+From the =:ui emoji= module.
+#+end_quote
+
+
+For starters, twitter's emojis look nicer than emoji-one.
+Other than that, this is pretty great OOTB 😀.
+
+#+begin_src emacs-lisp
+(setq emojify-emoji-set "twemoji-v2")
+#+end_src
+
+One minor annoyance is the use of emojis over the default character
+when the default is actually preferred. This occurs with overlay symbols I use
+in Org mode, such as checkbox state, and a few other miscellaneous cases.
+
+We can accommodate our preferences by deleting those entries from the emoji hash
+table
+
+#+begin_src emacs-lisp
+(defvar emojify-disabled-emojis
+  '(;; Org
+    "◼" "☑" "☸" "⚙" "⏩" "⏪" "⬆" "⬇" "❓" "↔"
+    ;; Terminal powerline
+    "✔"
+    ;; Box drawing
+    "▶" "◀"
+    ;; I just want to see this as text
+    "©" "™")
+  "Characters that should never be affected by `emojify-mode'.")
+
+(defadvice! emojify-delete-from-data ()
+  "Ensure `emojify-disabled-emojis' don't appear in `emojify-emojis'."
+  :after #'emojify-set-emoji-data
+  (dolist (emoji emojify-disabled-emojis)
+    (remhash emoji emojify-emojis)))
+#+end_src
+
+Now, it would be good to have a minor mode which allowed you to type ascii/gh
+emojis and get them converted to unicode. Let's make one.
+#+begin_src emacs-lisp
+(defun emojify--replace-text-with-emoji (orig-fn emoji text buffer start end &optional target)
+  "Modify `emojify--propertize-text-for-emoji' to replace ascii/github emoticons with unicode emojis, on the fly."
+  (if (or (not emoticon-to-emoji) (= 1 (length text)))
+      (funcall orig-fn emoji text buffer start end target)
+    (delete-region start end)
+    (insert (ht-get emoji "unicode"))))
+
+(define-minor-mode emoticon-to-emoji
+  "Write ascii/gh emojis, and have them converted to unicode live."
+  :global nil
+  :init-value nil
+  (if emoticon-to-emoji
+      (progn
+        (setq-local emojify-emoji-styles '(ascii github unicode))
+        (advice-add 'emojify--propertize-text-for-emoji :around #'emojify--replace-text-with-emoji)
+        (unless emojify-mode
+          (emojify-turn-on-emojify-mode)))
+    (setq-local emojify-emoji-styles (default-value 'emojify-emoji-styles))
+    (advice-remove 'emojify--propertize-text-for-emoji #'emojify--replace-text-with-emoji)))
+#+end_src
+
+This new minor mode of ours will be nice for messages, so let's hook it in for
+Email and IRC.
+#+begin_src emacs-lisp
+(add-hook! '(mu4e-compose-mode org-msg-edit-mode circe-channel-mode) (emoticon-to-emoji 1))
+#+end_src
+
+*** Doom modeline
+
+#+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
+
+#+begin_quote
+From the =:ui modeline= module.
+#+end_quote
+
+**** Modified buffer colour
+
+The modeline is very nice and pretty, however I have a few niggles with the
+defaults. For starters, by default ~red~ text is used to indicate an unsaved file.
+This makes me feel like something's gone /wrong/, so let's tone that down to
+orange.
+
+#+begin_src emacs-lisp
+(custom-set-faces!
+  '(doom-modeline-buffer-modified :foreground "orange"))
+#+end_src
+
+**** Height
+
+The default size (=25=) makes for a rather narrow mode line. To me, the modeline
+feels a bit comfier if we give it a bit more space. I find =45= adds roughly a
+third of the line height as padding above and below.
+
+#+begin_src emacs-lisp
+(setq doom-modeline-height 45)
+#+end_src
+
+**** File encoding
+
+While we're modifying the modeline, when we have the default file encoding (=LF
+UTF-8=), it really isn't worth noting in the modeline. So, why not conditionally
+hide it?
+
+#+begin_src emacs-lisp
+(defun doom-modeline-conditional-buffer-encoding ()
+  "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
+  (setq-local doom-modeline-buffer-encoding
+              (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
+                                 '(coding-category-undecided coding-category-utf-8))
+                           (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
+                t)))
+
+(add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
+#+end_src
+
+**** Time
+
+Moving onto the modeline segments, there's a calendar icon showed next to the
+current time, which I'm not a fan of. Let's replace that by redefining the
+segment. Instead of the calendar, it would be much nicer to have an updating
+analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
+
+First, we'll need a way to produce svg clocks on-demand.
+
+#+begin_src emacs-lisp
+(defvar micro-clock-hour-hand-ratio 0.45
+  "Length of the hour hand as a proportion of the radius.")
+(defvar micro-clock-minute-hand-ratio 0.7
+  "Length of the minute hand as a proportion of the radius.")
+
+(defun micro-clock-svg (hour minute radius color)
+  "Construct an SVG clock showing the time HOUR:MINUTE.
+The clock will be of the specified RADIUS and COLOR."
+  (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+                   micro-clock-hour-hand-ratio))
+        (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+                   micro-clock-hour-hand-ratio))
+        (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
+                     micro-clock-minute-hand-ratio))
+        (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
+                     micro-clock-minute-hand-ratio))
+        (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
+    (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
+    (svg-circle svg radius radius 1 :fill color :stroke "none")
+    (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
+              :stroke-width 2)
+    (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
+              :stroke-width 1.5)
+    svg))
+#+end_src
+
+With that out the way, we need to figure out how to integrate this into the
+modeline. For the most part this was fairly easy, the tricky part was getting
+the alignment right. I tried using the =(raise FACTOR)= display property, but that
+doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
+descriptors]] though, I came across the =:ascent= property, which looked rather
+promising. By setting =:ascent center= the image is centred relative to the text,
+which is exactly what we need. With that sorted, we just add some caching and
+the obvious customisations and we've got modeline-appropriate clock generation!
+
+#+begin_src emacs-lisp
+(require 'svg)
+
+(defvar +doom-modeline-micro-clock-minute-resolution 1
+  "The clock will be updated every this many minutes, truncating.")
+(defvar +doom-modeline-micro-clock-inverse-size 4.8
+  "The size of the clock, as an inverse proportion to the mode line height.")
+
+(defvar +doom-modeline-micro-clock--cache nil)
+
+(defvar +doom-modeline-clock-text-format "%c")
+
+(defun +doom-modeline--clock-text (&optional _window _object _pos)
+  (format-time-string +doom-modeline-clock-text-format))
+
+(defun +doom-modeline-micro-clock ()
+  "Return a string containing an current analogue clock."
+  (cdr
+   (if (equal (truncate (float-time)
+                        (* +doom-modeline-micro-clock-minute-resolution 60))
+              (car +doom-modeline-micro-clock--cache))
+       +doom-modeline-micro-clock--cache
+     (setq +doom-modeline-micro-clock--cache
+           (cons (truncate (float-time)
+                           (* +doom-modeline-micro-clock-minute-resolution 60))
+                 (with-temp-buffer
+                   (svg-insert-image
+                    (micro-clock-svg
+                     (string-to-number (format-time-string "%-I")) ; hour
+                     (* (truncate (string-to-number (format-time-string "%-M"))
+                                  +doom-modeline-micro-clock-minute-resolution)
+                        +doom-modeline-micro-clock-minute-resolution) ; minute
+                     (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
+                     "currentColor"))
+                   (propertize
+                    " "
+                    'display
+                    (append (get-text-property 0 'display (buffer-string))
+                            '(:ascent center))
+                    'face 'doom-modeline-time
+                    'help-echo #'+doom-modeline--clock-text)))))))
+#+end_src
+
+With clock generation sorted out, all that's to be done is replacing the =time=
+modeline segment with our design.
+
+#+begin_src emacs-lisp
+(doom-modeline-def-segment time
+  (when (and doom-modeline-time
+             (bound-and-true-p display-time-mode)
+             (not doom-modeline--limited-width-p))
+    (concat
+     doom-modeline-spc
+     (when doom-modeline-time-icon
+       (concat
+        (+doom-modeline-micro-clock)
+        (and (or doom-modeline-icon doom-modeline-unicode-fallback)
+             doom-modeline-spc)))
+     (propertize display-time-string
+                 'face (doom-modeline-face 'doom-modeline-time)))))
+#+end_src
+
+**** PDF modeline
+
+I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
+however the response was basically "put your preferences in your personal
+config, the current default is sensible" --- so here we are.
+
+First up I'm going to want a segment for just the buffer file name, and a PDF
+icon. Then we'll redefine two functions used to generate the modeline.
+
+#+begin_src emacs-lisp
+(doom-modeline-def-segment buffer-name
+  "Display the current buffer's name, without any other information."
+  (concat
+   doom-modeline-spc
+   (doom-modeline--buffer-name)))
+
+(doom-modeline-def-segment pdf-icon
+  "PDF icon from all-the-icons."
+  (concat
+   doom-modeline-spc
+   (doom-modeline-icon 'octicon "file-pdf" nil nil
+                       :face (if (doom-modeline--active)
+                                 'all-the-icons-red
+                               'mode-line-inactive)
+                       :v-adjust 0.02)))
+
+(defun doom-modeline-update-pdf-pages ()
+  "Update PDF pages."
+  (setq doom-modeline--pdf-pages
+        (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
+              (total-page-str (number-to-string (pdf-cache-number-of-pages))))
+          (concat
+           (propertize
+            (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
+                    " P" current-page-str)
+            'face 'mode-line)
+           (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
+
+(doom-modeline-def-segment pdf-pages
+  "Display PDF pages."
+  (if (doom-modeline--active) doom-modeline--pdf-pages
+    (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
+
+(doom-modeline-def-modeline 'pdf
+  '(bar window-number pdf-pages pdf-icon buffer-name)
+  '(misc-info matches major-mode process vcs))
+#+end_src
+
+*** Keycast
+
+#+call: confpkg("!Pkg Keycast")
+
+For some reason, I find myself demoing Emacs every now and then. Showing what
+keyboard stuff I'm doing on-screen seems helpful. While [[https://gitlab.com/screenkey/screenkey][screenkey]] does exist,
+having something that doesn't cover up screen content is nice.
+
+#+attr_html: :class invertible :alt Screenshot of Keycast-mode in action
+[[https://tecosaur.com/lfs/emacs-config/screenshots/keycast.png]]
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! keycast :pin "72d9add8ba16e0cae8cfcff7fc050fa75e493b4e")
+#+end_src
+
+Let's just make sure this is lazy-loaded appropriately.
+#+begin_src emacs-lisp
+(use-package! keycast
+  :commands keycast-mode
+  :config
+  (define-minor-mode keycast-mode
+    "Show current command and its key binding in the mode line."
+    :global t
+    (if keycast-mode
+        (progn
+          (add-hook 'pre-command-hook 'keycast--update t)
+          (add-to-list 'global-mode-string '("" mode-line-keycast " ")))
+      (remove-hook 'pre-command-hook 'keycast--update)
+      (setq global-mode-string (remove '("" mode-line-keycast " ") global-mode-string))))
+  (custom-set-faces!
+    '(keycast-command :inherit doom-modeline-debug
+                      :height 0.9)
+    '(keycast-key :inherit custom-modified
+                  :height 1.1
+                  :weight bold)))
+#+end_src
+
+*** Screencast
+
+#+call: confpkg("!Pkg Screencast")
+
+In a similar manner to [[Keycast]], [[https://gitlab.com/ambrevar/emacs-gif-screencast][gif-screencast]] may come in handy.
+#+begin_src emacs-lisp :tangle packages.el
+(package! gif-screencast :pin "adec408e6adab2e8e057fe0ad828749f473bfb83")
+#+end_src
+
+We can lazy load this using the start/stop commands.
+
+I initially installed ~scrot~ for this, since it was the default capture program.
+However it raised ~glib error: Saving to file ... failed~ each time it was run.
+Google didn't reveal any easy fixed, so I switched to [[https://github.com/naelstrof/maim][maim]]. We now need to pass
+it the window ID. This doesn't change throughout the lifetime of an emacs
+instance, so as long as a single window is used ~xdotool getactivewindow~ will
+give a satisfactory result.
+
+It seems that when new colours appear, that tends to make ~gifsicle~ introduce
+artefacts. To avoid this we pre-populate the colour map using the current doom
+theme.
+#+begin_src emacs-lisp
+(use-package! gif-screencast
+  :commands gif-screencast-mode
+  :config
+  (map! :map gif-screencast-mode-map
+        :g "<f8>" #'gif-screencast-toggle-pause
+        :g "<f9>" #'gif-screencast-stop)
+  (setq gif-screencast-program "maim"
+        gif-screencast-args `("--quality" "3" "-i" ,(string-trim-right
+                                                     (shell-command-to-string
+                                                      "xdotool getactivewindow")))
+        gif-screencast-optimize-args '("--batch" "--optimize=3" "--usecolormap=/tmp/doom-color-theme"))
+  (defun gif-screencast-write-colormap ()
+    (f-write-text
+     (replace-regexp-in-string
+      "\n+" "\n"
+      (mapconcat (lambda (c) (if (listp (cdr c))
+                                 (cadr c))) doom-themes--colors "\n"))
+     'utf-8
+     "/tmp/doom-color-theme" ))
+  (gif-screencast-write-colormap)
+  (add-hook 'doom-load-theme-hook #'gif-screencast-write-colormap))
+#+end_src
+
+*** Mixed pitch
+
+#+call: confpkg("!Pkg mixed pitch")
+
+#+begin_quote
+From the =:ui zen= module.
+#+end_quote
+
+We'd like to use mixed pitch in certain modes. If we simply add a hook, when
+directly opening a file with (a new) Emacs =mixed-pitch-mode= runs before UI
+initialisation, which is problematic. To resolve this, we create a hook that
+runs after UI initialisation and both
++ conditionally enables =mixed-pitch-mode=
++ sets up the mixed pitch hooks
+
+#+begin_src emacs-lisp
+(defvar mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
+  "Modes that `mixed-pitch-mode' should be enabled in, but only after UI initialisation.")
+(defun init-mixed-pitch-h ()
+  "Hook `mixed-pitch-mode' into each mode in `mixed-pitch-modes'.
+Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
+  (when (memq major-mode mixed-pitch-modes)
+    (mixed-pitch-mode 1))
+  (dolist (hook mixed-pitch-modes)
+    (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
+(add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
+#+end_src
+
+As mixed pitch uses the variable =mixed-pitch-face=, we can create a new function
+to apply mixed pitch with a serif face instead of the default (see the
+subsequent face definition). This was created for writeroom mode.
+
+#+begin_src emacs-lisp
+(autoload #'mixed-pitch-serif-mode "mixed-pitch"
+  "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
+
+(setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
+
+(after! mixed-pitch
+  (setq mixed-pitch-set-height t)
+  (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
+  (defun mixed-pitch-serif-mode (&optional arg)
+    "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
+    (interactive)
+    (let ((mixed-pitch-face 'variable-pitch-serif))
+      (mixed-pitch-mode (or arg 'toggle)))))
+#+end_src
+
+Now, as Harfbuzz is currently used in Emacs, we'll be missing out on the
+following Alegreya ligatures:
+#+begin_center
+ff /ff/ ffi /ffi/ ffj /ffj/ ffl /ffl/
+fft /fft/ fi /fi/ fj /fj/ ft /ft/
+Th /Th/
+#+end_center
+
+Thankfully, it isn't to hard to add these to the ~composition-function-table~.
+#+begin_src emacs-lisp
+(set-char-table-range composition-function-table ?f '(["\\(?:ff?[fijlt]\\)" 0 font-shape-gstring]))
+(set-char-table-range composition-function-table ?T '(["\\(?:Th\\)" 0 font-shape-gstring]))
+#+end_src
+
+**** Variable pitch serif font
+
+#+call: confpkg()
+
+It would be nice if we were able to make use of a serif version of the
+=variable-pitch= face. Since this doesn't already exist, let's create it.
+
+#+begin_src emacs-lisp
+(defface variable-pitch-serif
+    '((t (:family "serif")))
+    "A variable-pitch face with serifs."
+    :group 'basic-faces)
+#+end_src
+
+For ease of use, let's also set up an easy way of setting the ~:font~ attribute.
+
+#+begin_src emacs-lisp
+(defcustom variable-pitch-serif-font (font-spec :family "serif")
+  "The font face used for `variable-pitch-serif'."
+  :group 'basic-faces
+  :set (lambda (symbol value)
+         (set-face-attribute 'variable-pitch-serif nil :font value)
+         (set-default-toplevel-value symbol value)))
+#+end_src
+
+*** Marginalia
+
+#+call: confpkg("!Pkg Marginalia")
+
+#+begin_quote
+Part of the =:completion vertico= module.
+#+end_quote
+
+Marginalia is nice, but the file metadata annotations are a little too plain.
+Specifically, I have these gripes
++ File attributes would be nicer if coloured
++ I don't care about the user/group information if the user/group is me
++ When a file time is recent, a relative age (e.g. =2h ago=) is more useful than
+  the date
++ An indication of file fatness would be nice
+
+Thanks to the ~marginalia-annotator-registry~, we don't have to advise, we can
+just add a new =file= annotator.
+
+Another small thing is the face used for docstrings. At the moment it's =(italic
+shadow)=, but I don't like that.
+
+#+begin_src emacs-lisp
+(after! marginalia
+  (setq marginalia-censor-variables nil)
+
+  (defadvice! +marginalia--anotate-local-file-colorful (cand)
+    "Just a more colourful version of `marginalia--anotate-local-file'."
+    :override #'marginalia--annotate-local-file
+    (when-let (attrs (file-attributes (substitute-in-file-name
+                                       (marginalia--full-candidate cand))
+                                      'integer))
+      (marginalia--fields
+       ((marginalia--file-owner attrs)
+        :width 12 :face 'marginalia-file-owner)
+       ((marginalia--file-modes attrs))
+       ((+marginalia-file-size-colorful (file-attribute-size attrs))
+        :width 7)
+       ((+marginalia--time-colorful (file-attribute-modification-time attrs))
+        :width 12))))
+
+  (defun +marginalia--time-colorful (time)
+    (let* ((seconds (float-time (time-subtract (current-time) time)))
+           (color (doom-blend
+                   (face-attribute 'marginalia-date :foreground nil t)
+                   (face-attribute 'marginalia-documentation :foreground nil t)
+                   (/ 1.0 (log (+ 3 (/ (+ 1 seconds) 345600.0)))))))
+      ;; 1 - log(3 + 1/(days + 1)) % grey
+      (propertize (marginalia--time time) 'face (list :foreground color))))
+
+  (defun +marginalia-file-size-colorful (size)
+    (let* ((size-index (/ (log10 (+ 1 size)) 7.0))
+           (color (if (< size-index 10000000) ; 10m
+                      (doom-blend 'orange 'green size-index)
+                    (doom-blend 'red 'orange (- size-index 1)))))
+      (propertize (file-size-human-readable size) 'face (list :foreground color)))))
+#+end_src
+
+*** Centaur Tabs
+
+#+call: confpkg("!Pkg Centaur Tabs")
+
+#+begin_quote
+From the =:ui tabs= module.
+#+end_quote
+
+We want to make the tabs a nice, comfy size (~36~), with icons. The modifier
+marker is nice, but the particular default Unicode one causes a lag spike, so
+let's just switch to an ~o~, which still looks decent but doesn't cause any
+issues.
+An 'active-bar' is nice, so let's have one of those. If we have it ~under~ needs us to
+turn on ~x-underline-at-decent~ though. For some reason this didn't seem to work
+inside the src_elisp{(after! ... )} block ¯\_(ツ)_/¯.
+Then let's change the font to a sans serif, but the default one doesn't fit too
+well somehow, so let's switch to 'P22 Underground Book'; it looks much nicer.
+
+#+begin_src emacs-lisp
+(after! centaur-tabs
+  (centaur-tabs-mode -1)
+  (setq centaur-tabs-height 36
+        centaur-tabs-set-icons t
+        centaur-tabs-modified-marker "o"
+        centaur-tabs-close-button "×"
+        centaur-tabs-set-bar 'above
+        centaur-tabs-gray-out-icons 'buffer)
+  (centaur-tabs-change-fonts "P22 Underground Book" 160))
+;; (setq x-underline-at-descent-line t)
+#+end_src
+
+*** All the icons
+
+#+call: confpkg("!Pkg All the Icons")
+
+#+begin_quote
+From the =:core packages= module.
+#+end_quote
+
+=all-the-icons= does a generally great job giving file names icons. One minor
+niggle I have is that when /I/ open a =.m= file, it's much more likely to be Matlab
+than Objective-C. As such, it'll be switching the icon associated with =.m=.
+#+begin_src emacs-lisp
+(after! all-the-icons
+  (setcdr (assoc "m" all-the-icons-extension-icon-alist)
+          (cdr (assoc "matlab" all-the-icons-extension-icon-alist))))
+#+end_src
+
+*** Prettier page breaks
+
+#+call: confpkg("!Pkg page break lines")
+
+In some files, =^L= appears as a page break character. This isn't that visually
+appealing, and Steve Purcell has been nice enough to make a package to display
+these as horizontal rules.
+#+begin_src emacs-lisp :tangle packages.el
+(package! page-break-lines :recipe (:host github :repo "purcell/page-break-lines")
+  :pin "79eca86e0634ac68af862e15c8a236c37f446dcd")
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! page-break-lines
+  :commands page-break-lines-mode
+  :init
+  (autoload 'turn-on-page-break-lines-mode "page-break-lines")
+  :config
+  (setq page-break-lines-max-width fill-column)
+  (map! :prefix "g"
+        :desc "Prev page break" :nv "[" #'backward-page
+        :desc "Next page break" :nv "]" #'forward-page))
+#+end_src
+
+*** Writeroom
+
+#+call: confpkg("Writeroom")
+
+#+begin_quote
+From the =:ui zen= module.
+#+end_quote
+
+For starters, I think Doom is a bit over-zealous when zooming in
+#+begin_src emacs-lisp
+(setq +zen-text-scale 0.8)
+#+end_src
+
+Then, when using Org it would be nice to make a number of other aesthetic
+tweaks. Namely:
++ Use a serifed variable-pitch font
++ Hiding headline leading stars
++ Using fleurons as headline bullets
++ Hiding line numbers
++ Removing outline indentation
++ Centring the text
+
+#+begin_src emacs-lisp
+(defvar +zen-serif-p t
+  "Whether to use a serifed font with `mixed-pitch-mode'.")
+(defvar +zen-org-starhide t
+  "The value `org-modern-hide-stars' is set to.")
+
+(after! writeroom-mode
+  (defvar-local +zen--original-org-indent-mode-p nil)
+  (defvar-local +zen--original-mixed-pitch-mode-p nil)
+  (defun +zen-enable-mixed-pitch-mode-h ()
+    "Enable `mixed-pitch-mode' when in `+zen-mixed-pitch-modes'."
+    (when (apply #'derived-mode-p +zen-mixed-pitch-modes)
+      (if writeroom-mode
+          (progn
+            (setq +zen--original-mixed-pitch-mode-p mixed-pitch-mode)
+            (funcall (if +zen-serif-p #'mixed-pitch-serif-mode #'mixed-pitch-mode) 1))
+        (funcall #'mixed-pitch-mode (if +zen--original-mixed-pitch-mode-p 1 -1)))))
+  (defun +zen-prose-org-h ()
+    "Reformat the current Org buffer appearance for prose."
+    (when (eq major-mode 'org-mode)
+      (setq display-line-numbers nil
+            visual-fill-column-width 60
+            org-adapt-indentation nil)
+      (when (featurep 'org-modern)
+        (setq-local org-modern-star '("🙘" "🙙" "🙚" "🙛")
+                    ;; org-modern-star '("🙐" "🙑" "🙒" "🙓" "🙔" "🙕" "🙖" "🙗")
+                    org-modern-hide-stars +zen-org-starhide)
+        (org-modern-mode -1)
+        (org-modern-mode 1))
+      (setq
+       +zen--original-org-indent-mode-p org-indent-mode)
+      (org-indent-mode -1)))
+  (defun +zen-nonprose-org-h ()
+    "Reverse the effect of `+zen-prose-org'."
+    (when (eq major-mode 'org-mode)
+      (when (bound-and-true-p org-modern-mode)
+        (org-modern-mode -1)
+        (org-modern-mode 1))
+      (when +zen--original-org-indent-mode-p (org-indent-mode 1))))
+  (pushnew! writeroom--local-variables
+            'display-line-numbers
+            'visual-fill-column-width
+            'org-adapt-indentation
+            'org-modern-mode
+            'org-modern-star
+            'org-modern-hide-stars)
+  (add-hook 'writeroom-mode-enable-hook #'+zen-prose-org-h)
+  (add-hook 'writeroom-mode-disable-hook #'+zen-nonprose-org-h))
+#+end_src
+
+#+attr_html: :class invertible :alt Writeroom applied to an Org file
+[[https://tecosaur.com/lfs/emacs-config/screenshots/writeroom-and-org.png]]
+
+*** Treemacs
+
+#+call: confpkg("!Pkg treemacs")
+
+#+begin_quote
+From the =:ui treemacs= module.
+#+end_quote
+
+Quite often there are superfluous files I'm not that interested in. There's no
+good reason for them to take up space. Let's add a mechanism to ignore them.
+#+begin_src emacs-lisp
+(after! treemacs
+  (defvar treemacs-file-ignore-extensions '()
+    "File extension which `treemacs-ignore-filter' will ensure are ignored")
+  (defvar treemacs-file-ignore-globs '()
+    "Globs which will are transformed to `treemacs-file-ignore-regexps' which `treemacs-ignore-filter' will ensure are ignored")
+  (defvar treemacs-file-ignore-regexps '()
+    "RegExps to be tested to ignore files, generated from `treeemacs-file-ignore-globs'")
+  (defun treemacs-file-ignore-generate-regexps ()
+    "Generate `treemacs-file-ignore-regexps' from `treemacs-file-ignore-globs'"
+    (setq treemacs-file-ignore-regexps (mapcar 'dired-glob-regexp treemacs-file-ignore-globs)))
+  (if (equal treemacs-file-ignore-globs '()) nil (treemacs-file-ignore-generate-regexps))
+  (defun treemacs-ignore-filter (file full-path)
+    "Ignore files specified by `treemacs-file-ignore-extensions', and `treemacs-file-ignore-regexps'"
+    (or (member (file-name-extension file) treemacs-file-ignore-extensions)
+        (let ((ignore-file nil))
+          (dolist (regexp treemacs-file-ignore-regexps ignore-file)
+            (setq ignore-file (or ignore-file (if (string-match-p regexp full-path) t nil)))))))
+  (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-filter))
+#+end_src
+
+Now, we just identify the files in question.
+#+begin_src emacs-lisp
+(setq treemacs-file-ignore-extensions
+      '(;; LaTeX
+        "aux"
+        "ptc"
+        "fdb_latexmk"
+        "fls"
+        "synctex.gz"
+        "toc"
+        ;; LaTeX - glossary
+        "glg"
+        "glo"
+        "gls"
+        "glsdefs"
+        "ist"
+        "acn"
+        "acr"
+        "alg"
+        ;; LaTeX - pgfplots
+        "mw"
+        ;; LaTeX - pdfx
+        "pdfa.xmpi"
+        ))
+(setq treemacs-file-ignore-globs
+      '(;; LaTeX
+        "*/_minted-*"
+        ;; AucTeX
+        "*/.auctex-auto"
+        "*/_region_.log"
+        "*/_region_.tex"))
+#+end_src
+
+** Frivolities
+*** xkcd
+
+#+call: confpkg("XKCD")
+
+XKCD comics are fun.
+#+begin_src emacs-lisp :tangle packages.el
+(package! xkcd :pin "80011da2e7def8f65233d4e0d790ca60d287081d")
+#+end_src
+
+We want to set this up so it loads nicely in [[*Extra links][Extra links]].
+#+begin_src emacs-lisp
+(use-package! xkcd
+  :commands (xkcd-get-json
+             xkcd-download xkcd-get
+             ;; now for funcs from my extension of this pkg
+             +xkcd-find-and-copy +xkcd-find-and-view
+             +xkcd-fetch-info +xkcd-select)
+  :config
+  (setq xkcd-cache-dir (expand-file-name "xkcd/" doom-cache-dir)
+        xkcd-cache-latest (concat xkcd-cache-dir "latest"))
+  (unless (file-exists-p xkcd-cache-dir)
+    (make-directory xkcd-cache-dir))
+  (after! evil-snipe
+    (add-to-list 'evil-snipe-disabled-modes 'xkcd-mode))
+  :general (:states 'normal
+            :keymaps 'xkcd-mode-map
+            "<right>" #'xkcd-next
+            "n"       #'xkcd-next ; evil-ish
+            "<left>"  #'xkcd-prev
+            "N"       #'xkcd-prev ; evil-ish
+            "r"       #'xkcd-rand
+            "a"       #'xkcd-rand ; because image-rotate can interfere
+            "t"       #'xkcd-alt-text
+            "q"       #'xkcd-kill-buffer
+            "o"       #'xkcd-open-browser
+            "e"       #'xkcd-open-explanation-browser
+            ;; extras
+            "s"       #'+xkcd-find-and-view
+            "/"       #'+xkcd-find-and-view
+            "y"       #'+xkcd-copy))
+#+end_src
+
+Let's also extend the functionality a whole bunch.
+#+begin_src emacs-lisp
+(after! xkcd
+  (require 'emacsql-sqlite)
+
+  (defun +xkcd-select ()
+    "Prompt the user for an xkcd using `completing-read' and `+xkcd-select-format'. Return the xkcd number or nil"
+    (let* (prompt-lines
+           (-dummy (maphash (lambda (key xkcd-info)
+                              (push (+xkcd-select-format xkcd-info) prompt-lines))
+                            +xkcd-stored-info))
+           (num (completing-read (format "xkcd (%s): " xkcd-latest) prompt-lines)))
+      (if (equal "" num) xkcd-latest
+        (string-to-number (replace-regexp-in-string "\\([0-9]+\\).*" "\\1" num)))))
+
+  (defun +xkcd-select-format (xkcd-info)
+    "Creates each completing-read line from an xkcd info plist. Must start with the xkcd number"
+    (format "%-4s  %-30s %s"
+            (propertize (number-to-string (plist-get xkcd-info :num))
+                        'face 'counsel-key-binding)
+            (plist-get xkcd-info :title)
+            (propertize (plist-get xkcd-info :alt)
+                        'face '(variable-pitch font-lock-comment-face))))
+
+  (defun +xkcd-fetch-info (&optional num)
+    "Fetch the parsed json info for comic NUM. Fetches latest when omitted or 0"
+    (require 'xkcd)
+    (when (or (not num) (= num 0))
+      (+xkcd-check-latest)
+      (setq num xkcd-latest))
+    (let ((res (or (gethash num +xkcd-stored-info)
+                   (puthash num (+xkcd-db-read num) +xkcd-stored-info))))
+      (unless res
+        (+xkcd-db-write
+         (let* ((url (format "https://xkcd.com/%d/info.0.json" num))
+                (json-assoc
+                 (if (gethash num +xkcd-stored-info)
+                     (gethash num +xkcd-stored-info)
+                   (json-read-from-string (xkcd-get-json url num)))))
+           json-assoc))
+        (setq res (+xkcd-db-read num)))
+      res))
+
+  ;; since we've done this, we may as well go one little step further
+  (defun +xkcd-find-and-copy ()
+    "Prompt for an xkcd using `+xkcd-select' and copy url to clipboard"
+    (interactive)
+    (+xkcd-copy (+xkcd-select)))
+
+  (defun +xkcd-copy (&optional num)
+    "Copy a url to xkcd NUM to the clipboard"
+    (interactive "i")
+    (let ((num (or num xkcd-cur)))
+      (gui-select-text (format "https://xkcd.com/%d" num))
+      (message "xkcd.com/%d copied to clipboard" num)))
+
+  (defun +xkcd-find-and-view ()
+    "Prompt for an xkcd using `+xkcd-select' and view it"
+    (interactive)
+    (xkcd-get (+xkcd-select))
+    (switch-to-buffer "*xkcd*"))
+
+  (defvar +xkcd-latest-max-age (* 60 60) ; 1 hour
+    "Time after which xkcd-latest should be refreshed, in seconds")
+
+  ;; initialise `xkcd-latest' and `+xkcd-stored-info' with latest xkcd
+  (add-transient-hook! '+xkcd-select
+    (require 'xkcd)
+    (+xkcd-fetch-info xkcd-latest)
+    (setq +xkcd-stored-info (+xkcd-db-read-all)))
+
+  (add-transient-hook! '+xkcd-fetch-info
+    (xkcd-update-latest))
+
+  (defun +xkcd-check-latest ()
+    "Use value in `xkcd-cache-latest' as long as it isn't older thabn `+xkcd-latest-max-age'"
+    (unless (and (file-exists-p xkcd-cache-latest)
+                 (< (- (time-to-seconds (current-time))
+                       (time-to-seconds (file-attribute-modification-time (file-attributes xkcd-cache-latest))))
+                    +xkcd-latest-max-age))
+      (let* ((out (xkcd-get-json "http://xkcd.com/info.0.json" 0))
+             (json-assoc (json-read-from-string out))
+             (latest (cdr (assoc 'num json-assoc))))
+        (when (/= xkcd-latest latest)
+          (+xkcd-db-write json-assoc)
+          (with-current-buffer (find-file xkcd-cache-latest)
+            (setq xkcd-latest latest)
+            (erase-buffer)
+            (insert (number-to-string latest))
+            (save-buffer)
+            (kill-buffer (current-buffer)))))
+      (shell-command (format "touch %s" xkcd-cache-latest))))
+
+  (defvar +xkcd-stored-info (make-hash-table :test 'eql)
+    "Basic info on downloaded xkcds, in the form of a hashtable")
+
+  (defadvice! xkcd-get-json--and-cache (url &optional num)
+    "Fetch the Json coming from URL.
+If the file NUM.json exists, use it instead.
+If NUM is 0, always download from URL.
+The return value is a string."
+    :override #'xkcd-get-json
+    (let* ((file (format "%s%d.json" xkcd-cache-dir num))
+           (cached (and (file-exists-p file) (not (eq num 0))))
+           (out (with-current-buffer (if cached
+                                         (find-file file)
+                                       (url-retrieve-synchronously url))
+                  (goto-char (point-min))
+                  (unless cached (re-search-forward "^$"))
+                  (prog1
+                      (buffer-substring-no-properties (point) (point-max))
+                    (kill-buffer (current-buffer))))))
+      (unless (or cached (eq num 0))
+        (xkcd-cache-json num out))
+      out))
+
+  (defadvice! +xkcd-get (num)
+    "Get the xkcd number NUM."
+    :override 'xkcd-get
+    (interactive "nEnter comic number: ")
+    (xkcd-update-latest)
+    (get-buffer-create "*xkcd*")
+    (switch-to-buffer "*xkcd*")
+    (xkcd-mode)
+    (let (buffer-read-only)
+      (erase-buffer)
+      (setq xkcd-cur num)
+      (let* ((xkcd-data (+xkcd-fetch-info num))
+             (num (plist-get xkcd-data :num))
+             (img (plist-get xkcd-data :img))
+             (safe-title (plist-get xkcd-data :safe-title))
+             (alt (plist-get xkcd-data :alt))
+             title file)
+        (message "Getting comic...")
+        (setq file (xkcd-download img num))
+        (setq title (format "%d: %s" num safe-title))
+        (insert (propertize title
+                            'face 'outline-1))
+        (center-line)
+        (insert "\n")
+        (xkcd-insert-image file num)
+        (if (eq xkcd-cur 0)
+            (setq xkcd-cur num))
+        (setq xkcd-alt alt)
+        (message "%s" title))))
+
+  (defconst +xkcd-db--sqlite-available-p
+    (with-demoted-errors "+org-xkcd initialization: %S"
+      (emacsql-sqlite-ensure-binary)
+      t))
+
+  (defvar +xkcd-db--connection (make-hash-table :test #'equal)
+    "Database connection to +org-xkcd database.")
+
+  (defun +xkcd-db--get ()
+    "Return the sqlite db file."
+    (expand-file-name "xkcd.db" xkcd-cache-dir))
+
+  (defun +xkcd-db--get-connection ()
+    "Return the database connection, if any."
+    (gethash (file-truename xkcd-cache-dir)
+             +xkcd-db--connection))
+
+  (defconst +xkcd-db--table-schema
+    '((xkcds
+       [(num integer :unique :primary-key)
+        (year        :not-null)
+        (month       :not-null)
+        (link        :not-null)
+        (news        :not-null)
+        (safe_title  :not-null)
+        (title       :not-null)
+        (transcript  :not-null)
+        (alt         :not-null)
+        (img         :not-null)])))
+
+  (defun +xkcd-db--init (db)
+    "Initialize database DB with the correct schema and user version."
+    (emacsql-with-transaction db
+      (pcase-dolist (`(,table . ,schema) +xkcd-db--table-schema)
+        (emacsql db [:create-table $i1 $S2] table schema))))
+
+  (defun +xkcd-db ()
+    "Entrypoint to the +org-xkcd sqlite database.
+Initializes and stores the database, and the database connection.
+Performs a database upgrade when required."
+    (unless (and (+xkcd-db--get-connection)
+                 (emacsql-live-p (+xkcd-db--get-connection)))
+      (let* ((db-file (+xkcd-db--get))
+             (init-db (not (file-exists-p db-file))))
+        (make-directory (file-name-directory db-file) t)
+        (let ((conn (emacsql-sqlite db-file)))
+          (set-process-query-on-exit-flag (emacsql-process conn) nil)
+          (puthash (file-truename xkcd-cache-dir)
+                   conn
+                   +xkcd-db--connection)
+          (when init-db
+            (+xkcd-db--init conn)))))
+    (+xkcd-db--get-connection))
+
+  (defun +xkcd-db-query (sql &rest args)
+    "Run SQL query on +org-xkcd database with ARGS.
+SQL can be either the emacsql vector representation, or a string."
+    (if  (stringp sql)
+        (emacsql (+xkcd-db) (apply #'format sql args))
+      (apply #'emacsql (+xkcd-db) sql args)))
+
+  (defun +xkcd-db-read (num)
+    (when-let ((res
+                (car (+xkcd-db-query [:select * :from xkcds
+                                      :where (= num $s1)]
+                                     num
+                                     :limit 1))))
+      (+xkcd-db-list-to-plist res)))
+
+  (defun +xkcd-db-read-all ()
+    (let ((xkcd-table (make-hash-table :test 'eql :size 4000)))
+      (mapcar (lambda (xkcd-info-list)
+                (puthash (car xkcd-info-list) (+xkcd-db-list-to-plist xkcd-info-list) xkcd-table))
+              (+xkcd-db-query [:select * :from xkcds]))
+      xkcd-table))
+
+  (defun +xkcd-db-list-to-plist (xkcd-datalist)
+    `(:num ,(nth 0 xkcd-datalist)
+      :year ,(nth 1 xkcd-datalist)
+      :month ,(nth 2 xkcd-datalist)
+      :link ,(nth 3 xkcd-datalist)
+      :news ,(nth 4 xkcd-datalist)
+      :safe-title ,(nth 5 xkcd-datalist)
+      :title ,(nth 6 xkcd-datalist)
+      :transcript ,(nth 7 xkcd-datalist)
+      :alt ,(nth 8 xkcd-datalist)
+      :img ,(nth 9 xkcd-datalist)))
+
+  (defun +xkcd-db-write (data)
+    (+xkcd-db-query [:insert-into xkcds
+                     :values $v1]
+                    (list (vector
+                           (cdr (assoc 'num        data))
+                           (cdr (assoc 'year       data))
+                           (cdr (assoc 'month      data))
+                           (cdr (assoc 'link       data))
+                           (cdr (assoc 'news       data))
+                           (cdr (assoc 'safe_title data))
+                           (cdr (assoc 'title      data))
+                           (cdr (assoc 'transcript data))
+                           (cdr (assoc 'alt        data))
+                           (cdr (assoc 'img        data))
+                           )))))
+#+end_src
+
+*** Selectric
+
+#+call: confpkg("!Pkg Selectric")
+
+Every so often, you want everyone else to /know/ that you're typing, or just to
+amuse oneself. Introducing: typewriter sounds!
+#+begin_src emacs-lisp :tangle packages.el
+(package! selectric-mode :pin "1840de71f7414b7cd6ce425747c8e26a413233aa")
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! selectic-mode
+  :commands selectic-mode)
+#+end_src
+
+*** Wttrin
+
+#+call: confpkg("!Pkg Wttrin")
+
+Hey, let's get the weather in here while we're at it.
+Unfortunately this seems slightly unmaintained ([[https://github.com/bcbcarl/emacs-wttrin/pulls][few open bugfix PRs]]) so let's
+roll our [[file:lisp/wttrin/wttrin.el][own version]].
+#+begin_src emacs-lisp :tangle packages.el
+(package! wttrin :recipe (:local-repo "lisp/wttrin"))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! wttrin
+  :commands wttrin)
+#+end_src
+
+*** Spray
+
+#+call: confpkg("!Pkg Spray")
+
+Why not flash words on the screen. Why not --- hey, it could be fun.
+#+begin_src emacs-lisp :tangle packages.el
+(package! spray :pin "74d9dcfa2e8b38f96a43de9ab0eb13364300cb46")
+#+end_src
+
+It would be nice if Spray's default speed suited me better, and the keybindings
+worked in evil mode. Let's do that and make the display slightly nicer while
+we're at it.
+
+#+begin_src emacs-lisp
+(use-package! spray
+  :commands spray-mode
+  :config
+  (setq spray-wpm 600
+        spray-height 800)
+  (defun spray-mode-hide-cursor ()
+    "Hide or unhide the cursor as is appropriate."
+    (if spray-mode
+        (setq-local spray--last-evil-cursor-state evil-normal-state-cursor
+                    evil-normal-state-cursor '(nil))
+      (setq-local evil-normal-state-cursor spray--last-evil-cursor-state)))
+  (add-hook 'spray-mode-hook #'spray-mode-hide-cursor)
+  (map! :map spray-mode-map
+        "<return>" #'spray-start/stop
+        "f" #'spray-faster
+        "s" #'spray-slower
+        "t" #'spray-time
+        "<right>" #'spray-forward-word
+        "h" #'spray-forward-word
+        "<left>" #'spray-backward-word
+        "l" #'spray-backward-word
+        "q" #'spray-quit))
+#+end_src
 
 # *** Elcord
 
