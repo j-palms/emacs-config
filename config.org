@@ -1374,23 +1374,24 @@ changes Doom makes:
       lsp-headerline-breadcrumb-icons-enable t)
 #+end_src
 
-# *** Frame sizing
+*** Frame sizing
 
-# It's nice to control the size of new frames, when launching Emacs that can be
-# done with src_shell{emacs -geometry 160x48}. After the font size adjustment
-# during initialisation this works out to be ~102x31~.
+It's nice to control the size of new frames, when launching Emacs that can be
+done with src_shell{emacs -geometry 160x48}. After the font size adjustment
+during initialisation this works out to be ~102x31~.
 
-# Thanks to hotkeys, it's easy for me to expand a frame to half/full-screen, so it
-# makes sense to be conservative with the sizing of new frames.
+Thanks to hotkeys, it's easy for me to expand a frame to half/full-screen, so it
+makes sense to be conservative with the sizing of new frames.
 
-# Then, for creating new frames within the same Emacs instance, we'll just set the
-# default to be something roughly 80% of that size.
+Then, for creating new frames within the same Emacs instance, we'll just set the
+default to be something roughly 80% of that size.
 
-# #+begin_src emacs-lisp
-# (add-to-list 'default-frame-alist '(height . 24))
-# (add-to-list 'default-frame-alist '(width . 80))
-# #+end_src
-# COMOUT
+#+begin_src emacs-lisp
+(when window-system (set-frame-position (selected-frame) 0 0))
+(add-to-list 'default-frame-alist '(height . 36))
+(add-to-list 'default-frame-alist '(width . 68))
+
+#+end_src
 
 *** Auto-customisations
 
