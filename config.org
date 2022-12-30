@@ -4480,92 +4480,92 @@ theme.
   (add-hook 'doom-load-theme-hook #'gif-screencast-write-colormap))
 #+end_src
 
-*** Mixed pitch
+# *** Mixed pitch
 
-#+call: confpkg("!Pkg mixed pitch")
+# #+call: confpkg("!Pkg mixed pitch")
 
-#+begin_quote
-From the =:ui zen= module.
-#+end_quote
+# #+begin_quote
+# From the =:ui zen= module.
+# #+end_quote
 
-We'd like to use mixed pitch in certain modes. If we simply add a hook, when
-directly opening a file with (a new) Emacs =mixed-pitch-mode= runs before UI
-initialisation, which is problematic. To resolve this, we create a hook that
-runs after UI initialisation and both
-+ conditionally enables =mixed-pitch-mode=
-+ sets up the mixed pitch hooks
+# We'd like to use mixed pitch in certain modes. If we simply add a hook, when
+# directly opening a file with (a new) Emacs =mixed-pitch-mode= runs before UI
+# initialisation, which is problematic. To resolve this, we create a hook that
+# runs after UI initialisation and both
+# + conditionally enables =mixed-pitch-mode=
+# + sets up the mixed pitch hooks
 
-#+begin_src emacs-lisp
-(defvar mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
-  "Modes that `mixed-pitch-mode' should be enabled in, but only after UI initialisation.")
-(defun init-mixed-pitch-h ()
-  "Hook `mixed-pitch-mode' into each mode in `mixed-pitch-modes'.
-Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
-  (when (memq major-mode mixed-pitch-modes)
-    (mixed-pitch-mode 1))
-  (dolist (hook mixed-pitch-modes)
-    (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
-(add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
-#+end_src
+# #+begin_src emacs-lisp
+# (defvar mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
+#   "Modes that `mixed-pitch-mode' should be enabled in, but only after UI initialisation.")
+# (defun init-mixed-pitch-h ()
+#   "Hook `mixed-pitch-mode' into each mode in `mixed-pitch-modes'.
+# Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
+#   (when (memq major-mode mixed-pitch-modes)
+#     (mixed-pitch-mode 1))
+#   (dolist (hook mixed-pitch-modes)
+#     (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
+# (add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
+# #+end_src
 
-As mixed pitch uses the variable =mixed-pitch-face=, we can create a new function
-to apply mixed pitch with a serif face instead of the default (see the
-subsequent face definition). This was created for writeroom mode.
+# As mixed pitch uses the variable =mixed-pitch-face=, we can create a new function
+# to apply mixed pitch with a serif face instead of the default (see the
+# subsequent face definition). This was created for writeroom mode.
 
-#+begin_src emacs-lisp
-(autoload #'mixed-pitch-serif-mode "mixed-pitch"
-  "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
+# #+begin_src emacs-lisp
+# (autoload #'mixed-pitch-serif-mode "mixed-pitch"
+#   "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
 
-(setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
+# (setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
 
-(after! mixed-pitch
-  (setq mixed-pitch-set-height t)
-  (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
-  (defun mixed-pitch-serif-mode (&optional arg)
-    "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
-    (interactive)
-    (let ((mixed-pitch-face 'variable-pitch-serif))
-      (mixed-pitch-mode (or arg 'toggle)))))
-#+end_src
+# (after! mixed-pitch
+#   (setq mixed-pitch-set-height t)
+#   (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
+#   (defun mixed-pitch-serif-mode (&optional arg)
+#     "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
+#     (interactive)
+#     (let ((mixed-pitch-face 'variable-pitch-serif))
+#       (mixed-pitch-mode (or arg 'toggle)))))
+# #+end_src
 
-Now, as Harfbuzz is currently used in Emacs, we'll be missing out on the
-following Alegreya ligatures:
-#+begin_center
-ff /ff/ ffi /ffi/ ffj /ffj/ ffl /ffl/
-fft /fft/ fi /fi/ fj /fj/ ft /ft/
-Th /Th/
-#+end_center
+# Now, as Harfbuzz is currently used in Emacs, we'll be missing out on the
+# following Alegreya ligatures:
+# #+begin_center
+# ff /ff/ ffi /ffi/ ffj /ffj/ ffl /ffl/
+# fft /fft/ fi /fi/ fj /fj/ ft /ft/
+# Th /Th/
+# #+end_center
 
-Thankfully, it isn't to hard to add these to the ~composition-function-table~.
-#+begin_src emacs-lisp
-(set-char-table-range composition-function-table ?f '(["\\(?:ff?[fijlt]\\)" 0 font-shape-gstring]))
-(set-char-table-range composition-function-table ?T '(["\\(?:Th\\)" 0 font-shape-gstring]))
-#+end_src
+# Thankfully, it isn't to hard to add these to the ~composition-function-table~.
+# #+begin_src emacs-lisp
+# (set-char-table-range composition-function-table ?f '(["\\(?:ff?[fijlt]\\)" 0 font-shape-gstring]))
+# (set-char-table-range composition-function-table ?T '(["\\(?:Th\\)" 0 font-shape-gstring]))
+# #+end_src
 
-**** Variable pitch serif font
+# **** Variable pitch serif font
 
-#+call: confpkg()
+# #+call: confpkg()
 
-It would be nice if we were able to make use of a serif version of the
-=variable-pitch= face. Since this doesn't already exist, let's create it.
+# It would be nice if we were able to make use of a serif version of the
+# =variable-pitch= face. Since this doesn't already exist, let's create it.
 
-#+begin_src emacs-lisp
-(defface variable-pitch-serif
-    '((t (:family "serif")))
-    "A variable-pitch face with serifs."
-    :group 'basic-faces)
-#+end_src
+# #+begin_src emacs-lisp
+# (defface variable-pitch-serif
+#     '((t (:family "serif")))
+#     "A variable-pitch face with serifs."
+#     :group 'basic-faces)
+# #+end_src
 
-For ease of use, let's also set up an easy way of setting the ~:font~ attribute.
+# For ease of use, let's also set up an easy way of setting the ~:font~ attribute.
 
-#+begin_src emacs-lisp
-(defcustom variable-pitch-serif-font (font-spec :family "serif")
-  "The font face used for `variable-pitch-serif'."
-  :group 'basic-faces
-  :set (lambda (symbol value)
-         (set-face-attribute 'variable-pitch-serif nil :font value)
-         (set-default-toplevel-value symbol value)))
-#+end_src
+# #+begin_src emacs-lisp
+# (defcustom variable-pitch-serif-font (font-spec :family "serif")
+#   "The font face used for `variable-pitch-serif'."
+#   :group 'basic-faces
+#   :set (lambda (symbol value)
+#          (set-face-attribute 'variable-pitch-serif nil :font value)
+#          (set-default-toplevel-value symbol value)))
+# #+end_src
 
 *** Marginalia
 
