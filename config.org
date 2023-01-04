@@ -1371,7 +1371,10 @@ changes Doom makes:
 
 (setq lsp-headerline-breadcrumb-enable t
       lsp-headerline-breadcrumb-segments '(project file symbols)
-      lsp-headerline-breadcrumb-icons-enable t)
+      lsp-headerline-breadcrumb-icons-enable t
+      ;; lsp-ui-doc-delay 5
+      ;; lsp-ui-doc-use-childframe nil
+      company-box-doc-enable nil)
 #+end_src
 
 *** Frame sizing
