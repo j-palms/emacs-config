@@ -3867,9 +3867,9 @@ cd aspell6-en-custom
 
 #+call: confpkg("!Pkg Ispell")
 
-#+begin_src emacs-lisp
-(setq ispell-dictionary "en-custom")
-#+end_src
+# #+begin_src emacs-lisp
+# (setq ispell-dictionary "en-custom")
+# #+end_src
 
 Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
 ~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
@@ -3882,6 +3882,28 @@ nearby (also means that if I change the 'main' dictionary I keep my addition).
 #+begin_src emacs-lisp
 (setq ispell-personal-dictionary
       (expand-file-name "misc/ispell_personal" doom-private-dir))
+#+end_src
+
+#+begin_src emacs-lisp
+(after! ispell
+    ;; Configure `LANG`, otherwise ispell.el cannot find a 'default
+    ;; dictionary' even though multiple dictionaries will be configured
+    ;; in next line.
+    (setenv "LANG" "en_US.UTF-8")
+    (setq ispell-program-name "hunspell")
+    ;; Configure German, Swiss German, and two variants of English.
+    (setq ispell-dictionary "de_DE,en_US")
+    ;; ispell-set-spellchecker-params has to be called
+    ;; before ispell-hunspell-add-multi-dic will work
+    (ispell-set-spellchecker-params)
+    (ispell-hunspell-add-multi-dic "de_DE,en_US")
+    ;; For saving words to the personal dictionary, don't infer it from
+    ;; the locale, otherwise it would save to ~/.hunspell_de_DE.
+
+    ;; The personal dictionary file has to exist, otherwise hunspell will
+    ;; silently not use it.
+    (unless (file-exists-p ispell-personal-dictionary)
+      (write-region "" nil ispell-personal-dictionary nil 0)))
 #+end_src
 
 *** TRAMP
@@ -13606,6 +13628,6 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
 # #+end_src
 # trigger tangle
 
-#+begin_src emacs-lisp
-(setq org-export-backends '(pandoc md ascii html icalendar odt))
-#+end_src
+# #+begin_src emacs-lisp
+# (setq org-export-backends '(pandoc md ascii html icalendar odt))
+# #+end_src
