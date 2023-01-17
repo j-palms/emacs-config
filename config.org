@@ -13628,6 +13628,10 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
 # #+end_src
 # trigger tangle
 
-# #+begin_src emacs-lisp
-# (setq org-export-backends '(pandoc md ascii html icalendar odt))
-# #+end_src
+#+begin_src emacs-lisp
+(setq org-export-backends '())
+#+end_src
+
+# Local Variables:
+# eval: (flyspell-mode -1)
+# End:
