@@ -8085,6 +8085,9 @@ packages already loaded. For starters, we can make use of the my Zotero files
 with =citar=, and make the symbols a bit prettier.
 
 #+begin_src emacs-lisp
+(map! :leader
+      (:prefix "n"
+       :desc "File from bibliographic note" "B" #'citar-open-files))
 (after! citar
   (setq org-cite-global-bibliography
         (let ((libfile-search-names '("library.json" "Library.json" "library.bib" "Library.bib"))
