@@ -1375,6 +1375,8 @@ changes Doom makes:
       ;; lsp-ui-doc-delay 5
       ;; lsp-ui-doc-use-childframe nil
       company-box-doc-enable nil)
+
+(setq max-specpdl-size 13000)
 #+end_src
 
 *** Frame sizing
@@ -3835,59 +3837,59 @@ add package src directories to projectile. This isn't desirable in my opinion.
   (or (mapcar (lambda (p) (s-starts-with-p p filepath)) projectile-ignored-projects)))
 #+end_src
 
-*** Ispell
-**** Downloading dictionaries
+# *** Ispell
+# **** Downloading dictionaries
 
-Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
-the following configuration
-- size :: 80 (huge)
-- spellings :: British(-ise) and Australian
-- spelling variants level :: 0
-- diacritics :: keep
-- extra lists :: hacker, roman numerals
+# Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
+# the following configuration
+# - size :: 80 (huge)
+# - spellings :: British(-ise) and Australian
+# - spelling variants level :: 0
+# - diacritics :: keep
+# - extra lists :: hacker, roman numerals
 
-***** Hunspell
+# ***** Hunspell
 
-#+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
-cd /tmp
-curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
-unzip "hunspell-en-custom.zip"
+# #+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
+# cd /tmp
+# curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
+# unzip "hunspell-en-custom.zip"
 
-sudo chown root:root en-custom.*
-sudo mv en-custom.{aff,dic} /usr/share/myspell/
-#+end_src
+# sudo chown root:root en-custom.*
+# sudo mv en-custom.{aff,dic} /usr/share/myspell/
+# #+end_src
 
-***** Aspell
+# ***** Aspell
 
-#+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
-cd /tmp
-curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
-tar -xjf "aspell6-en-custom.tar.bz2"
+# #+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
+# cd /tmp
+# curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
+# tar -xjf "aspell6-en-custom.tar.bz2"
 
-cd aspell6-en-custom
-./configure && make && sudo make install
-#+end_src
+# cd aspell6-en-custom
+# ./configure && make && sudo make install
+# #+end_src
 
-**** Configuration
+# **** Configuration
 
-#+call: confpkg("!Pkg Ispell")
+# #+call: confpkg("!Pkg Ispell")
 
-#+begin_src emacs-lisp
-(setq ispell-dictionary "en-custom")
-#+end_src
+# #+begin_src emacs-lisp
+# (setq ispell-dictionary "en-custom")
+# #+end_src
 
-Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
-~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
-~ispell-alternate-dictionary~, which at the moment maps to a plaintext version of
-the above.
+# Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
+# ~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
+# ~ispell-alternate-dictionary~, which at the moment maps to a plaintext version of
+# the above.
 
-It seems reasonable to want to keep an eye on my personal dict, let's have it
-nearby (also means that if I change the 'main' dictionary I keep my addition).
+# It seems reasonable to want to keep an eye on my personal dict, let's have it
+# nearby (also means that if I change the 'main' dictionary I keep my addition).
 
-#+begin_src emacs-lisp
-(setq ispell-personal-dictionary
-      (expand-file-name "misc/ispell_personal" doom-private-dir))
-#+end_src
+# #+begin_src emacs-lisp
+# (setq ispell-personal-dictionary
+#       (expand-file-name "misc/ispell_personal" doom-private-dir))
+# #+end_src
 
 *** TRAMP
 
@@ -12531,104 +12533,138 @@ For how I've setup Org's LaTeX export, the following packages are needed:
 | xparse     | Extended command/env definition forms                 |
 | xcoffins   | Manipulate coffins (boxes) for typesetting            |
 
-Then for the various fontsets:
 #+name: org-latex-font-packages-list
-+ Alegreya
-+ arev
-+ biolinum
-+ FiraMono
-+ FiraSans
-+ fourier
-+ gillius
-+ kpfonts
-+ libertine
-+ newpxmath
-+ newpxtext
-+ newtxmath
-+ newtxtext
-+ newtxsf
-+ noto
-+ plex-mono
-+ plex-sans
-+ plex-serif
-+ sourcecodepro
-+ sourcesanspro
-+ sourceserifpro
+| Package        | Description |
+|----------------+-------------|
+| Alegreya       |             |
+| arev           |             |
+| biolinum       |             |
+| FiraMono       |             |
+| FiraSans       |             |
+| fourier        |             |
+| gillius        |             |
+| kpfonts        |             |
+| libertine      |             |
+| newpxmath      |             |
+| newpxtext      |             |
+| newtxmath      |             |
+| newtxtext      |             |
+| newtxsf        |             |
+| noto           |             |
+| plex-mono      |             |
+| plex-sans      |             |
+| plex-serif     |             |
+| sourcecodepro  |             |
+| sourcesanspro  |             |
+| sourceserifpro |             |
+
 
 We can write a function which will check for each of these packages with
 =kpsewhich=, and then if any of them are missing we'll inject some advice into the
 generated config that gets a list of missing packages and warns us every time we
 export to a PDF.
 
-# #+name: org-missing-latex-packages
-# #+begin_src emacs-lisp :noweb-ref none :var org-latex-required-packages-list=org-latex-required-packages-list[,0] :var org-latex-font-packages-list=org-latex-font-packages-list
-# (setq org-required-latex-packages
-#       (append org-latex-required-packages-list
-#               org-latex-font-packages-list))
+#+name: org-missing-latex-packages
+#+begin_src emacs-lisp :noweb-ref none :var org-latex-required-packages-list=org-latex-required-packages-list[,0] :var org-latex-font-packages-list=org-latex-font-packages-list[,0]
+(setq org-required-latex-packages
+      (append org-latex-required-packages-list
+              org-latex-font-packages-list))
 
-# (defun check-for-latex-packages (packages)
-#   (delq nil (mapcar (lambda (package)
-#                       (unless
-#                           (= 0 (call-process "kpsewhich" nil nil nil (concat package ".sty")))
-#                         package))
-#                     packages)))
+(defun check-for-latex-packages (packages)
+  (delq nil (mapcar (lambda (package)
+                      (unless
+                          (= 0 (call-process "kpsewhich" nil nil nil (concat package ".sty")))
+                        package))
+                    packages)))
 
-# (if-let ((missing-pkgs (check-for-latex-packages org-required-latex-packages)))
-#     (concat
-#      (pp-to-string `(setq org-required-latex-packages ',org-required-latex-packages))
-#      (message ";; Detected missing LaTeX packages: %s\n" (mapconcat #'identity missing-pkgs ", "))
-#      (pp-to-string
-#       '(defun check-for-latex-packages (packages)
-#          (delq nil (mapcar (lambda (package)
-#                              (unless
-#                                  (= 0 (call-process "kpsewhich" nil nil nil (concat package ".sty")))
-#                                package))
-#                            packages))))
-#      (pp-to-string
-#       '(defun +org-warn-about-missing-latex-packages (&rest _)
-#          (message "Checking for missing LaTeX packages...")
-#          (sleep-for 0.4)
-#          (if-let (missing-pkgs (check-for-latex-packages org-required-latex-packages))
-#              (message "%s You are missing the following LaTeX packages: %s."
-#                       (propertize "Warning!" 'face '(bold warning))
-#                       (mapconcat (lambda (pkg) (propertize pkg 'face 'font-lock-variable-name-face))
-#                                  missing-pkgs
-#                                  ", "))
-#            (message "%s You have all the required LaTeX packages. Run %s to make this message go away."
-#                     (propertize "Success!" 'face '(bold success))
-#                     (propertize "doom sync" 'face 'font-lock-keyword-face))
-#            (advice-remove 'org-latex-export-to-pdf #'+org-warn-about-missing-latex-packages))
-#          (sleep-for 1)))
-#      (pp-to-string
-#       '(advice-add 'org-latex-export-to-pdf :before #'+org-warn-about-missing-latex-packages)))
-#   ";; No missing LaTeX packags detected")
-# #+end_src
-
-# #+begin_src emacs-lisp :noweb no-export
-# <<org-missing-latex-packages()>>
-# #+end_src
-
-*** Beamer Export
-
-#+call: confpkg("ox-beamer", after="ox-beamer")
-
-It's nice to use a different theme
-#+begin_src emacs-lisp
-(setq org-beamer-theme "[progressbar=foot]metropolis")
+(if-let ((missing-pkgs (check-for-latex-packages org-required-latex-packages)))
+    (concat
+     (pp-to-string `(setq org-required-latex-packages ',org-required-latex-packages))
+     (message ";; Detected missing LaTeX packages: %s\n" (mapconcat #'identity missing-pkgs ", "))
+     (pp-to-string
+      '(defun check-for-latex-packages (packages)
+         (delq nil (mapcar (lambda (package)
+                             (unless
+                                 (= 0 (call-process "kpsewhich" nil nil nil (concat package ".sty")))
+                               package))
+                           packages))))
+     (pp-to-string
+      '(defun +org-warn-about-missing-latex-packages (&rest _)
+         (message "Checking for missing LaTeX packages...")
+         (sleep-for 0.4)
+         (if-let (missing-pkgs (check-for-latex-packages org-required-latex-packages))
+             (message "%s You are missing the following LaTeX packages: %s."
+                      (propertize "Warning!" 'face '(bold warning))
+                      (mapconcat (lambda (pkg) (propertize pkg 'face 'font-lock-variable-name-face))
+                                 missing-pkgs
+                                 ", "))
+           (message "%s You have all the required LaTeX packages. Run %s to make this message go away."
+                    (propertize "Success!" 'face '(bold success))
+                    (propertize "doom sync" 'face 'font-lock-keyword-face))
+           (advice-remove 'org-latex-export-to-pdf #'+org-warn-about-missing-latex-packages))
+         (sleep-for 1)))
+     (pp-to-string
+      '(advice-add 'org-latex-export-to-pdf :before #'+org-warn-about-missing-latex-packages)))
+  ";; No missing LaTeX packags detected")
 #+end_src
 
-When using metropolis though, we want to make a few tweaks:
-#+name: beamer-metropolis-tweaks
-#+begin_src LaTeX
-\NewCommandCopy{\moldusetheme}{\usetheme}
-\renewcommand*{\usetheme}[2][]{\moldusetheme[#1]{#2}
-  \setbeamertemplate{items}{$\bullet$}
-  \setbeamerfont{block title}{size=\normalsize, series=\bfseries\parbox{0pt}{\rule{0pt}{4ex}}}}
+#+begin_src emacs-lisp :noweb no-export
+<<org-missing-latex-packages()>>
+#+end_src
 
-\makeatletter
-\newcommand{\setmetropolislinewidth}{
-  \setlength{\metropolis@progressinheadfoot@linewidth}{1.2px}}
-\makeatother
+# *** Beamer Export
+
+# #+call: confpkg("ox-beamer", after="ox-beamer")
+
+# It's nice to use a different theme
+# #+begin_src emacs-lisp
+# (setq org-beamer-theme "[progressbar=foot]metropolis")
+# #+end_src
+
+# When using metropolis though, we want to make a few tweaks:
+# #+name: beamer-metropolis-tweaks
+# #+begin_src LaTeX
+# \NewCommandCopy{\moldusetheme}{\usetheme}
+# \renewcommand*{\usetheme}[2][]{\moldusetheme[#1]{#2}
+#   \setbeamertemplate{items}{$\bullet$}
+#   \setbeamerfont{block title}{size=\normalsize, series=\bfseries\parbox{0pt}{\rule{0pt}{4ex}}}}
+
+# \makeatletter
+# \newcommand{\setmetropolislinewidth}{
+#   \setlength{\metropolis@progressinheadfoot@linewidth}{1.2px}}
+# \makeatother
+
+# \usepackage{etoolbox}
+# \AtEndPreamble{\setmetropolislinewidth}
+# #+end_src
+
+# Now let's just apply this along with some extra beamer tweaks.
+
+# #+begin_src emacs-lisp :noweb no-export :noweb-prefix no
+# (defun org-beamer-p (info)
+#   (eq 'beamer (and (plist-get info :back-end)
+#                    (org-export-backend-name (plist-get info :back-end)))))
+
+# (add-to-list 'org-export-conditional-features
+#              '(org-beamer-p . beamer) t)
+# (add-to-list 'org-latex-feature-implementations
+#              '(beamer :requires .missing-koma :prevents (italic-quotes condensed-lists)) t)
+# (add-to-list 'org-latex-feature-implementations
+#              '(.missing-koma :snippet "\\usepackage{scrextend}" :order 2) t)
+
+# (defvar org-beamer-metropolis-tweaks
+#   <<grab("beamer-metropolis-tweaks")>>
+#   "LaTeX preamble snippet that tweaks the Beamer metropolis theme styling.")
+
+# (add-to-list 'org-export-conditional-features
+#              (cons (lambda (info)
+#                      (and (org-beamer-p info)
+#                           (string-match-p "metropolis$" org-beamer-theme)))
+#                    'beamer-metropolis)
+#              t)
+# (add-to-list 'org-latex-feature-implementations
+#              '(beamer-metropolis :requires beamer :snippet org-beamer-metropolis-tweaks :order 3) t)
+# #+end_src
 
 \usepackage{etoolbox}
 \AtEndPreamble{\setmetropolislinewidth}
@@ -13640,4 +13676,8 @@ which is perfect for our needs.
 
 #+begin_src emacs-lisp
 (add-to-list 'magic-mode-alist (cons "\\`GIMP Palette\n" #'gimp-palette-mode))
+#+end_src
+
+#+begin_src emacs-lisp
+(setq org-export-backends '(pandoc md ascii html icalendar odt))
 #+end_src
