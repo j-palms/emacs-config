@@ -1439,6 +1439,28 @@ navigation/swapping commands.
       "C-<right>"      #'+evil/window-move-right)
 #+end_src
 
+CUSTOM:
+Hydra for changing split window size.
+
+#+begin_src emacs-lisp
+(defhydra doom-window-resize-hydra (:hint nil)
+  "
+             _k_ increase height
+_h_ decrease width    _l_ increase width
+             _j_ decrease height
+"
+  ("h" evil-window-decrease-width)
+  ("j" evil-window-increase-height)
+  ("k" evil-window-decrease-height)
+  ("l" evil-window-increase-width)
+  ("q" nil))
+
+(map!
+    (:prefix "w"
+      :desc "Hydra resize" :n "SPC" #'doom-window-resize-hydra/body))
+#+end_src
+
+
 *** Buffer defaults
 
 I'd much rather have my new buffers in ~org-mode~ than ~fundamental-mode~, hence
@@ -1551,7 +1573,7 @@ doom-quit                    ; DOOM quit-message prompts when you quit Emacs
 (emoji +unicode)             ; 🙂
 ;;fill-column                ; a `fill-column' indicator
 hl-todo                      ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
-;;hydra                      ; quick documentation for related commands
+hydra                      ; quick documentation for related commands
 ;;indent-guides              ; highlighted indent columns, notoriously slow
 (ligatures +extra)           ; ligatures and symbols to make your code pretty again
 ;;minimap                    ; show a map of the code on the side
