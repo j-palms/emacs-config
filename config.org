@@ -3830,59 +3830,59 @@ add package src directories to projectile. This isn't desirable in my opinion.
   (or (mapcar (lambda (p) (s-starts-with-p p filepath)) projectile-ignored-projects)))
 #+end_src
 
-# *** Ispell
-# **** Downloading dictionaries
+*** Ispell
+**** Downloading dictionaries
 
-# Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
-# the following configuration
-# - size :: 80 (huge)
-# - spellings :: British(-ise) and Australian
-# - spelling variants level :: 0
-# - diacritics :: keep
-# - extra lists :: hacker, roman numerals
+Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
+the following configuration
+- size :: 80 (huge)
+- spellings :: British(-ise) and Australian
+- spelling variants level :: 0
+- diacritics :: keep
+- extra lists :: hacker, roman numerals
 
-# ***** Hunspell
+***** Hunspell
 
-# #+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
-# cd /tmp
-# curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
-# unzip "hunspell-en-custom.zip"
+#+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
+cd /tmp
+curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
+unzip "hunspell-en-custom.zip"
 
-# sudo chown root:root en-custom.*
-# sudo mv en-custom.{aff,dic} /usr/share/myspell/
-# #+end_src
+sudo chown root:root en-custom.*
+sudo mv en-custom.{aff,dic} /usr/share/myspell/
+#+end_src
 
-# ***** Aspell
+***** Aspell
 
-# #+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
-# cd /tmp
-# curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
-# tar -xjf "aspell6-en-custom.tar.bz2"
+#+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
+cd /tmp
+curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
+tar -xjf "aspell6-en-custom.tar.bz2"
 
-# cd aspell6-en-custom
-# ./configure && make && sudo make install
-# #+end_src
+cd aspell6-en-custom
+./configure && make && sudo make install
+#+end_src
 
-# **** Configuration
+**** Configuration
 
-# #+call: confpkg("!Pkg Ispell")
+#+call: confpkg("!Pkg Ispell")
 
-# #+begin_src emacs-lisp
-# (setq ispell-dictionary "en-custom")
-# #+end_src
+#+begin_src emacs-lisp
+(setq ispell-dictionary "en-custom")
+#+end_src
 
-# Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
-# ~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
-# ~ispell-alternate-dictionary~, which at the moment maps to a plaintext version of
-# the above.
+Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
+~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
+~ispell-alternate-dictionary~, which at the moment maps to a plaintext version of
+the above.
 
-# It seems reasonable to want to keep an eye on my personal dict, let's have it
-# nearby (also means that if I change the 'main' dictionary I keep my addition).
+It seems reasonable to want to keep an eye on my personal dict, let's have it
+nearby (also means that if I change the 'main' dictionary I keep my addition).
 
-# #+begin_src emacs-lisp
-# (setq ispell-personal-dictionary
-#       (expand-file-name "misc/ispell_personal" doom-private-dir))
-# #+end_src
+#+begin_src emacs-lisp
+(setq ispell-personal-dictionary
+      (expand-file-name "misc/ispell_personal" doom-private-dir))
+#+end_src
 
 *** TRAMP
 
