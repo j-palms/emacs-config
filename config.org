@@ -114,48 +114,48 @@ applications which act like islands, but this often doesn't mirror how we
 /actually use/ our computers. Emacs, if one goes down the rabbit hole, can give
 users the power to bridge this gap.
 
-#+name: emacs-platform
-#+begin_src dot :cmd circo :file misc/emacs-platform.svg :exports none
-digraph {
-    graph [bgcolor="transparent"];
-    node  [shape="underline" penwidth="2" style="rounded,filled" fillcolor="#efefef" color="#c9c9c9" fontcolor="#000000" fontname="overpass"];
-    edge  [arrowhead=none color="#aaaaaa" penwidth="1.2"]
-    // nodes
-    "Task Managment" [color="#2ec27e"]
-    "Email" [color="#1c71d8"]
-    "Office suite" [color="#813d9c"]
-    "Code editor" [color="#f5c211"]
-    "Git client" [color="#e66100"]
-    // "News feed" [color="#c01c28"]
-    // "Personal Knowledge Base" [color="#986a44"]
+# #+name: emacs-platform
+# #+begin_src dot :cmd circo :file misc/emacs-platform.svg :exports none
+# digraph {
+#     graph [bgcolor="transparent"];
+#     node  [shape="underline" penwidth="2" style="rounded,filled" fillcolor="#efefef" color="#c9c9c9" fontcolor="#000000" fontname="overpass"];
+#     edge  [arrowhead=none color="#aaaaaa" penwidth="1.2"]
+#     // nodes
+#     "Task Managment" [color="#2ec27e"]
+#     "Email" [color="#1c71d8"]
+#     "Office suite" [color="#813d9c"]
+#     "Code editor" [color="#f5c211"]
+#     "Git client" [color="#e66100"]
+#     // "News feed" [color="#c01c28"]
+#     // "Personal Knowledge Base" [color="#986a44"]
 
-    "Task Managment" -> "Email"
-    "Task Managment" -> "Office suite"
-    "Task Managment" -> "Code editor"
-    "Task Managment" -> "Git client"
-    // "Task Managment" -> "News feed"
-    // "Task Managment" -> "Personal Knowledge Base"
+#     "Task Managment" -> "Email"
+#     "Task Managment" -> "Office suite"
+#     "Task Managment" -> "Code editor"
+#     "Task Managment" -> "Git client"
+#     // "Task Managment" -> "News feed"
+#     // "Task Managment" -> "Personal Knowledge Base"
 
-    "Email" -> "Office suite"
-    "Email" -> "Code editor"
-    "Email" -> "Git client"
-    // "Email" -> "Personal Knowledge Base"
+#     "Email" -> "Office suite"
+#     "Email" -> "Code editor"
+#     "Email" -> "Git client"
+#     // "Email" -> "Personal Knowledge Base"
 
-    "Office suite" -> "Code editor"
-    "Office suite" -> "Git client"
-    // "Office suite" -> "News feed"
-    // "Office suite" -> "Personal Knowledge Base"
+#     "Office suite" -> "Code editor"
+#     "Office suite" -> "Git client"
+#     // "Office suite" -> "News feed"
+#     // "Office suite" -> "Personal Knowledge Base"
 
-    "Code editor" -> "Git client"
+#     "Code editor" -> "Git client"
 
-    // "News feed" -> "Personal Knowledge Base"
-}
-#+end_src
+#     // "News feed" -> "Personal Knowledge Base"
+# }
+# #+end_src
 
-#+caption: Some sample workflow integrations that can be used within Emacs
-#+attr_html: :class invertible :alt Graph of possible Emacs task integrations :style max-width:min(24em,100%)
-#+attr_latex: :width 0.55\linewidth
-[[file:misc/emacs-platform.svg]]
+# #+caption: Some sample workflow integrations that can be used within Emacs
+# #+attr_html: :class invertible :alt Graph of possible Emacs task integrations :style max-width:min(24em,100%)
+# #+attr_latex: :width 0.55\linewidth
+# [[file:misc/emacs-platform.svg]]
 
 *** Some notably unique features
 
@@ -1797,13 +1797,13 @@ fiddle with the font sizes a tad so that they visually match. Just for fun I'm
 trying out JetBrains Mono though. So far I have mixed feelings on it, some
 aspects are nice, but on others I prefer Fira.
 
-#+begin_src emacs-lisp
-(setq doom-font (font-spec :family "JetBrains Mono Nerd Font" :size 24)
-      doom-big-font (font-spec :family "JetBrains Mono Nerd Font" :size 36)
-      doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size 26)
-      doom-unicode-font (font-spec :family "JuliaMono")
-      doom-serif-font (font-spec :family "BlexMono Nerd Font" :size 22 :weight 'light))
-#+end_src
+# #+begin_src emacs-lisp
+# (setq doom-font (font-spec :family "JetBrains Mono Nerd Font" :size 24)
+#       doom-big-font (font-spec :family "JetBrains Mono Nerd Font" :size 36)
+#       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size 26)
+#       doom-unicode-font (font-spec :family "JuliaMono")
+#       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size 22 :weight 'light))
+# #+end_src
 
 #+attr_html: :class invertible :alt Screenshot of the fonts within Emacs.
 [[https://tecosaur.com/lfs/emacs-config/screenshots/font-face.png]]
@@ -1815,43 +1815,43 @@ files.
 Because we care about how things look let's add a check to make sure we're told
 if the system doesn't have any of those fonts.
 
-#+name: detect-missing-fonts
-#+begin_src emacs-lisp :tangle no
-(defvar required-fonts '("JetBrainsMono.*" "Overpass Nerd Font" "JuliaMono" "BlexMono Nerd Font" "Merriweather" "Alegreya"))
+# #+name: detect-missing-fonts
+# #+begin_src emacs-lisp :tangle no
+# (defvar required-fonts '("JetBrainsMono.*" "Overpass Nerd Font" "JuliaMono" "BlexMono Nerd Font" "Merriweather" "Alegreya"))
 
-(defvar available-fonts
-  (delete-dups (or (font-family-list)
-                   (split-string (shell-command-to-string "fc-list : family")
-                                 "[,\n]"))))
+# (defvar available-fonts
+#   (delete-dups (or (font-family-list)
+#                    (split-string (shell-command-to-string "fc-list : family")
+#                                  "[,\n]"))))
 
-(defvar missing-fonts
-  (delq nil (mapcar
-             (lambda (font)
-               (unless (delq nil (mapcar (lambda (f)
-                                           (string-match-p (format "^%s$" font) f))
-                                         available-fonts))
-                 font))
-             required-fonts)))
+# (defvar missing-fonts
+#   (delq nil (mapcar
+#              (lambda (font)
+#                (unless (delq nil (mapcar (lambda (f)
+#                                            (string-match-p (format "^%s$" font) f))
+#                                          available-fonts))
+#                  font))
+#              required-fonts)))
 
-(if missing-fonts
-    (pp-to-string
-     `(unless noninteractive
-        (add-hook! 'doom-init-ui-hook
-          (run-at-time nil nil
-                       (lambda ()
-                         (message "%s missing the following fonts: %s"
-                                  (propertize "Warning!" 'face '(bold warning))
-                                  (mapconcat (lambda (font)
-                                               (propertize font 'face 'font-lock-variable-name-face))
-                                             ',missing-fonts
-                                             ", "))
-                         (sleep-for 0.5))))))
-  ";; No missing fonts detected")
-#+end_src
+# (if missing-fonts
+#     (pp-to-string
+#      `(unless noninteractive
+#         (add-hook! 'doom-init-ui-hook
+#           (run-at-time nil nil
+#                        (lambda ()
+#                          (message "%s missing the following fonts: %s"
+#                                   (propertize "Warning!" 'face '(bold warning))
+#                                   (mapconcat (lambda (font)
+#                                                (propertize font 'face 'font-lock-variable-name-face))
+#                                              ',missing-fonts
+#                                              ", "))
+#                          (sleep-for 0.5))))))
+#   ";; No missing fonts detected")
+# #+end_src
 
-#+begin_src emacs-lisp :noweb no-export
-<<detect-missing-fonts()>>
-#+end_src
+# #+begin_src emacs-lisp :noweb no-export
+# <<detect-missing-fonts()>>
+# #+end_src
 
 This way whenever fonts are missing, after Doom's UI has initialised, a warning
 listing the missing fonts should appear for at least half a second.
@@ -11040,37 +11040,37 @@ the feature.
 This model also provides a number of nice secondary benefits, such as a simple
 implementation of feature dependency.
 
-#+begin_src dot :file misc/org-latex-clever-preamble.svg :exports none
-digraph {
-    graph [bgcolor="transparent"];
-    node  [shape="underline" penwidth="2" width="1.3" style="rounded,filled" fillcolor="#efefef" color="#c9c9c9" fontcolor="#000000" fontname="overpass"];
-    edge  [color="#aaaaaa" penwidth="1.2"]
-    rankdir=LR
+# #+begin_src dot :file misc/org-latex-clever-preamble.svg :exports none
+# digraph {
+#     graph [bgcolor="transparent"];
+#     node  [shape="underline" penwidth="2" width="1.3" style="rounded,filled" fillcolor="#efefef" color="#c9c9c9" fontcolor="#000000" fontname="overpass"];
+#     edge  [color="#aaaaaa" penwidth="1.2"]
+#     rankdir=LR
 
-    node[group=a,color="#2ec27e"]
-    "file:*.svg"
-    "file:*.jpeg"
-    "file:*.png"
-    "#+caption"
-    "xkcd:*"
-    node[group=b,color="#f5c211"]
-    "svg"
-    "image"
-    "caption"
-    node[group=c,color="#813d9c"]
-    "(TeX) svg"
-    "(TeX) graphicx"
-    "(TeX) caption"
+#     node[group=a,color="#2ec27e"]
+#     "file:*.svg"
+#     "file:*.jpeg"
+#     "file:*.png"
+#     "#+caption"
+#     "xkcd:*"
+#     node[group=b,color="#f5c211"]
+#     "svg"
+#     "image"
+#     "caption"
+#     node[group=c,color="#813d9c"]
+#     "(TeX) svg"
+#     "(TeX) graphicx"
+#     "(TeX) caption"
 
-    "file:*.svg" -> "svg" -> "(TeX) svg"
-    "file:*.jpeg" -> "image" -> "(TeX) graphicx"
-    "file:*.png" -> "image"
-    "(TeX) svg":s -> "(TeX) graphicx":n [constraint=false]
-    "#+caption" -> "caption" -> "(TeX) caption"
-    "xkcd:*" -> "image"
-    "xkcd:*" -> "caption"
-}
-#+end_src
+#     "file:*.svg" -> "svg" -> "(TeX) svg"
+#     "file:*.jpeg" -> "image" -> "(TeX) graphicx"
+#     "file:*.png" -> "image"
+#     "(TeX) svg":s -> "(TeX) graphicx":n [constraint=false]
+#     "#+caption" -> "caption" -> "(TeX) caption"
+#     "xkcd:*" -> "image"
+#     "xkcd:*" -> "caption"
+# }
+# #+end_src
 
 #+caption: Association between Org features, feature flags, and LaTeX snippets required.
 #+attr_html: :class invertible :alt DAG showing how Org features flow through to LaTeX :style max-width:min(24em,100%)
