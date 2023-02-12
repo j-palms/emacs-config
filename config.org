@@ -3272,6 +3272,19 @@ Now let's just have this included when an ErgoDox is found via =dmesg=.
 <<avy-colemak-setup>>
 #+end_src
 
+*** Ace-window
+
+#+call: confpkg("!Pkg ace-window")
+
+#+begin_quote
+From the =:config default= module.
+#+end_quote
+
+#+begin_src emacs-lisp
+(after! ace-window
+  (setq aw-keys '(?n ?e ?i ?o)))
+#+end_src
+
 *** Rotate (window management)
 
 The =rotate= package just adds the ability to rotate window layouts, but that
