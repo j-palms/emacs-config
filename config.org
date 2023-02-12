@@ -1364,10 +1364,11 @@ changes Doom makes:
 
 (display-time-mode 1)                             ; Enable time in the mode-line
 
-(unless (string-match-p "^Power N/A" (battery))   ; On laptops...
-  (display-battery-mode 1))                       ; it's nice to know how much power you have
+;; (unless (string-match-p "^Power N/A" (battery))   ; On laptops...
+;;   (display-battery-mode 1))                       ; it's nice to know how much power you have
 
 (global-subword-mode 1)                           ; Iterate through CamelCase words
+(setq lsp-pyright-multi-root nil)
 
 (setq lsp-headerline-breadcrumb-enable t
       lsp-headerline-breadcrumb-segments '(project file symbols)
