@@ -1365,7 +1365,29 @@ changes Doom makes:
 
 (setq lsp-headerline-breadcrumb-enable t
       lsp-headerline-breadcrumb-segments '(project file symbols)
-      lsp-headerline-breadcrumb-icons-enable t)
+      lsp-headerline-breadcrumb-icons-enable t
+      ;; lsp-ui-doc-delay 5
+      ;; lsp-ui-doc-use-childframe nil
+      company-box-doc-enable nil)
+
+(setq doom-modeline-persp-name t)
+
+(after! dap-mode
+  (setq dap-python-debugger 'debugpy))
+
+(map! ("C-c SPC"
+       :desc "Switch perspective" #'+workspace/cycle))
+
+(setq max-specpdl-size 13000)
+
+(setq doom-themes-treemacs-enable-variable-pitch nil)
+
+;; (add-hook! +dap-running-session-mode
+;;   (set-window-buffer nil (current-buffer)))
+
+(map! :leader
+      (:prefix "m"
+       :desc "Debug with dap-mode hydra" "d" #'dap-hydra))
 #+end_src
 
 *** Frame sizing
@@ -1597,7 +1619,7 @@ zen                          ; distraction-free coding or writing
 (evil +everywhere)           ; come to the dark side, we have cookies
 file-templates               ; auto-snippets for empty files
 fold                         ; (nigh) universal code folding
-(format)                     ; automated prettiness
+(format +onsave)                     ; automated prettiness
 ;;god                        ; run Emacs commands without modifier keys
 ;;lispy                      ; vim for lisp, for people who don't like vim
 multiple-cursors             ; editing in many places at once
@@ -1639,7 +1661,7 @@ grammar                      ; tasing grammar mistake every you make
 #+begin_src emacs-lisp
 ansible                      ; a crucible for infrastructure as code
 biblio                       ; Writes a PhD for you (citation needed)
-;;debugger                   ; FIXME stepping through code, to help you add bugs
+(debugger +lsp)                   ; FIXME stepping through code, to help you add bugs
 direnv                     ; be direct about your environment
 docker                       ; port everything to containers
 ;;editorconfig               ; let someone else argue about tabs vs spaces
@@ -13342,6 +13364,7 @@ In case of Emacs28,
 #+end_src
 
 ** Python
+
 
 ** PDF
 *** MuPDF
