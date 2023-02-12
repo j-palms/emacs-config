@@ -1863,9 +1863,9 @@ trying out JetBrains Mono though. So far I have mixed feelings on it, some
 aspects are nice, but on others I prefer Fira.
 
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "Hack Nerd Font Mono" :size 24)
-      doom-big-font (font-spec :family "Hack Nerd Font Mono" :size 36)
-      doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size 26)
+(setq doom-font (font-spec :family "Iosevka Nerd Font Mono" :size 20)
+      doom-big-font (font-spec :family "Iosevka Nerd Font Mono" :size 36)
+      doom-variable-pitch-font (font-spec :family "Vollkorn" :size 24)
       doom-unicode-font (font-spec :family "JuliaMono")
       doom-serif-font (font-spec :family "BlexMono Nerd Font" :size 22 :weight 'light))
 #+end_src
