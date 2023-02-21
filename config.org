@@ -4328,160 +4328,164 @@ hide it?
 (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
 #+end_src
 
-**** Time
 
-Moving onto the modeline segments, there's a calendar icon showed next to the
-current time, which I'm not a fan of. Let's replace that by redefining the
-segment. Instead of the calendar, it would be much nicer to have an updating
-analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
+CUSTOM:
+not working anymore after update
 
-First, we'll need a way to produce svg clocks on-demand.
+# **** Time
 
-#+begin_src emacs-lisp
-(defvar micro-clock-hour-hand-ratio 0.45
-  "Length of the hour hand as a proportion of the radius.")
-(defvar micro-clock-minute-hand-ratio 0.7
-  "Length of the minute hand as a proportion of the radius.")
+# Moving onto the modeline segments, there's a calendar icon showed next to the
+# current time, which I'm not a fan of. Let's replace that by redefining the
+# segment. Instead of the calendar, it would be much nicer to have an updating
+# analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
 
-(defun micro-clock-svg (hour minute radius color)
-  "Construct an SVG clock showing the time HOUR:MINUTE.
-The clock will be of the specified RADIUS and COLOR."
-  (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-                   micro-clock-hour-hand-ratio))
-        (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-                   micro-clock-hour-hand-ratio))
-        (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
-                     micro-clock-minute-hand-ratio))
-        (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
-                     micro-clock-minute-hand-ratio))
-        (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
-    (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
-    (svg-circle svg radius radius 1 :fill color :stroke "none")
-    (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
-              :stroke-width 2)
-    (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
-              :stroke-width 1.5)
-    svg))
-#+end_src
+# First, we'll need a way to produce svg clocks on-demand.
 
-With that out the way, we need to figure out how to integrate this into the
-modeline. For the most part this was fairly easy, the tricky part was getting
-the alignment right. I tried using the =(raise FACTOR)= display property, but that
-doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
-descriptors]] though, I came across the =:ascent= property, which looked rather
-promising. By setting =:ascent center= the image is centred relative to the text,
-which is exactly what we need. With that sorted, we just add some caching and
-the obvious customisations and we've got modeline-appropriate clock generation!
+# #+begin_src emacs-lisp
+# (defvar micro-clock-hour-hand-ratio 0.45
+#   "Length of the hour hand as a proportion of the radius.")
+# (defvar micro-clock-minute-hand-ratio 0.7
+#   "Length of the minute hand as a proportion of the radius.")
 
-#+begin_src emacs-lisp
-(require 'svg)
+# (defun micro-clock-svg (hour minute radius color)
+#   "Construct an SVG clock showing the time HOUR:MINUTE.
+# The clock will be of the specified RADIUS and COLOR."
+#   (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+#                    micro-clock-hour-hand-ratio))
+#         (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+#                    micro-clock-hour-hand-ratio))
+#         (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
+#                      micro-clock-minute-hand-ratio))
+#         (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
+#                      micro-clock-minute-hand-ratio))
+#         (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
+#     (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
+#     (svg-circle svg radius radius 1 :fill color :stroke "none")
+#     (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
+#               :stroke-width 2)
+#     (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
+#               :stroke-width 1.5)
+#     svg))
+# #+end_src
 
-(defvar +doom-modeline-micro-clock-minute-resolution 1
-  "The clock will be updated every this many minutes, truncating.")
-(defvar +doom-modeline-micro-clock-inverse-size 4.8
-  "The size of the clock, as an inverse proportion to the mode line height.")
+# With that out the way, we need to figure out how to integrate this into the
+# modeline. For the most part this was fairly easy, the tricky part was getting
+# the alignment right. I tried using the =(raise FACTOR)= display property, but that
+# doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
+# descriptors]] though, I came across the =:ascent= property, which looked rather
+# promising. By setting =:ascent center= the image is centred relative to the text,
+# which is exactly what we need. With that sorted, we just add some caching and
+# the obvious customisations and we've got modeline-appropriate clock generation!
 
-(defvar +doom-modeline-micro-clock--cache nil)
+# #+begin_src emacs-lisp
+# (require 'svg)
 
-(defvar +doom-modeline-clock-text-format "%c")
+# (defvar +doom-modeline-micro-clock-minute-resolution 1
+#   "The clock will be updated every this many minutes, truncating.")
+# (defvar +doom-modeline-micro-clock-inverse-size 4.8
+#   "The size of the clock, as an inverse proportion to the mode line height.")
 
-(defun +doom-modeline--clock-text (&optional _window _object _pos)
-  (format-time-string +doom-modeline-clock-text-format))
+# (defvar +doom-modeline-micro-clock--cache nil)
 
-(defun +doom-modeline-micro-clock ()
-  "Return a string containing an current analogue clock."
-  (cdr
-   (if (equal (truncate (float-time)
-                        (* +doom-modeline-micro-clock-minute-resolution 60))
-              (car +doom-modeline-micro-clock--cache))
-       +doom-modeline-micro-clock--cache
-     (setq +doom-modeline-micro-clock--cache
-           (cons (truncate (float-time)
-                           (* +doom-modeline-micro-clock-minute-resolution 60))
-                 (with-temp-buffer
-                   (svg-insert-image
-                    (micro-clock-svg
-                     (string-to-number (format-time-string "%-I")) ; hour
-                     (* (truncate (string-to-number (format-time-string "%-M"))
-                                  +doom-modeline-micro-clock-minute-resolution)
-                        +doom-modeline-micro-clock-minute-resolution) ; minute
-                     (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
-                     "currentColor"))
-                   (propertize
-                    " "
-                    'display
-                    (append (get-text-property 0 'display (buffer-string))
-                            '(:ascent center))
-                    'face 'doom-modeline-time
-                    'help-echo #'+doom-modeline--clock-text)))))))
-#+end_src
+# (defvar +doom-modeline-clock-text-format "%c")
 
-With clock generation sorted out, all that's to be done is replacing the =time=
-modeline segment with our design.
+# (defun +doom-modeline--clock-text (&optional _window _object _pos)
+#   (format-time-string +doom-modeline-clock-text-format))
 
-#+begin_src emacs-lisp
-(doom-modeline-def-segment time
-  (when (and doom-modeline-time
-             (bound-and-true-p display-time-mode)
-             (not doom-modeline--limited-width-p))
-    (concat
-     doom-modeline-spc
-     (when doom-modeline-time-icon
-       (concat
-        (+doom-modeline-micro-clock)
-        (and (or doom-modeline-icon doom-modeline-unicode-fallback)
-             doom-modeline-spc)))
-     (propertize display-time-string
-                 'face (doom-modeline-face 'doom-modeline-time)))))
-#+end_src
+# (defun +doom-modeline-micro-clock ()
+#   "Return a string containing an current analogue clock."
+#   (cdr
+#    (if (equal (truncate (float-time)
+#                         (* +doom-modeline-micro-clock-minute-resolution 60))
+#               (car +doom-modeline-micro-clock--cache))
+#        +doom-modeline-micro-clock--cache
+#      (setq +doom-modeline-micro-clock--cache
+#            (cons (truncate (float-time)
+#                            (* +doom-modeline-micro-clock-minute-resolution 60))
+#                  (with-temp-buffer
+#                    (svg-insert-image
+#                     (micro-clock-svg
+#                      (string-to-number (format-time-string "%-I")) ; hour
+#                      (* (truncate (string-to-number (format-time-string "%-M"))
+#                                   +doom-modeline-micro-clock-minute-resolution)
+#                         +doom-modeline-micro-clock-minute-resolution) ; minute
+#                      (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
+#                      "currentColor"))
+#                    (propertize
+#                     " "
+#                     'display
+#                     (append (get-text-property 0 'display (buffer-string))
+#                             '(:ascent center))
+#                     'face 'doom-modeline-time
+#                     'help-echo #'+doom-modeline--clock-text)))))))
+# #+end_src
 
-**** PDF modeline
+# With clock generation sorted out, all that's to be done is replacing the =time=
+# modeline segment with our design.
 
-I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
-however the response was basically "put your preferences in your personal
-config, the current default is sensible" --- so here we are.
+# #+begin_src emacs-lisp
+# (doom-modeline-def-segment time
+#   (when (and doom-modeline-time
+#              (bound-and-true-p display-time-mode)
+#              (not doom-modeline--limited-width-p))
+#     (concat
+#      doom-modeline-spc
+#      (when doom-modeline-time-icon
+#        (concat
+#         (+doom-modeline-micro-clock)
+#         (and (or doom-modeline-icon doom-modeline-unicode-fallback)
+#              doom-modeline-spc)))
+#      (propertize display-time-string
+#                  'face (doom-modeline-face 'doom-modeline-time)))))
+# #+end_src
 
-First up I'm going to want a segment for just the buffer file name, and a PDF
-icon. Then we'll redefine two functions used to generate the modeline.
+# **** PDF modeline
 
-#+begin_src emacs-lisp
-(doom-modeline-def-segment buffer-name
-  "Display the current buffer's name, without any other information."
-  (concat
-   doom-modeline-spc
-   (doom-modeline--buffer-name)))
+# I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
+# however the response was basically "put your preferences in your personal
+# config, the current default is sensible" --- so here we are.
 
-(doom-modeline-def-segment pdf-icon
-  "PDF icon from all-the-icons."
-  (concat
-   doom-modeline-spc
-   (doom-modeline-icon 'octicon "file-pdf" nil nil
-                       :face (if (doom-modeline--active)
-                                 'all-the-icons-red
-                               'mode-line-inactive)
-                       :v-adjust 0.02)))
+# First up I'm going to want a segment for just the buffer file name, and a PDF
+# icon. Then we'll redefine two functions used to generate the modeline.
 
-(defun doom-modeline-update-pdf-pages ()
-  "Update PDF pages."
-  (setq doom-modeline--pdf-pages
-        (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
-              (total-page-str (number-to-string (pdf-cache-number-of-pages))))
-          (concat
-           (propertize
-            (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
-                    " P" current-page-str)
-            'face 'mode-line)
-           (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
+# #+begin_src emacs-lisp
+# (doom-modeline-def-segment buffer-name
+#   "Display the current buffer's name, without any other information."
+#   (concat
+#    doom-modeline-spc
+#    (doom-modeline--buffer-name)))
 
-(doom-modeline-def-segment pdf-pages
-  "Display PDF pages."
-  (if (doom-modeline--active) doom-modeline--pdf-pages
-    (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
+# (doom-modeline-def-segment pdf-icon
+#   "PDF icon from all-the-icons."
+#   (concat
+#    doom-modeline-spc
+#    (doom-modeline-icon 'octicon "file-pdf" nil nil
+#                        :face (if (doom-modeline--active)
+#                                  'all-the-icons-red
+#                                'mode-line-inactive)
+#                        :v-adjust 0.02)))
 
-(doom-modeline-def-modeline 'pdf
-  '(bar window-number pdf-pages pdf-icon buffer-name)
-  '(misc-info matches major-mode process vcs))
-#+end_src
+# (defun doom-modeline-update-pdf-pages ()
+#   "Update PDF pages."
+#   (setq doom-modeline--pdf-pages
+#         (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
+#               (total-page-str (number-to-string (pdf-cache-number-of-pages))))
+#           (concat
+#            (propertize
+#             (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
+#                     " P" current-page-str)
+#             'face 'mode-line)
+#            (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
+
+# (doom-modeline-def-segment pdf-pages
+#   "Display PDF pages."
+#   (if (doom-modeline--active) doom-modeline--pdf-pages
+#     (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
+
+# (doom-modeline-def-modeline 'pdf
+#   '(bar window-number pdf-pages pdf-icon buffer-name)
+#   '(misc-info matches major-mode process vcs))
+# #+end_src
 
 *** Keycast
 
@@ -7662,12 +7666,12 @@ I can check this by checking the content of the SSH key =~/.ssh/id_ed25519.pub=.
 To account for this situation properly, we need a short script to determine the
 correct package statement needed.
 
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! org
-#   :recipe (:host nil :repo "https://git.savannah.gnu.org/git/emacs/org-mode.git")
-#   :pin "7771b8917e0c980dc2709f03538c5fda93f39072")
-# (unpin! org)
-# #+end_src
+#+begin_src emacs-lisp :tangle packages.el
+(package! org
+  :recipe (:host nil :repo "https://git.savannah.gnu.org/git/emacs/org-mode.git")
+  :pin "74eb0f8bc9e39fc0acd871fb3767ba357dab7fad")
+(unpin! org)
+#+end_src
 
 **** Visuals
 ***** Org Modern
@@ -9749,15 +9753,18 @@ and out of the LaTeX fragments.
 
 Thankfully, all we need to do to make this happen is use ~org-latex-preview-auto-mode~.
 
-#+begin_src emacs-lisp
-(add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
-#+end_src
+CUSTOM: NOT WORKING!
+
+ # #+begin_src emacs-lisp
+ # (add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
+ # #+end_src
 
 ***** Prettier rendering
 
 It's nice to customise the look of LaTeX fragments so they fit better in the
 text --- like this \(\sqrt{\beta^2+3}-\sum_{\phi=1}^\infty \frac{x^\phi-1}{\Gamma(a)}\).
 
+text --- like this \(\sqrt{\beta^2+3}-\sum_{\phi=1}^\infty \frac{x^\phi-1}{\Gamma(a)}\)
 The default snippet preamble basically just sets the margins and text size, with
 templates to be filled in by ~org-latex-default-packages-alist~ and
 =#+latex_header:= entries (but not =#+latex_header_extra:=).
@@ -12650,59 +12657,59 @@ export to a PDF.
 <<org-missing-latex-packages()>>
 #+end_src
 
-# *** Beamer Export
+*** Beamer Export
 
-# #+call: confpkg("ox-beamer", after="ox-beamer")
+#+call: confpkg("ox-beamer", after="ox-beamer")
 
-# It's nice to use a different theme
-# #+begin_src emacs-lisp
-# (setq org-beamer-theme "[progressbar=foot]metropolis")
-# #+end_src
+It's nice to use a different theme
+#+begin_src emacs-lisp
+(setq org-beamer-theme "[progressbar=foot]metropolis")
+#+end_src
 
-# When using metropolis though, we want to make a few tweaks:
-# #+name: beamer-metropolis-tweaks
-# #+begin_src LaTeX
-# \NewCommandCopy{\moldusetheme}{\usetheme}
-# \renewcommand*{\usetheme}[2][]{\moldusetheme[#1]{#2}
-#   \setbeamertemplate{items}{$\bullet$}
-#   \setbeamerfont{block title}{size=\normalsize, series=\bfseries\parbox{0pt}{\rule{0pt}{4ex}}}}
+When using metropolis though, we want to make a few tweaks:
+#+name: beamer-metropolis-tweaks
+#+begin_src LaTeX
+\NewCommandCopy{\moldusetheme}{\usetheme}
+\renewcommand*{\usetheme}[2][]{\moldusetheme[#1]{#2}
+  \setbeamertemplate{items}{$\bullet$}
+  \setbeamerfont{block title}{size=\normalsize, series=\bfseries\parbox{0pt}{\rule{0pt}{4ex}}}}
 
-# \makeatletter
-# \newcommand{\setmetropolislinewidth}{
-#   \setlength{\metropolis@progressinheadfoot@linewidth}{1.2px}}
-# \makeatother
+\makeatletter
+\newcommand{\setmetropolislinewidth}{
+  \setlength{\metropolis@progressinheadfoot@linewidth}{1.2px}}
+\makeatother
 
-# \usepackage{etoolbox}
-# \AtEndPreamble{\setmetropolislinewidth}
-# #+end_src
+\usepackage{etoolbox}
+\AtEndPreamble{\setmetropolislinewidth}
+#+end_src
 
-# Now let's just apply this along with some extra beamer tweaks.
+Now let's just apply this along with some extra beamer tweaks.
 
-# #+begin_src emacs-lisp :noweb no-export :noweb-prefix no
-# (defun org-beamer-p (info)
-#   (eq 'beamer (and (plist-get info :back-end)
-#                    (org-export-backend-name (plist-get info :back-end)))))
+#+begin_src emacs-lisp :noweb no-export :noweb-prefix no
+(defun org-beamer-p (info)
+  (eq 'beamer (and (plist-get info :back-end)
+                   (org-export-backend-name (plist-get info :back-end)))))
 
-# (add-to-list 'org-export-conditional-features
-#              '(org-beamer-p . beamer) t)
-# (add-to-list 'org-latex-feature-implementations
-#              '(beamer :requires .missing-koma :prevents (italic-quotes condensed-lists)) t)
-# (add-to-list 'org-latex-feature-implementations
-#              '(.missing-koma :snippet "\\usepackage{scrextend}" :order 2) t)
+(add-to-list 'org-export-conditional-features
+             '(org-beamer-p . beamer) t)
+(add-to-list 'org-latex-feature-implementations
+             '(beamer :requires .missing-koma :prevents (italic-quotes condensed-lists)) t)
+(add-to-list 'org-latex-feature-implementations
+             '(.missing-koma :snippet "\\usepackage{scrextend}" :order 2) t)
 
-# (defvar org-beamer-metropolis-tweaks
-#   <<grab("beamer-metropolis-tweaks")>>
-#   "LaTeX preamble snippet that tweaks the Beamer metropolis theme styling.")
+(defvar org-beamer-metropolis-tweaks
+  <<grab("beamer-metropolis-tweaks")>>
+  "LaTeX preamble snippet that tweaks the Beamer metropolis theme styling.")
 
-# (add-to-list 'org-export-conditional-features
-#              (cons (lambda (info)
-#                      (and (org-beamer-p info)
-#                           (string-match-p "metropolis$" org-beamer-theme)))
-#                    'beamer-metropolis)
-#              t)
-# (add-to-list 'org-latex-feature-implementations
-#              '(beamer-metropolis :requires beamer :snippet org-beamer-metropolis-tweaks :order 3) t)
-# #+end_src
+(add-to-list 'org-export-conditional-features
+             (cons (lambda (info)
+                     (and (org-beamer-p info)
+                          (string-match-p "metropolis$" org-beamer-theme)))
+                   'beamer-metropolis)
+             t)
+(add-to-list 'org-latex-feature-implementations
+             '(beamer-metropolis :requires beamer :snippet org-beamer-metropolis-tweaks :order 3) t)
+#+end_src
 
 \usepackage{etoolbox}
 \AtEndPreamble{\setmetropolislinewidth}
@@ -13731,3 +13738,4 @@ which is perfect for our needs.
 #+begin_src emacs-lisp
 (setq org-export-backends '(pandoc md ascii html icalendar odt))
 #+end_src
+trigger tangle
