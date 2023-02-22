@@ -8744,7 +8744,7 @@ no modeline.
         :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
         :desc "org-roam-capture" "c" #'org-roam-capture)
   (setq org-roam-directory (file-truename "~/org/notes"))
-        ;;org-roam-database-connector 'sqlite-builtin
+        org-roam-database-connector 'sqlite-builtin
         ;; org-roam-db-gc-threshold most-positive-fixnum
         ;; org-id-link-to-org-use-id t)
 
