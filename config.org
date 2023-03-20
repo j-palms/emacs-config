@@ -1627,7 +1627,8 @@ zen                          ; distraction-free coding or writing
 (evil +everywhere)           ; come to the dark side, we have cookies
 file-templates               ; auto-snippets for empty files
 fold                         ; (nigh) universal code folding
-(format +onsave)                     ; automated prettiness
+format
+ ;;+onsave)                     ; automated prettiness
 ;;god                        ; run Emacs commands without modifier keys
 ;;lispy                      ; vim for lisp, for people who don't like vim
 multiple-cursors             ; editing in many places at once
@@ -4728,7 +4729,7 @@ let's just switch to an ~o~, which still looks decent but doesn't cause any
 issues.
 An 'active-bar' is nice, so let's have one of those. If we have it ~under~ needs us to
 turn on ~x-underline-at-decent~ though. For some reason this didn't seem to work
-inside the src_elisp{(after! ... )} block ¯\_(ツ)_/¯.
+inside the src_elisp{(after! ... )}  block ¯\_(ツ)_/¯.
 Then let's change the font to a sans serif, but the default one doesn't fit too
 well somehow, so let's switch to 'P22 Underground Book'; it looks much nicer.
 
@@ -4873,12 +4874,12 @@ Quite often there are superfluous files I'm not that interested in. There's no
 good reason for them to take up space. Let's add a mechanism to ignore them.
 
 
-#+begin_src emacs-lisp
-(setq  doom-themes-neotree-file-icons t)
+# #+begin_src emacs-lisp
+# (setq  doom-themes-neotree-file-icons t)
 
-(with-eval-after-load 'doom-themes
-  (doom-themes-neotree-config))
-#+end_src
+# (with-eval-after-load 'doom-themes
+#   (doom-themes-neotree-config))
+# #+end_src
 
 #+begin_src emacs-lisp
 (after! treemacs
@@ -8748,6 +8749,7 @@ no modeline.
 ****** CUSTOM: from jethrokuan
 
 #+begin_src emacs-lisp
+
 (use-package! org-roam
   :init
   (map! :leader
@@ -8759,7 +8761,8 @@ no modeline.
         :desc "org-roam-show-graph" "g" #'org-roam-show-graph
         :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
         :desc "org-roam-capture" "c" #'org-roam-capture)
-  (setq org-roam-directory (file-truename "~/org/notes"))
+  (setq org-roam-directory (file-truename "~/org/notes")
+        org-roam-dailies-directory "journals/")
         org-roam-database-connector 'sqlite-builtin
         ;; org-roam-db-gc-threshold most-positive-fixnum
         ;; org-id-link-to-org-use-id t)
@@ -8776,7 +8779,7 @@ no modeline.
   (setq org-roam-capture-templates
         '(("n" "notes" plain
            "\n%?"
-           :if-new (file+head "${slug}.org"
+           :if-new (file+head "pages/${slug}.org"
                               "#+title: ${title}\n")
            :immediate-finish t
            :unnarrowed t)))
@@ -13427,16 +13430,16 @@ priority of =mypyls=
 #   (set-lsp-priority! 'mspyls 1))
 # #+end_src
 
-#+begin_src emacs-lisp
-(use-package! python-black
-  :demand t
-  :after python
-  :config
-  (add-hook! 'python-mode-hook #'python-black-on-save-mode)
-  ;; Feel free to throw your own personal keybindings here
-)
-(map! :desc "Blacken Buffer" "C-c f" #'python-black-buffer)
-#+end_src
+# #+begin_src emacs-lisp
+# (use-package! python-black
+#   :demand t
+#   :after python
+#   :config
+#   (add-hook! 'python-mode-hook #'python-black-on-save-mode)
+#   ;; Feel free to throw your own personal keybindings here
+# )
+# (map! :desc "Blacken Buffer" "C-c f" #'python-black-buffer)
+# #+end_src
 
 
 ** PDF
@@ -13754,4 +13757,14 @@ which is perfect for our needs.
 #+begin_src emacs-lisp
 (setq org-export-backends '(pandoc md ascii html icalendar odt))
 #+end_src
-trigger tangle
+
+#+begin_src emacs-lisp :tangle yes
+(after! format
+(setq +format-on-save-enabled-modes
+  '(not python-mode
+        emacs-lisp-mode    ; elisp's mechanisms are good enough
+        sql-mode           ; sqlformat is currently broken
+        tex-mode           ; latexindent is broken
+        latex-mode
+        org-msg-edit-mode))) ; doesn't need a formatter
+#+end_src
