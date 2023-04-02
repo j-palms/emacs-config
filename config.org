@@ -4103,7 +4103,7 @@ would be nice if it was, just slightly. Surprisingly, I couldn't find a package
 for this, so I made one.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! simple-comment-markup :recipe (:host github :repo "tecosaur/simple-comment-markup"))
+(package! simple-comment-markup :recipe (:repo "https://git.tecosaur.net/tec/simple-comment-markup.git"))
 #+end_src
 
 Let's use both basic Org markup and Markdown code backticks, to cover most
@@ -7779,7 +7779,7 @@ recognising the pgtk window system]].
 
 =ob-julia= is currently a bit borked, but there's an effort to improve this.
 #+begin_src emacs-lisp :tangle packages.el
-(package! ob-julia :recipe (:host github :repo "tecosaur/ob-julia"))
+(package! ob-julia :recipe (:host github :repo "nico202/ob-julia"))
 #+end_src
 
 #+begin_src emacs-lisp
