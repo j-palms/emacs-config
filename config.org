@@ -13313,14 +13313,6 @@ In case of Emacs28,
 
 ** Python
 
-Since I'm using =mypyls=, as suggested in [[file:~/.config/emacs/modules/lang/python/README.org::*Language Server Protocol Support][:lang python LSP support]] I'll tweak the
-priority of =mypyls=
-
-#+begin_src emacs-lisp
-(after! lsp-python-ms
-  (set-lsp-priority! 'mspyls 1))
-#+end_src
-
 ** PDF
 *** MuPDF
 
