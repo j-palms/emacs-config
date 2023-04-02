@@ -1600,8 +1600,11 @@ vterm                        ; the best terminal emulation in Emacs
 
 #+name: doom-checkers
 #+begin_src emacs-lisp
-syntax                       ; tasing you for every semicolon you forget
-(:if (executable-find "aspell") spell) ; tasing you for misspelling mispelling
+(syntax +childframe)         ; tasing you for every semicolon you forget
+(spell
+ +flyspell
+ +hunspell
+ +everywhere)
 grammar                      ; tasing grammar mistake every you make
 #+end_src
 
@@ -3741,6 +3744,19 @@ let's improve that memory.
 #+end_src
 We then configure the dictionary we're using in [[*Ispell][Ispell]].
 
+CUSTOM:
+#+begin_src emacs-lisp
+(setq company-ispell-available t)
+
+(defun company-ispell-german ()
+  (interactive)
+  (setq-local company-ispell-dictionary (file-truename "~/.config/doom/misc/german_top10000_clean.txt")))
+
+(defun company-ispell-english ()
+  (interactive)
+  (setq-local company-ispell-dictionary nil))
+#+end_src
+
 **** ESS
 
 ~company-dabbrev-code~ is nice. Let's have it.
@@ -3768,45 +3784,47 @@ add package src directories to projectile. This isn't desirable in my opinion.
 #+end_src
 
 *** Ispell
-**** Downloading dictionaries
+# **** Downloading dictionaries
 
-Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
-the following configuration
-- size :: 80 (huge)
-- spellings :: British(-ise) and Australian
-- spelling variants level :: 0
-- diacritics :: keep
-- extra lists :: hacker, roman numerals
+# Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
+# the following configuration
+# - size :: 80 (huge)
+# - spellings :: British(-ise) and Australian
+# - spelling variants level :: 0
+# - diacritics :: keep
+# - extra lists :: hacker, roman numerals
 
-***** Hunspell
+# ***** Hunspell
 
-#+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
-cd /tmp
-curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
-unzip "hunspell-en-custom.zip"
+# #+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
+# cd /tmp
+# curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
+# unzip "hunspell-en-custom.zip"
 
-sudo chown root:root en-custom.*
-sudo mv en-custom.{aff,dic} /usr/share/myspell/
-#+end_src
+# sudo chown root:root en-custom.*
+# sudo mv en-custom.{aff,dic} /usr/share/myspell/
+# #+end_src
 
-***** Aspell
+# ***** Aspell
 
-#+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
-cd /tmp
-curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
-tar -xjf "aspell6-en-custom.tar.bz2"
+# #+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
+# cd /tmp
+# curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
+# tar -xjf "aspell6-en-custom.tar.bz2"
 
-cd aspell6-en-custom
-./configure && make && sudo make install
-#+end_src
+# cd aspell6-en-custom
+# ./configure && make && sudo make install
+# #+end_src
+
+For now arch packages of hunspell (de, en_us) are required.
 
 **** Configuration
 
 #+call: confpkg("!Pkg Ispell")
 
-#+begin_src emacs-lisp
-(setq ispell-dictionary "en-custom")
-#+end_src
+# #+begin_src emacs-lisp
+# (setq ispell-dictionary "en-custom")
+# #+end_src
 
 Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
 ~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
@@ -3817,9 +3835,28 @@ It seems reasonable to want to keep an eye on my personal dict, let's have it
 nearby (also means that if I change the 'main' dictionary I keep my addition).
 
 #+begin_src emacs-lisp
-(setq ispell-personal-dictionary
+(after! ispell
+    ;; Configure `LANG`, otherwise ispell.el cannot find a 'default
+    ;; dictionary' even though multiple dictionaries will be configured
+    ;; in next line.
+    (setenv "LANG" "en_US.UTF-8")
+    (setq ispell-program-name "hunspell")
+    ;; Configure German, Swiss German, and two variants of English.
+    (setq ispell-dictionary "de_DE,en_US")
+    ;; ispell-set-spellchecker-params has to be called
+    ;; before ispell-hunspell-add-multi-dic will work
+    (ispell-set-spellchecker-params)
+    (ispell-hunspell-add-multi-dic "de_DE,en_US")
+    ;; For saving words to the personal dictionary, don't infer it from
+    ;; the locale, otherwise it would save to ~/.hunspell_de_DE.
+    (setq ispell-personal-dictionary
       (expand-file-name "misc/ispell_personal" doom-private-dir))
+    ;; The personal dictionary file has to exist, otherwise hunspell will
+    ;; silently not use it.
+    (unless (file-exists-p ispell-personal-dictionary)
+      (write-region "" nil ispell-personal-dictionary nil 0)))
 #+end_src
+
 
 *** TRAMP
 
