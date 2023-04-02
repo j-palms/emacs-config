@@ -8028,7 +8028,7 @@ It's nice to be able to link to music
 **** Tweaking defaults
 
 #+begin_src emacs-lisp
-(setq org-directory (expand-file-name "org" (xdg-data-home)) ; Let's put files here.
+(setq org-directory "~/org" ; Let's put files here.
       org-agenda-files (list org-directory)                  ; Seems like the obvious place.
       org-use-property-inheritance t                         ; It's convenient to have properties inherited.
       org-log-done 'time                                     ; Having the time a item is done sounds convenient.
