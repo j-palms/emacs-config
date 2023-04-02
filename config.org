@@ -8779,6 +8779,64 @@ no modeline.
         (set-window-parameter nil 'mode-line-format 'none)
         (org-capture)))
 #+end_src
+**** GTD
+#+call: confpkg("!Pkg org-gtd", after="org")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-gtd)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! org-gtd
+  :after org
+  :init
+  (setq org-gtd-update-ack "2.1.0")
+  :custom
+  (org-gtd-directory "~/org/gtd")
+  (org-edna-use-inheritance t)
+  :config
+  (org-edna-mode)
+  (map! :prefix "C-c"
+        "d c" #'org-gtd-capture
+        "d e" #'org-gtd-engage
+        "d p" #'org-gtd-process-inbox
+        "d n" #'org-gtd-show-all-next
+        "d s" #'org-gtd-show-stuck-projects
+        "d a" #'org-gtd-archive-completed-items)
+  (map! :map org-gtd-process-map
+        "C-c c" #'org-gtd-choose))
+#+end_src
+
+#+begin_src emacs-lisp
+;; (setq org-capture-templates
+;;       `(("s" "Slipbox" entry  (file "notes/inbox.org")
+;;          "* %?\n")))
+
+;; (defun josua/set-org-capture-templates ()
+;;   (interactive)
+;;   (setq org-capture-templates
+;;       `(("i" "Inbox" entry  (file "gtd/inbox.org")
+;;          (concat "* %?\n"
+;;                  ;;":PROPERTIES:\n"
+;;                  ;;":CATEGORY: %\1 %\\1 \n"
+;;                  ;;":END:\n"
+;;                   "/Entered on/ %U"))
+;;         ("s" "Slipbox" entry  (file "notes/inbox.org")
+;;          "* %?\n"))))
+
+;; (josua/set-org-capture-templates)
+
+;; (map! "C-c C" #'org-capture)
+
+;; (defun jethro/org-capture-inbox ()
+;;   (interactive)
+;;   (org-capture nil "i"))
+
+;; (defun jethro/org-capture-slipbox ()
+;;   (interactive)
+;;   (org-capture nil "s"))
+#+end_src
+
 
 **** Roam
 
