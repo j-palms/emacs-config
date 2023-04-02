@@ -1294,10 +1294,7 @@ configuration.
 (let ((standard-output #'ignore))
   (with-temp-buffer
     (insert
-     ";; -*- no-byte-compile: t; -*-\n\n"
-     (pp (quote
-          <<org-pkg-statement()>>
-          )))
+     ";; -*- no-byte-compile: t; -*-\n\n")
     (write-region nil nil "packages.el")))
 
 (doom-packages-install)
@@ -1319,8 +1316,8 @@ the start of the tangle process. This is done by calling =bootstrap= within the
 
 It's useful to have some basic personal information
 #+begin_src emacs-lisp
-(setq user-full-name "TEC"
-      user-mail-address "contact@tecosaur.net")
+(setq user-full-name "Josua Palmstedt"
+      user-mail-address "palmstedt@posteo.de")
 #+end_src
 Apparently this is used by ~GPG~, and all sorts of other things.
 
@@ -1758,39 +1755,39 @@ irc                          ; how neckbeards socialize
 ;;twitter                    ; twitter client https://twitter.com/vnought
 #+end_src
 
-*** Profiles
+# *** Profiles
 
-Doom has support for multiple configuration profiles. For general usage, this
-isn't a particularly useful feature, but for niche use cases it's fantastic.
+# Doom has support for multiple configuration profiles. For general usage, this
+# isn't a particularly useful feature, but for niche use cases it's fantastic.
 
-#+begin_src emacs-lisp :tangle ~/.config/emacs/profiles.el :noweb-ref none
-((orgdev (env ("DOOMDIR" . "~/.config/doom.orgdev"))))
-#+end_src
+# #+begin_src emacs-lisp :tangle ~/.config/emacs/profiles.el :noweb-ref none
+# ((orgdev (env ("DOOMDIR" . "~/.config/doom.orgdev"))))
+# #+end_src
 
-**** Org development profile
-:PROPERTIES:
-:header-args:emacs-lisp: :noweb-ref none
-:END:
+# **** Org development profile
+# :PROPERTIES:
+# :header-args:emacs-lisp: :noweb-ref none
+# :END:
 
-For development purposes, it's handy to have a more minimal config without my
-many customisations and interacting packages. Let's go ahead and create a
-near-minimal new config:
+# For development purposes, it's handy to have a more minimal config without my
+# many customisations and interacting packages. Let's go ahead and create a
+# near-minimal new config:
 
-#+begin_src emacs-lisp :tangle ../doom.orgdev/init.el :mkdirp yes
-;;; init.el -*- lexical-binding: t; -*-
-(doom! :completion vertico
-       :editor evil
-       :config (default +bindings))
-#+end_src
+# #+begin_src emacs-lisp :tangle ../doom.orgdev/init.el :mkdirp yes
+# ;;; init.el -*- lexical-binding: t; -*-
+# (doom! :completion vertico
+#        :editor evil
+#        :config (default +bindings))
+# #+end_src
 
-#+begin_src emacs-lisp :tangle ../doom.orgdev/packages.el :noweb no-export
-(unpin! org) ; there be bugs
-#+end_src
+# #+begin_src emacs-lisp :tangle ../doom.orgdev/packages.el :noweb no-export
+# (unpin! org) ; there be bugs
+# #+end_src
 
-#+begin_src emacs-lisp :tangle ../doom.orgdev/config.el
-(require 'org)
-(load-theme 'modus-operandi t)
-#+end_src
+# #+begin_src emacs-lisp :tangle ../doom.orgdev/config.el
+# (require 'org)
+# (load-theme 'modus-operandi t)
+# #+end_src
 
 *** Visual Settings
 **** Font Face
@@ -5245,7 +5242,7 @@ something through Emacs?
 (use-package! calibredb
   :commands calibredb
   :config
-  (setq calibredb-root-dir "~/Desktop/TEC/Other/Ebooks"
+  (setq calibredb-root-dir "~/books"
         calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
   (map! :map calibredb-show-mode-map
         :ne "?" #'calibredb-entry-dispatch
@@ -7548,72 +7545,72 @@ Then adding a regex for it to =~/.config/git/config=
 #+end_src
 
 *** Packages
-**** Org itself
+# **** Org itself
 
-There are actually three possible package statements I may want to use for Org.
+# There are actually three possible package statements I may want to use for Org.
 
-If I'm on a machine where I can push changes, I want to be able to develop Org.
-I can check this by checking the content of the SSH key =~/.ssh/id_ed25519.pub=.
-1. If this key exists and there isn't a repo at
-   =$doom-user-dir/lisp/org= with the right remote, we should
-   install it as such.
-2. If the key exists and repo are both set up, the package should just be ignored.
-3. If the key does not exist, the Org's ~HEAD~ should just be used
+# If I'm on a machine where I can push changes, I want to be able to develop Org.
+# I can check this by checking the content of the SSH key =~/.ssh/id_ed25519.pub=.
+# 1. If this key exists and there isn't a repo at
+#    =$doom-user-dir/lisp/org= with the right remote, we should
+#    install it as such.
+# 2. If the key exists and repo are both set up, the package should just be ignored.
+# 3. If the key does not exist, the Org's ~HEAD~ should just be used
 
-To account for this situation properly, we need a short script to determine the
-correct package statement needed.
+# To account for this situation properly, we need a short script to determine the
+# correct package statement needed.
 
-#+name: org-pkg-statement
-#+begin_src emacs-lisp :noweb-ref none
-(or (require 'doom (expand-file-name "lisp/doom.el"
-                                     (or (bound-and-true-p doom-emacs-dir)
-                                         user-emacs-directory)))
-    (setq doom-local-dir
-          (expand-file-name ".local/" (or (bound-and-true-p doom-emacs-dir)
-                                          user-emacs-directory))))
-(let ((dev-key-p (and (file-exists-p "~/.ssh/id_ed25519.pub")
-                      (= 0 (shell-command "cat ~/.ssh/id_ed25519.pub | grep -q AAAAC3NzaC1lZDI1NTE5AAAAIOZZqcJOLdN+QFHKyW8ST2zz750+8TdvO9IT5geXpQVt"))))
-      (recipe-common '(:files (:defaults "etc")
-                       :build t
-                       :pre-build
-                       (with-temp-file "org-version.el"
-                         (require 'lisp-mnt)
-                         (let ((version ;; (lm-version "lisp/org.el")
-                                (with-temp-buffer
-                                  (insert-file-contents "lisp/org.el")
-                                  (lm-header "version")))
-                               (git-version (string-trim
-                                             (with-temp-buffer
-                                               (call-process "git" nil t nil
-                                                             "rev-parse" "--short" "HEAD")
-                                               (buffer-string)))))
-                           (insert (format "(defun org-release () \"The release version of Org.\" %S)\n"
-                                           version)
-                                   (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n"
-                                           git-version)
-                                   "(provide 'org-version)\n"))))))
-  (with-temp-buffer
-    (insert
-     (pp `(package! org
-            :recipe (,@(if dev-key-p
-                           (list :host nil :repo "tec@git.savannah.gnu.org:/srv/git/emacs/org-mode.git" :local-repo "lisp/org"
-                                 :fork (list :host nil :repo "gitea@git.tecosaur.net:tec/org-mode.git" :branch "dev" :remote "tecosaur"))
-                         (list :host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror"
-                               :fork (list :host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")))
-                     ,@recipe-common)
-            :pin nil)))
-    (untabify (point-min) (point-max))
-    (buffer-string)))
-#+end_src
+# #+name: org-pkg-statement
+# #+begin_src emacs-lisp :noweb-ref none
+# (or (require 'doom (expand-file-name "lisp/doom.el"
+#                                      (or (bound-and-true-p doom-emacs-dir)
+#                                          user-emacs-directory)))
+#     (setq doom-local-dir
+#           (expand-file-name ".local/" (or (bound-and-true-p doom-emacs-dir)
+#                                           user-emacs-directory))))
+# (let ((dev-key-p (and (file-exists-p "~/.ssh/id_ed25519.pub")
+#                       (= 0 (shell-command "cat ~/.ssh/id_ed25519.pub | grep -q AAAAC3NzaC1lZDI1NTE5AAAAIOZZqcJOLdN+QFHKyW8ST2zz750+8TdvO9IT5geXpQVt"))))
+#       (recipe-common '(:files (:defaults "etc")
+#                        :build t
+#                        :pre-build
+#                        (with-temp-file "org-version.el"
+#                          (require 'lisp-mnt)
+#                          (let ((version ;; (lm-version "lisp/org.el")
+#                                 (with-temp-buffer
+#                                   (insert-file-contents "lisp/org.el")
+#                                   (lm-header "version")))
+#                                (git-version (string-trim
+#                                              (with-temp-buffer
+#                                                (call-process "git" nil t nil
+#                                                              "rev-parse" "--short" "HEAD")
+#                                                (buffer-string)))))
+#                            (insert (format "(defun org-release () \"The release version of Org.\" %S)\n"
+#                                            version)
+#                                    (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n"
+#                                            git-version)
+#                                    "(provide 'org-version)\n"))))))
+#   (with-temp-buffer
+#     (insert
+#      (pp `(package! org
+#             :recipe (,@(if dev-key-p
+#                            (list :host nil :repo "tec@git.savannah.gnu.org:/srv/git/emacs/org-mode.git" :local-repo "lisp/org"
+#                                  :fork (list :host nil :repo "gitea@git.tecosaur.net:tec/org-mode.git" :branch "dev" :remote "tecosaur"))
+#                          (list :host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror"
+#                                :fork (list :host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")))
+#                      ,@recipe-common)
+#             :pin nil)))
+#     (untabify (point-min) (point-max))
+#     (buffer-string)))
+# #+end_src
 
-#+begin_src emacs-lisp :tangle packages.el :noweb no-export
-<<org-pkg-statement()>>
-(unpin! org) ; there be bugs
-(package! org-contrib
-  :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
-           :files ("lisp/*.el"))
-  :pin "6422b265f1150204f024e33d54f2dcfd8323005c")
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el :noweb no-export
+# <<org-pkg-statement()>>
+# (unpin! org) ; there be bugs
+# (package! org-contrib
+#   :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
+#            :files ("lisp/*.el"))
+#   :pin "6422b265f1150204f024e33d54f2dcfd8323005c")
+# #+end_src
 
 **** Visuals
 ***** Org Modern
@@ -8405,7 +8402,7 @@ set up org-capture.
 
   (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
 
-  (defvar +org-capture-recipies  "~/Desktop/TEC/Organisation/recipies.org")
+  (defvar +org-capture-recipies  "~/org/recipies.org")
 
   (defun set-org-capture-templates ()
     (setq org-capture-templates
@@ -8671,15 +8668,7 @@ I'll just set this to be within =Organisation= folder for now, in the future it
 could be worth seeing if I could hook this up to a [[https://nextcloud.com/][Nextcloud]] instance.
 
 #+begin_src emacs-lisp
-(setq org-roam-directory "~/Desktop/TEC/Organisation/Roam/")
-#+end_src
-
-That said, if the directory doesn't exist we likely don't want to be using roam.
-Since we don't want to trigger errors (which will happen as soon as roam tries
-to initialise), let's not load roam.
-
-#+begin_src emacs-lisp :noweb-ref none :tangle (if (file-exists-p "~/Desktop/TEC/Organisation/Roam/") "no" "packages.el")
-(package! org-roam :disable t)
+(setq org-roam-directory "~/notes/")
 #+end_src
 
 ***** Modeline file name
