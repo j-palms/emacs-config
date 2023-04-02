@@ -1524,8 +1524,9 @@ I reckon enabling half the modules Doom provides should do it.
 
 #+name: doom-completion
 #+begin_src emacs-lisp
-(company                     ; the ultimate code completion backend
- +childframe)                ; ... when your children are better than you
+(company
+ ;;+tng)                     ; the ultimate code completion backend
++childframe)                ; ... when your children are better than you
 ;;helm                       ; the *other* search engine for love and life
 ;;ido                        ; the other *other* search engine...
 ;; (ivy                      ; a search engine for love and life
@@ -1613,10 +1614,10 @@ grammar                      ; tasing grammar mistake every you make
 ansible                      ; a crucible for infrastructure as code
 biblio                       ; Writes a PhD for you (citation needed)
 ;;debugger                   ; FIXME stepping through code, to help you add bugs
-;;direnv                     ; be direct about your environment
+direnv                     ; be direct about your environment
 docker                       ; port everything to containers
 ;;editorconfig               ; let someone else argue about tabs vs spaces
-;;ein                        ; tame Jupyter notebooks with emacs
+ein                        ; tame Jupyter notebooks with emacs
 (eval +overlay)              ; run code, run (also, repls)
 ;;gist                       ; interacting with github gists
 (lookup                      ; helps you navigate your code and documentation
@@ -1652,9 +1653,9 @@ associated file.
 #+name: doom-lang
 #+begin_src emacs-lisp
 ;;agda                       ; types of types of types of types...
-;;beancount                  ; mind the GAAP
-;;(cc +lsp)                  ; C > C++ == 1
-;;clojure                    ; java with a lisp
+beancount                  ; mind the GAAP
+(cc +lsp)                  ; C > C++ == 1
+clojure                    ; java with a lisp
 ;;common-lisp                ; if you've seen one lisp, you've seen them all
 ;;coq                        ; proofs-as-programs
 ;;crystal                    ; ruby at the speed of c
@@ -1684,7 +1685,8 @@ json                         ; At least it ain't XML
 (latex                       ; writing papers in Emacs has never been so fun
  +latexmk                    ; what else would you use?
  +cdlatex                    ; quick maths symbols
- +fold)                      ; fold the clutter away nicities
+ +fold
+ +lsp)                      ; fold the clutter away nicities
 ;;lean                       ; proof that mathematicians need help
 ;;factor                     ; for when scripts are stacked against you
 ;;ledger                     ; an accounting system in Emacs
@@ -1700,13 +1702,17 @@ nix                          ; I hereby declare "nix geht mehr!"
  +jupyter                    ; ipython/jupyter support for babel
  +pandoc                     ; export-with-pandoc support
  +gnuplot                    ; who doesn't like pretty pictures
- ;;+pomodoro                 ; be fruitful with the tomato technique
+ +pomodoro                 ; be fruitful with the tomato technique
  +present                    ; using org-mode for presentations
  +roam2)                     ; wander around notes
 ;;php                        ; perl's insecure younger brother
-;;plantuml                   ; diagrams for confusing people more
+plantuml                   ; diagrams for confusing people more
 ;;purescript                 ; javascript, but functional
-(python +lsp +pyright)       ; beautiful is better than ugly
+(python                      ; beautiful is better than ugly
+ +lsp
+ +pyright
+ +pyenv
+ +poetry)
 ;;qt                         ; the 'cutest' gui framework ever
 ;;racket                     ; a DSL for DSLs
 ;;raku                       ; the artist formerly known as perl6
@@ -1750,7 +1756,7 @@ I couldn't resist the Email and Feed modules.
 
 #+name: doom-app
 #+begin_src emacs-lisp
-;;calendar                   ; A dated approach to timetabling
+calendar                   ; A dated approach to timetabling
 ;;emms                       ; Multimedia in Emacs is music to my ears
 everywhere                   ; *leave* Emacs!? You must be joking.
 irc                          ; how neckbeards socialize
