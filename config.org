@@ -8029,7 +8029,8 @@ It's nice to be able to link to music
 
 #+begin_src emacs-lisp
 (setq org-directory "~/org" ; Let's put files here.
-      org-agenda-files (list org-directory)                  ; Seems like the obvious place.
+      ;;org-agenda-files (list org-directory)                  ; Seems like the obvious place.
+      org-agenda-files (list "~/org/gtd")                  ; Seems like the obvious place.
       org-use-property-inheritance t                         ; It's convenient to have properties inherited.
       org-log-done 'time                                     ; Having the time a item is done sounds convenient.
       org-list-allow-alphabetical t                          ; Have a. A. a) A) list bullets.
