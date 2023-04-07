@@ -7742,21 +7742,26 @@ Fontifying =org-mode= buffers to be as pretty as possible is of paramount import
 and Minad's lovely =org-modern= goes a long way in this regard.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
+(package! org-modern)
 #+end_src
+
+This is the original package..
+(package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
 
 ...with a touch of configuration...
 
+
 #+begin_src emacs-lisp
 (use-package! org-modern
-  :hook (org-mode . org-modern-mode)
+  :hook (org-mode . global-org-modern-mode)
   :config
   (setq org-modern-star '("◉" "○" "✸" "✿" "✤" "✜" "◆" "▶")
         org-modern-table-vertical 1
         org-modern-table-horizontal 0.2
+        org-modern-label-border 0.3)
         org-modern-list '((43 . "➤")
                           (45 . "–")
-                          (42 . "•"))
+                          (42 . "•")
         org-modern-todo-faces
         '(("TODO" :inverse-video t :inherit org-todo)
           ("PROJ" :inverse-video t :inherit +org-todo-project)
