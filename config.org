@@ -1341,6 +1341,16 @@ my home machine is pretty safe, and my laptop is shutdown a lot.
       auth-source-cache-expiry nil) ; default is 7200 (2h)
 #+end_src
 
+
+** DEBUGGING
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! closql
+  ;;:recipe (:host github :repo "magit/closql" :files ("*.el"))
+  :pin "0a7226331ff1f96142199915c0ac7940bac4afdd")
+#+end_src
+
+
 ** Better defaults
 
 #+call: confpkg()
