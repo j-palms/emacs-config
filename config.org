@@ -7618,7 +7618,7 @@ Then adding a regex for it to =~/.config/git/config=
 #+end_src
 
 *** Packages
-# **** Org itself
+**** Org itself
 
 # There are actually three possible package statements I may want to use for Org.
 
@@ -7683,6 +7683,16 @@ Then adding a regex for it to =~/.config/git/config=
 #   :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
 #            :files ("lisp/*.el"))
 #   :pin "6422b265f1150204f024e33d54f2dcfd8323005c")
+# #+end_src
+
+
+# Use most recent org version (9.6.3):
+
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! org
+#   :recipe (:host nil :repo "https://git.savannah.gnu.org/git/emacs/org-mode.git")
+#   :pin "03d3b302bb12b9897650e2e8002310c90d07c397")
+# (unpin! org)
 # #+end_src
 
 **** Visuals
