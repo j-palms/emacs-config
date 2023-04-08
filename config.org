@@ -1397,7 +1397,7 @@ changes Doom makes:
 (after! dap-mode
   (setq dap-python-debugger 'debugpy))
 
-(map! ("C-c SPC"
+(map! ("C-c C-SPC"
        :desc "Switch perspective" #'+workspace/cycle))
 
 (setq max-specpdl-size 13000)
