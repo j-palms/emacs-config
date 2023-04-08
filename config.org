@@ -7741,12 +7741,14 @@ correct package statement needed.
 Fontifying =org-mode= buffers to be as pretty as possible is of paramount importance,
 and Minad's lovely =org-modern= goes a long way in this regard.
 
-#+begin_src emacs-lisp :tangle packages.el
-(package! org-modern)
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! org-modern)
+# #+end_src
 
-This is the original package..
+This is the original version used by TEC.
+#+begin_src emacs-lisp :tangle packages.el
 (package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
+#+end_src
 
 ...with a touch of configuration...
 
