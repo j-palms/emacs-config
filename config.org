@@ -7755,16 +7755,20 @@ This is the original version used by TEC.
 
 #+begin_src emacs-lisp
 (use-package! org-modern
-  :hook (org-mode . global-org-modern-mode)
+  :hook (org-mode . org-modern-mode)
   :config
   (setq org-modern-star '("◉" "○" "✸" "✿" "✤" "✜" "◆" "▶")
         org-modern-table-vertical 1
         org-modern-table-horizontal 0.2
-        org-modern-label-border 0.3)
+        org-modern-label-border 0.3
         org-modern-list '((43 . "➤")
                           (45 . "–")
-                          (42 . "•")
-        org-modern-todo-faces
+                          (42 . "•"))
+        org-modern-priority
+        '((?A . \"❗\")
+          (?B . \"⬆\")
+          (?C . \"⬇\"))
+       org-modern-todo-faces
         '(("TODO" :inverse-video t :inherit org-todo)
           ("PROJ" :inverse-video t :inherit +org-todo-project)
           ("STRT" :inverse-video t :inherit +org-todo-active)
@@ -7784,7 +7788,7 @@ This is the original version used by TEC.
           ("quote" "❝" "❞")
           ("export" "⏩" "⏪"))
         org-modern-progress nil
-        org-modern-priority nil
+        ;;org-modern-priority nil
         org-modern-horizontal-rule (make-string 36 ?─)
         org-modern-keyword
         '((t . t)
@@ -8438,7 +8442,7 @@ The agenda is nice, but a souped up version is nicer.
                         (org-agenda-overriding-header "Blocked items")))
           (search "* " ((org-agenda-overriding-header "Inbox")
                         (org-agenda-files '("~/org/gtd/inbox.org"))))))
-        ("o" "Overview"
+        ("n" "NEXT items"
          (
           ;; (agenda "" ((org-agenda-span 'day)
           ;;             (org-super-agenda-groups
@@ -8498,21 +8502,30 @@ The agenda is nice, but a souped up version is nicer.
                           ;; (:name "due soon"
                           ;;  :deadline future
                           ;;  :order 3)
-                          ;; (:name "important"
-                          ;;  :priority "A"
-                          ;;  :order 4)
-                          ;; (:name "Habits"
-                          ;;  :habit t
-                          ;;  :order 5)
+                          (:name "important"
+                           :priority "A"
+                           :order 4)
+                          (:name "chores"
+                           :tag "chore"
+                           :todo "NEXT"
+                           :order 7)
+                          (:name "organize"
+                           :tag "orga"
+                           :todo "NEXT"
+                           :order 8)
+                          (:name "call/write"
+                           :todo "NEXT"
+                           :tag "call"
+                           :tag "write"
+                           :order 9)
+                          (:name "sell/buy"
+                           :todo "NEXT"
+                           :tag "sell"
+                           :tag "buy"
+                           :order 10)
                           (:name "next to do"
                            :todo "NEXT"
-                           :order 6)
-                          (:name "assignments"
-                           :tag "assignment"
-                           :order 10)
-                          (:name "issues"
-                           :tag "issue"
-                           :order 12)
+                           :order 11)
                           (:name "emacs"
                            :tag "emacs"
                            :order 13)
@@ -8522,8 +8535,9 @@ The agenda is nice, but a souped up version is nicer.
                           (:name "research"
                            :tag "research"
                            :order 15)
-                          (:name "to read"
+                          (:name "to read/watch"
                            :tag "read"
+                           :tag "watch"
                            :order 30)
                           (:name "waiting"
                            :todo "waiting"
@@ -8536,7 +8550,13 @@ The agenda is nice, but a souped up version is nicer.
                            :tag ("trivial" "unimportant")
                            :todo ("someday" )
                            :order 90)
-                          (:discard (:tag ("chore" "routine" "daily")))))))
+                          ;;(:discard (:tag ("chore" "routine" "daily")))
+                          (:discard (:todo "TODO"))
+                          ))))
+          (todo "WAIT" ((org-agenda-todo-ignore-with-date t)
+                        (org-agenda-overriding-header "Blocked items")))
+          (search "* " ((org-agenda-overriding-header "Inbox")
+                        (org-agenda-files '("~/org/gtd/inbox.org"))))
           ))))
 
 
