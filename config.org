@@ -1873,7 +1873,11 @@ aspects are nice, but on others I prefer Fira.
 #+begin_src emacs-lisp
 (setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 24)
       doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 36)
-      doom-variable-pitch-font (font-spec :family "Overpass" :size 26)
+      ;;doom-variable-pitch-font (font-spec :family "Avenir Next LT Pro" :size 28)
+      ;;doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 28 :weight 'light)
+      doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 28)
+      ;;doom-variable-pitch-font (font-spec :family "Metropolis" :size 28 :weight 'light)
+      ;;doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 28 :weight 'light)
       doom-unicode-font (font-spec :family "JuliaMono")
       doom-serif-font (font-spec :family "IBM Plex Mono" :size 22 :weight 'light))
 #+end_src
@@ -3816,15 +3820,20 @@ let's improve that memory.
 
 ~Ispell~ is nice, let's have it in ~text~, ~markdown~, and ~GFM~.
 #+begin_src emacs-lisp
+(set-company-backend! 'text-mode '(company-wordfreq))
+#+end_src
+
+#+begin_src emacs-lisp
 (set-company-backend!
-  '(text-mode
+  '(;;text-mode
     markdown-mode
     gfm-mode)
   '(:seperate
-    company-ispell
-    company-files
-    company-yasnippet))
+   ;;company-ispell
+   company-files
+   company-yasnippet))
 #+end_src
+
 We then configure the dictionary we're using in [[*Ispell][Ispell]].
 
 CUSTOM:
@@ -3833,7 +3842,7 @@ CUSTOM:
 
 (defun company-ispell-german ()
   (interactive)
-  (setq-local company-ispell-dictionary (file-truename "~/.config/doom/misc/german_top10000_clean.txt")))
+  (setq-local company-ispell-dictionary (file-truename "~/.config/dictionaries/wordlist_german.txt")))
 
 (defun company-ispell-english ()
   (interactive)
@@ -3846,6 +3855,25 @@ CUSTOM:
 #+begin_src emacs-lisp
 (set-company-backend! 'ess-r-mode '(company-R-args company-R-objects company-dabbrev-code :separate))
 #+end_src
+*** Company-wordfreq
+
+#+call: confpkg("!Pkg company-wordfreq")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! company-wordfreq)
+#+end_src
+
+#+begin_src emacs-lisp
+(defun +set-company-backend-company-wordfreq ()
+  (setq-local company-backends '(company-wordfreq))
+  (setq-local company-transformers nil))
+#+end_src
+
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook #'+set-company-backend-company-wordfreq)
+#+end_src
+
 
 *** Projectile
 
@@ -4621,7 +4649,7 @@ subsequent face definition). This was created for writeroom mode.
 (autoload #'mixed-pitch-serif-mode "mixed-pitch"
   "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
 
-(setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
+(setq! variable-pitch-serif-font (font-spec :family "Source Serif 4" :size 27))
 
 (after! mixed-pitch
   (setq mixed-pitch-set-height t)
@@ -8601,56 +8629,27 @@ The agenda is nice, but a souped up version is nicer.
 ;;                           (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
 #+end_src
 
-# **** Capture
+**** Capture
 
-# Let's setup some org-capture templates, and make them visually nice to access.
+Let's setup some org-capture templates, and make them visually nice to access.
 
-# #+attr_html: :class invertible :alt My org-capture dialouge.
-# [[https://tecosaur.com/lfs/emacs-config/screenshots/org-capture.png]]
+#+attr_html: :class invertible :alt My org-capture dialouge.
+[[https://tecosaur.com/lfs/emacs-config/screenshots/org-capture.png]]
 
-# ~doct~ (Declarative Org Capture Templates) seems to be a nicer way to
-# set up org-capture.
-# #+begin_src emacs-lisp :noweb-ref none :tangle packages.el
-# (package! doct
-#   :recipe (:host github :repo "progfolio/doct")
-#   :pin "8464809754f3316d5a2fdcf3c01ce1e8736b323b")
-# #+end_src
+~doct~ (Declarative Org Capture Templates) seems to be a nicer way to
+set up org-capture.
+#+begin_src emacs-lisp :noweb-ref none :tangle packages.el
+(package! doct
+  :recipe (:host github :repo "progfolio/doct")
+  :pin "8464809754f3316d5a2fdcf3c01ce1e8736b323b")
+#+end_src
 
+#+begin_src emacs-lisp
+(use-package! doct
+  :commands doct)
+#+end_src
 # #+begin_src emacs-lisp
-# (use-package! doct
-#   :commands doct)
-# #+end_src
-
-# #+begin_src emacs-lisp :noweb no-export
-# (after! org-capture
-#   <<prettify-capture>>
-
-#   (defun +doct-icon-declaration-to-icon (declaration)
-#     "Convert :icon declaration to icon"
-#     (let ((name (pop declaration))
-#           (set  (intern (concat "all-the-icons-" (plist-get declaration :set))))
-#           (face (intern (concat "all-the-icons-" (plist-get declaration :color))))
-#           (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
-#       (apply set `(,name :face ,face :v-adjust ,v-adjust))))
-
-#   (defun +doct-iconify-capture-templates (groups)
-#     "Add declaration's :icon to each template group in GROUPS."
-#     (let ((templates (doct-flatten-lists-in groups)))
-#       (setq doct-templates (mapcar (lambda (template)
-#                                      (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
-#                                                  (spec (plist-get (plist-get props :doct) :icon)))
-#                                        (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
-#                                                                       "\t"
-#                                                                       (nth 1 template))))
-#                                      template)
-#                                    templates))))
-
-#   (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
-
-#   (defvar +org-capture-recipies  "~/org/recipies.org")
-
-#   (defun set-org-capture-templates ()
-#     (setq org-capture-templates
+# (setq org-capture-templates
 #           (doct `(("Personal todo" :keys "t"
 #                    :icon ("checklist" :set "octicon" :color "green")
 #                    :file +org-capture-todo-file
@@ -8667,119 +8666,202 @@ The agenda is nice, but a souped up version is nicer.
 #                    :type entry
 #                    :template ("* %?"
 #                               "%i %a"))
-#                   ("Email" :keys "e"
-#                    :icon ("envelope" :set "faicon" :color "blue")
-#                    :file +org-capture-todo-file
+#                  ("Project todo" :keys "p"
+#                    :icon ("repo" :set "octicon" :color "green")
+#                    :file +org-capture-central-project-todo-file
 #                    :prepend t
 #                    :headline "Inbox"
 #                    :type entry
-#                    :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
-#                               "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
-#                               "about %^{topic}"
-#                               "%U %i %a"))
-#                   ("Interesting" :keys "i"
-#                    :icon ("eye" :set "faicon" :color "lcyan")
-#                    :file +org-capture-todo-file
-#                    :prepend t
-#                    :headline "Interesting"
-#                    :type entry
-#                    :template ("* [ ] %{desc}%? :%{i-type}:"
-#                               "%i %a")
-#                    :children (("Webpage" :keys "w"
-#                                :icon ("globe" :set "faicon" :color "green")
-#                                :desc "%(org-cliplink-capture) "
-#                                :i-type "read:web")
-#                               ("Article" :keys "a"
-#                                :icon ("file-text" :set "octicon" :color "yellow")
-#                                :desc ""
-#                                :i-type "read:reaserch")
-#                               ("\tRecipie" :keys "r"
-#                                :icon ("spoon" :set "faicon" :color "dorange")
-#                                :file +org-capture-recipies
-#                                :headline "Unsorted"
-#                                :template "%(org-chef-get-recipe-from-url)")
-#                               ("Information" :keys "i"
-#                                :icon ("info-circle" :set "faicon" :color "blue")
-#                                :desc ""
-#                                :i-type "read:info")
-#                               ("Idea" :keys "I"
-#                                :icon ("bubble_chart" :set "material" :color "silver")
-#                                :desc ""
-#                                :i-type "idea")))
-#                   ("Tasks" :keys "k"
-#                    :icon ("inbox" :set "octicon" :color "yellow")
-#                    :file +org-capture-todo-file
-#                    :prepend t
-#                    :headline "Tasks"
-#                    :type entry
-#                    :template ("* TODO %? %^G%{extra}"
-#                               "%i %a")
-#                    :children (("General Task" :keys "k"
-#                                :icon ("inbox" :set "octicon" :color "yellow")
-#                                :extra "")
-#                               ("Task with deadline" :keys "d"
-#                                :icon ("timer" :set "material" :color "orange" :v-adjust -0.1)
-#                                :extra "\nDEADLINE: %^{Deadline:}t")
-#                               ("Scheduled Task" :keys "s"
-#                                :icon ("calendar" :set "octicon" :color "orange")
-#                                :extra "\nSCHEDULED: %^{Start time:}t")))
-#                   ("Project" :keys "p"
-#                    :icon ("repo" :set "octicon" :color "silver")
-#                    :prepend t
-#                    :type entry
-#                    :headline "Inbox"
-#                    :template ("* %{time-or-todo} %?"
-#                               "%i"
-#                               "%a")
-#                    :file ""
-#                    :custom (:time-or-todo "")
-#                    :children (("Project-local todo" :keys "t"
-#                                :icon ("checklist" :set "octicon" :color "green")
-#                                :time-or-todo "TODO"
-#                                :file +org-capture-project-todo-file)
-#                               ("Project-local note" :keys "n"
-#                                :icon ("sticky-note" :set "faicon" :color "yellow")
-#                                :time-or-todo "%U"
-#                                :file +org-capture-project-notes-file)
-#                               ("Project-local changelog" :keys "c"
-#                                :icon ("list" :set "faicon" :color "blue")
-#                                :time-or-todo "%U"
-#                                :heading "Unreleased"
-#                                :file +org-capture-project-changelog-file)))
-#                   ("\tCentralised project templates"
-#                    :keys "o"
-#                    :type entry
-#                    :prepend t
-#                    :template ("* %{time-or-todo} %?"
-#                               "%i"
-#                               "%a")
-#                    :children (("Project todo"
-#                                :keys "t"
-#                                :prepend nil
-#                                :time-or-todo "TODO"
-#                                :heading "Tasks"
-#                                :file +org-capture-central-project-todo-file)
-#                               ("Project note"
-#                                :keys "n"
-#                                :time-or-todo "%U"
-#                                :heading "Notes"
-#                                :file +org-capture-central-project-notes-file)
-#                               ("Project changelog"
-#                                :keys "c"
-#                                :time-or-todo "%U"
-#                                :heading "Unreleased"
-#                                :file +org-capture-central-project-changelog-file)))))))
-
-#   (set-org-capture-templates)
-#   (unless (display-graphic-p)
-#     (add-hook 'server-after-make-frame-hook
-#               (defun org-capture-reinitialise-hook ()
-#                 (when (display-graphic-p)
-#                   (set-org-capture-templates)
-#                   (remove-hook 'server-after-make-frame-hook
-#                                #'org-capture-reinitialise-hook))))))
+#                    :template ("* TODO %?"
+#                               "%i" "%a")))))
 # #+end_src
-# It would also be nice to improve how the capture dialogue looks
+
+# #+begin_src emacs-lisp :noweb no-export
+# (after! org-capture
+
+#  (setq org-capture-templates
+#           (doct `(("Personal todo" :keys "t"
+#                    :icon ("checklist" :set "octicon" :color "green")
+#                    :file +org-capture-todo-file
+#                    :prepend t
+#                    :headline "Inbox"
+#                    :type entry
+#                    :template ("* TODO %?"
+#                               "%i %a"))
+#                   ("Personal note" :keys "n"
+#                    :icon ("sticky-note-o" :set "faicon" :color "green")
+#                    :file +org-capture-todo-file
+#                    :prepend t
+#                    :headline "Inbox"
+#                    :type entry
+#                    :template ("* %?"
+#                               "%i %a"))
+#                  ("Project todo" :keys "p"
+#                    :icon ("repo" :set "octicon" :color "green")
+#                    :file +org-capture-central-project-todo-file
+#                    :prepend t
+#                    :headline "Inbox"
+#                    :type entry
+#                    :template ("* TODO %?"
+#                               "%i" "%a"))))))
+
+#   ;; <<prettify-capture>>
+
+# ;;   (defun +doct-icon-declaration-to-icon (declaration)
+# ;;     "Convert :icon declaration to icon"
+# ;;     (let ((name (pop declaration))
+# ;;           (set  (intern (concat "all-the-icons-" (plist-get declaration :set))))
+# ;;           (face (intern (concat "all-the-icons-" (plist-get declaration :color))))
+# ;;           (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
+# ;;       (apply set `(,name :face ,face :v-adjust ,v-adjust))))
+
+# ;;   (defun +doct-iconify-capture-templates (groups)
+# ;;     "Add declaration's :icon to each template group in GROUPS."
+# ;;     (let ((templates (doct-flatten-lists-in groups)))
+# ;;       (setq doct-templates (mapcar (lambda (template)
+# ;;                                      (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
+# ;;                                                  (spec (plist-get (plist-get props :doct) :icon)))
+# ;;                                        (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
+# ;;                                                                       "\t"
+# ;;                                                                       (nth 1 template))))
+# ;;                                      template)
+# ;;                                    templates))))
+
+# ;;   (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
+
+# ;;   (defvar +org-capture-recipies  "~/org/recipies.org")
+
+# ;;   (defun set-org-capture-templates ()
+# ;;     (setq org-capture-templates
+# ;;           (doct `(("Personal todo" :keys "t"
+# ;;                    :icon ("checklist" :set "octicon" :color "green")
+# ;;                    :file +org-capture-todo-file
+# ;;                    :prepend t
+# ;;                    :headline "Inbox"
+# ;;                    :type entry
+# ;;                    :template ("* TODO %?"
+# ;;                               "%i %a"))
+# ;;                   ("Personal note" :keys "n"
+# ;;                    :icon ("sticky-note-o" :set "faicon" :color "green")
+# ;;                    :file +org-capture-todo-file
+# ;;                    :prepend t
+# ;;                    :headline "Inbox"
+# ;;                    :type entry
+# ;;                    :template ("* %?"
+# ;;                               "%i %a"))
+# ;;                  ("Project todo" :keys "p"
+# ;;                    :icon ("repo" :set "octicon" :color "green")
+# ;;                    :file +org-capture-central-project-todo-file
+# ;;                    :prepend t
+# ;;                    ;;:headline "Inbox"
+# ;;                    :type entry
+# ;;                    :template ("* TODO %?"
+# ;;                               "%i" "%a"))))))
+# ;; ;                 ;; ("Email" :keys "e"
+# ;;                   ;;  :icon ("envelope" :set "faicon" :color "blue")
+# ;;                   ;;  :file +org-capture-todo-file
+# ;;                   ;;  :prepend t
+# ;;                   ;;  :headline "Inbox"
+# ;;                   ;;  :type entry
+# ;;                   ;;  :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
+# ;;                   ;;             "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
+# ;;                   ;;             "about %^{topic}"
+# ;;                   ;;             "%U %i %a"))
+# ;;                   ;; ("Interesting" :keys "i"
+# ;;                   ;;  :icon ("eye" :set "faicon" :color "lcyan")
+# ;;                   ;;  :file +org-capture-todo-file
+# ;;                   ;;  :prepend t
+# ;;                   ;;  :headline "Interesting"
+# ;;                   ;;  :type entry
+# ;;                   ;;  :template ("* [ ] %{desc}%? :%{i-type}:"
+# ;;                   ;;             "%i %a")
+# ;;                   ;;  :children (("Webpage" :keys "w"
+# ;;                   ;;              :icon ("globe" :set "faicon" :color "green")
+# ;;                   ;;              :desc "%(org-cliplink-capture) "
+# ;;                   ;;              :i-type "read:web")
+# ;;                   ;;             ("Article" :keys "a"
+# ;;                   ;;              :icon ("file-text" :set "octicon" :color "yellow")
+# ;;                   ;;              :desc ""
+# ;;                   ;;              :i-type "read:reaserch")
+# ;;                   ;;             ("\tRecipie" :keys "r"
+# ;;                   ;;              :icon ("spoon" :set "faicon" :color "dorange")
+# ;;                   ;;              :file +org-capture-recipies
+# ;;                   ;;              :headline "Unsorted"
+# ;;                   ;;              :template "%(org-chef-get-recipe-from-url)")
+# ;;                   ;;             ("Information" :keys "i"
+# ;;                   ;;              :icon ("info-circle" :set "faicon" :color "blue")
+# ;;                   ;;              :desc ""
+# ;;                   ;;              :i-type "read:info")
+# ;;                   ;;             ("Idea" :keys "I"
+# ;;                   ;;              :icon ("bubble_chart" :set "material" :color "silver")
+# ;;                   ;;              :desc ""
+# ;;                   ;;              :i-type "idea")))
+# ;;                   ;; ("Tasks" :keys "k"
+# ;;                   ;;  :icon ("inbox" :set "octicon" :color "yellow")
+# ;;                   ;;  :file +org-capture-todo-file
+# ;;                   ;;  :prepend t
+# ;;                   ;;  :headline "Tasks"
+# ;;                   ;;  :type entry
+# ;;                   ;;  :template ("* TODO %? %^G%{extra}"
+# ;;                   ;;             "%i %a")
+# ;;                   ;;  :children (("General Task" :keys "k"
+# ;;                   ;;              :icon ("inbox" :set "octicon" :color "yellow")
+# ;;                   ;;              :extra "")
+# ;;                   ;;             ("Task with deadline" :keys "d"
+# ;;                   ;;              :icon ("timer" :set "material" :color "orange" :v-adjust -0.1)
+# ;;                   ;;              :extra "\nDEADLINE: %^{Deadline:}t")
+# ;;                   ;;             ("Scheduled Task" :keys "s"
+# ;;                   ;;              :icon ("calendar" :set "octicon" :color "orange")
+# ;;                   ;;              :extra "\nSCHEDULED: %^{Start time:}t")))
+
+# ;; ;                :custom (:time-or-todo "")
+# ;;                    ;; :children (("Project-local todo" :keys "t"
+# ;;                    ;;             :icon ("checklist" :set "octicon" :color "green")
+# ;;                    ;;             :time-or-todo "TODO"
+# ;;                    ;;             :file +org-capture-project-todo-file)
+# ;;                    ;;            ("Project-local note" :keys "n"
+# ;;                    ;;             :icon ("sticky-note" :set "faicon" :color "yellow")
+# ;;                    ;;             :time-or-todo "%U"
+# ;;                    ;;             :file +org-capture-project-notes-file)
+# ;;                    ;;            ("Project-local changelog" :keys "c"
+# ;;                    ;;             :icon ("list" :set "faicon" :color "blue")
+# ;;                    ;;             :time-or-todo "%U"
+# ;;                    ;;             :heading "Unreleased"
+# ;;                    ;;             :file +org-capture-project-changelog-file)))
+# ;;                   ;; ("\tCentralised project templates"
+# ;;                   ;;  :keys "o"
+# ;;                   ;;  :type entry
+# ;;                   ;;  :prepend t
+# ;;                   ;;  :template ("* %{time-or-todo} %?"
+# ;;                   ;;             "%i"
+# ;;                   ;;             "%a")
+# ;;                   ;;  :children (("Project todo"
+# ;;                   ;;              :keys "t"
+# ;;                   ;;              :prepend nil
+# ;;                   ;;              :time-or-todo "TODO"
+# ;;                   ;;              ;;:heading "Tasks"
+# ;;                   ;;              :file +org-capture-central-project-todo-file)
+# ;;                   ;;             ("Project note"
+# ;;                   ;;              :keys "n"
+# ;;                   ;;              :time-or-todo "%U"
+# ;;                   ;;              :heading "Notes"
+# ;;                   ;;              :file +org-capture-central-project-notes-file)
+# ;;                   ;;             ("Project changelog"
+# ;;                   ;;              :keys "c"
+# ;;                   ;;              :time-or-todo "%U"
+# ;;                   ;;              :heading "Unreleased"
+# ;;                   ;;              :file +org-capture-central-project-changelog-file)))
+
+# ;;   (set-org-capture-templates)
+# ;;   (unless (display-graphic-p)
+# ;;     (add-hook 'server-after-make-frame-hook
+# ;;               (defun org-capture-reinitialise-hook ()
+# ;;                 (when (display-graphic-p)
+# ;;                   (set-org-capture-templates)
+# ;;                   (remove-hook 'server-after-make-frame-hook
+# ;;                                #'org-capture-reinitialise-hook))))))
+# #+end_src
+It would also be nice to improve how the capture dialogue looks
 # #+name: prettify-capture
 # #+begin_src emacs-lisp :noweb-ref none
 # (defun org-capture-select-template-prettier (&optional keys)
@@ -9823,107 +9905,107 @@ cause issues. Let's make their failure less eventful.
   (ignore-errors (apply orig-fn args)))
 #+end_src
 
-**** Flycheck with org-lint
+# **** Flycheck with org-lint
 
-#+call: confpkg("Flycheck org-lint", after="org")
+# #+call: confpkg("Flycheck org-lint", after="org")
 
-Org may be simple, but that doesn't mean there's no such thing as malformed Org.
-Thankfully, malformed Org is a much less annoying affair than malformed zipped
-XML (looks at DOCX/ODT...), particularly because there's a rather helpful little
-tool called ~org-lint~ bundled with Org that can tell you about your mistakes.
+# Org may be simple, but that doesn't mean there's no such thing as malformed Org.
+# Thankfully, malformed Org is a much less annoying affair than malformed zipped
+# XML (looks at DOCX/ODT...), particularly because there's a rather helpful little
+# tool called ~org-lint~ bundled with Org that can tell you about your mistakes.
 
-[[xkcd:2109]]
+# [[xkcd:2109]]
 
-Flycheck doesn't currently support Org, and there's aren't any packages to do so
-☹. However, in an issue on ~org-lint~ there is [[https://github.com/flycheck/flycheck/issues/1757#issuecomment-759546940][some code]] which apparently works.
-Surely this is what the clipboard was invented for? With that said, let's
-regurgitate the code, cross our fingers, and hope it works.
+# Flycheck doesn't currently support Org, and there's aren't any packages to do so
+# ☹. However, in an issue on ~org-lint~ there is [[https://github.com/flycheck/flycheck/issues/1757#issuecomment-759546940][some code]] which apparently works.
+# Surely this is what the clipboard was invented for? With that said, let's
+# regurgitate the code, cross our fingers, and hope it works.
 
-#+begin_src emacs-lisp
-(defconst flycheck-org-lint-form
-  (flycheck-prepare-emacs-lisp-form
-    (require 'org)
-    (require 'org-attach)
-    (let ((source (car command-line-args-left))
-          (process-default-directory default-directory))
-      (with-temp-buffer
-        (insert-file-contents source 'visit)
-        (setq buffer-file-name source)
-        (setq default-directory process-default-directory)
-        (delay-mode-hooks (org-mode))
-        (setq delayed-mode-hooks nil)
-        (dolist (err (org-lint))
-          (let ((inf (cl-second err)))
-            (princ (elt inf 0))
-            (princ ": ")
-            (princ (elt inf 2))
-            (terpri)))))))
+# #+begin_src emacs-lisp
+# (defconst flycheck-org-lint-form
+#   (flycheck-prepare-emacs-lisp-form
+#     (require 'org)
+#     (require 'org-attach)
+#     (let ((source (car command-line-args-left))
+#           (process-default-directory default-directory))
+#       (with-temp-buffer
+#         (insert-file-contents source 'visit)
+#         (setq buffer-file-name source)
+#         (setq default-directory process-default-directory)
+#         (delay-mode-hooks (org-mode))
+#         (setq delayed-mode-hooks nil)
+#         (dolist (err (org-lint))
+#           (let ((inf (cl-second err)))
+#             (princ (elt inf 0))
+#             (princ ": ")
+#             (princ (elt inf 2))
+#             (terpri)))))))
 
-(defconst flycheck-org-lint-variables
-  '(org-directory
-    org-id-locations
-    org-id-locations-file
-    org-attach-id-dir
-    org-attach-use-inheritance
-    org-attach-id-to-path-function-list
-    org-link-parameters)
-  "Variables inherited by the org-lint subprocess.")
+# (defconst flycheck-org-lint-variables
+#   '(org-directory
+#     org-id-locations
+#     org-id-locations-file
+#     org-attach-id-dir
+#     org-attach-use-inheritance
+#     org-attach-id-to-path-function-list
+#     org-link-parameters)
+#   "Variables inherited by the org-lint subprocess.")
 
-(defun flycheck-org-lint-variables-form ()
-  (require 'org-attach)  ; Needed to make variables available
-  `(progn
-     ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
-                (seq-filter #'boundp flycheck-org-lint-variables))))
+# (defun flycheck-org-lint-variables-form ()
+#   (require 'org-attach)  ; Needed to make variables available
+#   `(progn
+#      ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
+#                 (seq-filter #'boundp flycheck-org-lint-variables))))
 
-(eval ; To preveant eager macro expansion form loading flycheck early.
- '(flycheck-define-checker org-lint
-   "Org buffer checker using `org-lint'."
-   :command ("emacs" (eval flycheck-emacs-args)
-             "--eval" (eval (concat "(add-to-list 'load-path \""
-                                    (file-name-directory (locate-library "org"))
-                                    "\")"))
-             "--eval" (eval (flycheck-sexp-to-string
-                             (flycheck-org-lint-variables-form)))
-             "--eval" (eval (flycheck-sexp-to-string
-                             (flycheck-org-lint-customisations-form)))
-             "--eval" (eval flycheck-org-lint-form)
-             "--" source)
-   :error-patterns
-   ((error line-start line ": " (message) line-end))
-   :modes org-mode))
-#+end_src
+# (eval ; To preveant eager macro expansion form loading flycheck early.
+#  '(flycheck-define-checker org-lint
+#    "Org buffer checker using `org-lint'."
+#    :command ("emacs" (eval flycheck-emacs-args)
+#              "--eval" (eval (concat "(add-to-list 'load-path \""
+#                                     (file-name-directory (locate-library "org"))
+#                                     "\")"))
+#              "--eval" (eval (flycheck-sexp-to-string
+#                              (flycheck-org-lint-variables-form)))
+#              "--eval" (eval (flycheck-sexp-to-string
+#                              (flycheck-org-lint-customisations-form)))
+#              "--eval" (eval flycheck-org-lint-form)
+#              "--" source)
+#    :error-patterns
+#    ((error line-start line ": " (message) line-end))
+#    :modes org-mode))
+# #+end_src
 
-Turns out it almost works. Running =M-x flycheck-verify-setup= after running that
-snippet produces the following:
-#+begin_example
-The following syntax checkers are not registered:
-  - org-lint
-Try adding these syntax checkers to `flycheck-checkers'.
-#+end_example
+# Turns out it almost works. Running =M-x flycheck-verify-setup= after running that
+# snippet produces the following:
+# #+begin_example
+# The following syntax checkers are not registered:
+#   - org-lint
+# Try adding these syntax checkers to `flycheck-checkers'.
+# #+end_example
 
-Well that's very nice and helpful. We'll just do that 🙂.
-#+begin_src emacs-lisp
-(add-to-list 'flycheck-checkers 'org-lint)
-#+end_src
+# Well that's very nice and helpful. We'll just do that 🙂.
+# #+begin_src emacs-lisp
+# (add-to-list 'flycheck-checkers 'org-lint)
+# #+end_src
 
-It was missing custom link types, but that's easily fixed just by adding
-~org-link-parameters~ to ~flycheck-org-lint-variables~.
+# It was missing custom link types, but that's easily fixed just by adding
+# ~org-link-parameters~ to ~flycheck-org-lint-variables~.
 
-One remaining little annoyance is that it reports extra =#+options= that I've
-added to Org as errors. So we need to tell ~org-lint~ about them without having it
-load my whole config. Code duplication isn't great, but at least this isn't
-much.
+# One remaining little annoyance is that it reports extra =#+options= that I've
+# added to Org as errors. So we need to tell ~org-lint~ about them without having it
+# load my whole config. Code duplication isn't great, but at least this isn't
+# much.
 
-#+name: org-syntax-modifications
-#+begin_src emacs-lisp :tangle no
-(defun flycheck-org-lint-customisations-form ()
-  `(progn
-     (require 'ox)
-     (cl-pushnew '(:latex-cover-page nil "coverpage" nil)
-                 (org-export-backend-options (org-export-get-backend 'latex)))
-     (cl-pushnew '(:latex-font-set nil "fontset" nil)
-                 (org-export-backend-options (org-export-get-backend 'latex)))))
-#+end_src
+# #+name: org-syntax-modifications
+# #+begin_src emacs-lisp :tangle no
+# (defun flycheck-org-lint-customisations-form ()
+#   `(progn
+#      (require 'ox)
+#      (cl-pushnew '(:latex-cover-page nil "coverpage" nil)
+#                  (org-export-backend-options (org-export-get-backend 'latex)))
+#      (cl-pushnew '(:latex-font-set nil "fontset" nil)
+#                  (org-export-backend-options (org-export-get-backend 'latex)))))
+# #+end_src
 
 *** Visuals
 
@@ -10173,6 +10255,10 @@ Thankfully, all we need to do to make this happen is use ~org-latex-preview-auto
 (add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
 #+end_src
 
+# #+begin_src emacs-lisp
+# (setq org-startup-with-latex-preview t)
+# #+end_src
+
 ***** Prettier rendering
 
 It's nice to customise the look of LaTeX fragments so they fit better in the
@@ -10207,7 +10293,7 @@ let's make it transparent.
 
 #+begin_src emacs-lisp
 (plist-put org-format-latex-options :background "Transparent")
-(plist-put org-format-latex-options :zoom 0.93) ; Calibrated based on the TeX font and org-buffer font.
+(plist-put org-format-latex-options :zoom 2) ; Calibrated based on the TeX font and org-buffer font.
 #+end_src
 
 With the background taken care of, we just need to make sure we're using the
@@ -10230,8 +10316,8 @@ theme-appropriate foreground.
 We can either render from a ~dvi~ or ~pdf~ file, so let's benchmark ~latex~ and
 ~pdflatex~.
 | ~latex~ time | ~pdflatex~ time |
-|------------+---------------|
-| 135 \pm 2 ms | 215 \pm 3 ms    |
+|--------------+-----------------|
+| 135 \pm 2 ms   | 215 \pm 3 ms      |
 
 On the rendering side, there are two ~.dvi~-to-image converters which I am
 interested in: ~dvipng~ and ~dvisvgm~.
@@ -10378,65 +10464,65 @@ the creator string.
       (format "Emacs %s (Org mode %s–%s)" emacs-version (org-release) (org-git-version)))
 #+end_src
 
-**** Acronym formatting
+# **** Acronym formatting
 
-I like automatically using spaced small caps for acronyms. For strings I want to
-be unaffected let's use ~;~ as a prefix to prevent the transformation --- i.e.
-~;JFK~ (as one would want for two-letter geographic locations and names).
+# I like automatically using spaced small caps for acronyms. For strings I want to
+# be unaffected let's use ~;~ as a prefix to prevent the transformation --- i.e.
+# ~;JFK~ (as one would want for two-letter geographic locations and names).
 
-This has to be implemented on a per-format basis, currently HTML and LaTeX
-exports are supported.
+# This has to be implemented on a per-format basis, currently HTML and LaTeX
+# exports are supported.
 
-#+begin_src emacs-lisp
-(defun org-export-filter-text-acronym (text backend _info)
-  "Wrap suspected acronyms in acronyms-specific formatting.
-Treat sequences of 2+ capital letters (optionally succeeded by \"s\") as an acronym.
-Ignore if preceeded by \";\" (for manual prevention) or \"\\\" (for LaTeX commands).
+# #+begin_src emacs-lisp
+# (defun org-export-filter-text-acronym (text backend _info)
+#   "Wrap suspected acronyms in acronyms-specific formatting.
+# Treat sequences of 2+ capital letters (optionally succeeded by \"s\") as an acronym.
+# Ignore if preceeded by \";\" (for manual prevention) or \"\\\" (for LaTeX commands).
 
-TODO abstract backend implementations."
-  (let ((base-backend
-         (cond
-          ((org-export-derived-backend-p backend 'latex) 'latex)
-          ;; Markdown is derived from HTML, but we don't want to format it
-          ((org-export-derived-backend-p backend 'md) nil)
-          ((org-export-derived-backend-p backend 'html) 'html)))
-        (case-fold-search nil))
-    (when base-backend
-      (replace-regexp-in-string
-       "[;\\\\]?\\b[A-Z][A-Z]+s?\\(?:[^A-Za-z]\\|\\b\\)"
-       (lambda (all-caps-str)
-         (cond ((equal (aref all-caps-str 0) ?\\) all-caps-str)                ; don't format LaTeX commands
-               ((equal (aref all-caps-str 0) ?\;) (substring all-caps-str 1))  ; just remove not-acronym indicator char ";"
-               (t (let* ((final-char (if (string-match-p "[^A-Za-z]" (substring all-caps-str -1 (length all-caps-str)))
-                                         (substring all-caps-str -1 (length all-caps-str))
-                                       nil)) ; needed to re-insert the [^A-Za-z] at the end
-                         (trailing-s (equal (aref all-caps-str (- (length all-caps-str) (if final-char 2 1))) ?s))
-                         (acr (if final-char
-                                  (substring all-caps-str 0 (if trailing-s -2 -1))
-                                (substring all-caps-str 0 (+ (if trailing-s -1 (length all-caps-str)))))))
-                    (pcase base-backend
-                      ('latex (concat "\\acr{" (s-downcase acr) "}" (when trailing-s "\\acrs{}") final-char))
-                      ('html (concat "<span class='acr'>" acr "</span>" (when trailing-s "<small>s</small>") final-char)))))))
-       text t t))))
+# TODO abstract backend implementations."
+#   (let ((base-backend
+#          (cond
+#           ((org-export-derived-backend-p backend 'latex) 'latex)
+#           ;; Markdown is derived from HTML, but we don't want to format it
+#           ((org-export-derived-backend-p backend 'md) nil)
+#           ((org-export-derived-backend-p backend 'html) 'html)))
+#         (case-fold-search nil))
+#     (when base-backend
+#       (replace-regexp-in-string
+#        "[;\\\\]?\\b[A-Z][A-Z]+s?\\(?:[^A-Za-z]\\|\\b\\)"
+#        (lambda (all-caps-str)
+#          (cond ((equal (aref all-caps-str 0) ?\\) all-caps-str)                ; don't format LaTeX commands
+#                ((equal (aref all-caps-str 0) ?\;) (substring all-caps-str 1))  ; just remove not-acronym indicator char ";"
+#                (t (let* ((final-char (if (string-match-p "[^A-Za-z]" (substring all-caps-str -1 (length all-caps-str)))
+#                                          (substring all-caps-str -1 (length all-caps-str))
+#                                        nil)) ; needed to re-insert the [^A-Za-z] at the end
+#                          (trailing-s (equal (aref all-caps-str (- (length all-caps-str) (if final-char 2 1))) ?s))
+#                          (acr (if final-char
+#                                   (substring all-caps-str 0 (if trailing-s -2 -1))
+#                                 (substring all-caps-str 0 (+ (if trailing-s -1 (length all-caps-str)))))))
+#                     (pcase base-backend
+#                       ('latex (concat "\\acr{" (s-downcase acr) "}" (when trailing-s "\\acrs{}") final-char))
+#                       ('html (concat "<span class='acr'>" acr "</span>" (when trailing-s "<small>s</small>") final-char)))))))
+#        text t t))))
 
-(add-to-list 'org-export-filter-plain-text-functions
-             #'org-export-filter-text-acronym)
+# (add-to-list 'org-export-filter-plain-text-functions
+#              #'org-export-filter-text-acronym)
 
-;; We won't use `org-export-filter-headline-functions' because it
-;; passes (and formats) the entire section contents. That's no good.
+# ;; We won't use `org-export-filter-headline-functions' because it
+# ;; passes (and formats) the entire section contents. That's no good.
 
-(defun org-html-format-headline-acronymised (todo todo-type priority text tags info)
-  "Like `org-html-format-headline-default-function', but with acronym formatting."
-  (org-html-format-headline-default-function
-   todo todo-type priority (org-export-filter-text-acronym text 'html info) tags info))
-(setq org-html-format-headline-function #'org-html-format-headline-acronymised)
+# (defun org-html-format-headline-acronymised (todo todo-type priority text tags info)
+#   "Like `org-html-format-headline-default-function', but with acronym formatting."
+#   (org-html-format-headline-default-function
+#    todo todo-type priority (org-export-filter-text-acronym text 'html info) tags info))
+# (setq org-html-format-headline-function #'org-html-format-headline-acronymised)
 
-(defun org-latex-format-headline-acronymised (todo todo-type priority text tags info)
-  "Like `org-latex-format-headline-default-function', but with acronym formatting."
-  (org-latex-format-headline-default-function
-   todo todo-type priority (org-export-filter-text-acronym text 'latex info) tags info))
-(setq org-latex-format-headline-function #'org-latex-format-headline-acronymised)
-#+end_src
+# (defun org-latex-format-headline-acronymised (todo todo-type priority text tags info)
+#   "Like `org-latex-format-headline-default-function', but with acronym formatting."
+#   (org-latex-format-headline-default-function
+#    todo todo-type priority (org-export-filter-text-acronym text 'latex info) tags info))
+# (setq org-latex-format-headline-function #'org-latex-format-headline-acronymised)
+# #+end_src
 
 **** Exporting Org code
 
@@ -11750,7 +11836,7 @@ To start with I'll create a default state variable and register =fontset= as par
 of =#+options=.
 
 #+begin_src emacs-lisp
-(defvar org-latex-default-fontset 'alegreya
+(defvar org-latex-default-fontset 'cm
   "Fontset from `org-latex-fontsets' to use by default.
 As cm (computer modern) is TeX's default, that causes nothing
 to be added to the document.
