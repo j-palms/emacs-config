@@ -4109,8 +4109,8 @@ For when you want to change the case pattern for a symbol.
              string-inflection-capital-underscore
              string-inflection-upcase)
   :init
-  (map! :leader :prefix ("c~" . "naming convention")
-        :desc "cycle" "~" #'string-inflection-all-cycle
+  (map! :leader :prefix ("cn" . "naming convention")
+        :desc "next" "n" #'string-inflection-all-cycle
         :desc "toggle" "t" #'string-inflection-toggle
         :desc "CamelCase" "c" #'string-inflection-camelcase
         :desc "downCase" "d" #'string-inflection-lower-camelcase
