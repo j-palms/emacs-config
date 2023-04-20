@@ -9173,20 +9173,18 @@ It would also be nice to improve how the capture dialogue looks
   :after org
   :init
   (setq org-gtd-update-ack "2.1.0")
-  :custom
-  (org-gtd-directory "~/org/gtd")
-  (org-edna-use-inheritance t)
+  (map! :prefix ("C-c d" . "org-gtd")
+        :desc "Capture"        "c"  #'org-gtd-capture
+        :desc "Engage"         "e"  #'org-gtd-engage
+        :desc "Process inbox"  "p"  #'org-gtd-process-inbox
+        :desc "Show all next"  "n"  #'org-gtd-show-all-next
+        :desc "Stuck projects" "s"  #'org-gtd-show-stuck-projects)
   :config
   (org-edna-mode)
-  (map! :prefix "C-c"
-        "d c" #'org-gtd-capture
-        "d e" #'org-gtd-engage
-        "d p" #'org-gtd-process-inbox
-        "d n" #'org-gtd-show-all-next
-        "d s" #'org-gtd-show-stuck-projects
-        "d a" #'org-gtd-archive-completed-items)
+  (setq org-edna-use-inheritance t
+        org-gtd-directory "~/org/gtd")
   (map! :map org-gtd-process-map
-        "C-c c" #'org-gtd-choose))
+        :desc "Choose" "C-c c" #'org-gtd-choose))
 #+end_src
 
 #+begin_src emacs-lisp
