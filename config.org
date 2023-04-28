@@ -3365,6 +3365,19 @@ let's change that, and do a few other similar tweaks while we're at it.
 [[https://tecosaur.com/lfs/emacs-config/screenshots/whichkey-evil.png]]
 
 ** Tools
+*** Dired
+
+#+call: confpkg("Dired")
+
+#+begin_src emacs-lisp
+;;(defun dired-toggle-hide-files ()
+;;  (interactive)
+(use-package! dired
+  :config
+  (setq dired-omit-files "^\\.[^.]|^\\...+$|\\`[.]?#\\|\\`[.][.]?\\'\\|^\\.DS_Store\\'\\|^\\.project\\(?:ile\\)?\\'\\|^\\.\\(?:svn\\|git\\)\\'\\|^\\.ccls-cache\\'\\|\\(?:\\.js\\)?\\.meta\\'\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'")
+  )
+#+end_src
+
 *** Abbrev
 
 #+call: confpkg("Multi-mode abbrev")
