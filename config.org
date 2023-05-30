@@ -1896,11 +1896,11 @@ trying out JetBrains Mono though. So far I have mixed feelings on it, some
 aspects are nice, but on others I prefer Fira.
 
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 24)
+(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 20)
       doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 36)
       ;;doom-variable-pitch-font (font-spec :family "Avenir Next LT Pro" :size 28)
       ;;doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 28 :weight 'light)
-      doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 28)
+      doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 24)
       ;;doom-variable-pitch-font (font-spec :family "Metropolis" :size 28 :weight 'light)
       ;;doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 28 :weight 'light)
       doom-unicode-font (font-spec :family "JuliaMono")
@@ -10337,7 +10337,7 @@ let's make it transparent.
 
 #+begin_src emacs-lisp
 (plist-put org-format-latex-options :background "Transparent")
-(plist-put org-format-latex-options :zoom 2) ; Calibrated based on the TeX font and org-buffer font.
+(plist-put org-format-latex-options :zoom 1) ; Calibrated based on the TeX font and org-buffer font.
 #+end_src
 
 With the background taken care of, we just need to make sure we're using the
