@@ -1410,6 +1410,31 @@ changes Doom makes:
 (map! :leader
       (:prefix "m"
        :desc "Debug with dap-mode hydra" "d" #'dap-hydra))
+
+(setq +format-on-save-enabled-modes
+      '(not emacs-lisp-mode  ; elisp's mechanisms are good enough
+        sql-mode         ; sqlformat is currently broken
+        tex-mode         ; latexindent is broken
+        latex-mode
+        python-mode))
+
+;; (use-package! evil-surround
+;;   :config
+;;   (setq-default evil-surround-pairs-alist
+;;               (push '(?m . ("\(" . "\)")) evil-surround-pairs-alist))
+;;   (setq-default evil-surround-pairs-alist
+;;               (push '(?M . ("\[" . "\]")) evil-surround-pairs-alist)))
+
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! evil-surround
+  :after evil
+  :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+         (org-mode . (lambda () (push '(?m . ("\(" . "\)")) evil-surround-pairs-alist)))
+         (org-mode . (lambda () (push '(?M . ("\\[" . "\\]")) evil-surround-pairs-alist))))
+  :config
+  (global-evil-surround-mode 1)) ;; globally enable evil-surround
 #+end_src
 
 *** Frame sizing
