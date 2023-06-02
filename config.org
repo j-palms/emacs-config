@@ -3349,6 +3349,15 @@ sounds nice to me.
         "C-M-i" #'org-noter-insert-precise-note-toggle-no-questions))
 #+end_src
 
+*** Djvu (for org-noter)
+
+#+call: confpkg("!Pkg djvu")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! djvu)
+#+end_src
+
+
 *** Emacs Everywhere
 
 #+call: confpkg("!Pkg emacs-everywhere")
