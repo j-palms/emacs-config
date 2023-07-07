@@ -1385,6 +1385,8 @@ changes Doom makes:
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 (global-emojify-mode-line-mode 1)
 
+(org-clock-today-mode 1)
+
 (setq lsp-headerline-breadcrumb-enable t
       lsp-headerline-breadcrumb-segments '(project file symbols)
       lsp-headerline-breadcrumb-icons-enable t
@@ -1417,6 +1419,11 @@ changes Doom makes:
         tex-mode         ; latexindent is broken
         latex-mode
         python-mode))
+
+(map! :leader
+      (:prefix "o"
+       :desc "Open org-agenda" "a" #'org-agenda))
+
 
 ;; (use-package! evil-surround
 ;;   :config
@@ -1806,7 +1813,7 @@ nix                          ; I hereby declare "nix geht mehr!"
 ;;racket                     ; a DSL for DSLs
 ;;raku                       ; the artist formerly known as perl6
 ;;rest                       ; Emacs as a REST client
-;;rst                        ; ReST in peace
+rst                        ; ReST in peace
 ;;(ruby +rails)              ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
 (rust +lsp)                  ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
 ;;scala                      ; java, but good
@@ -4022,6 +4029,15 @@ nearby (also means that if I change the 'main' dictionary I keep my addition).
       (write-region "" nil ispell-personal-dictionary nil 0)))
 #+end_src
 
+# ***  Flycheck
+# #+call: confpkg("!Pkg flycheck")
+
+# #+begin_src emacs-lisp
+# (use-package! flycheck-golangci-lint
+#   :ensure t
+#   :hook (go-mode . flycheck-golangci-lint-setup))
+# #+end_src
+
 
 *** TRAMP
 
@@ -4381,208 +4397,208 @@ Email and IRC.
 (add-hook! '(mu4e-compose-mode org-msg-edit-mode circe-channel-mode) (emoticon-to-emoji 1))
 #+end_src
 
-*** Doom modeline
+# *** Doom modeline
 
-#+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
+# #+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
 
-#+begin_quote
-From the =:ui modeline= module.
-#+end_quote
+# #+begin_quote
+# From the =:ui modeline= module.
+# #+end_quote
 
-**** Modified buffer colour
+# **** Modified buffer colour
 
-The modeline is very nice and pretty, however I have a few niggles with the
-defaults. For starters, by default ~red~ text is used to indicate an unsaved file.
-This makes me feel like something's gone /wrong/, so let's tone that down to
-orange.
-
-#+begin_src emacs-lisp
-(custom-set-faces!
-  '(doom-modeline-buffer-modified :foreground "orange"))
-#+end_src
-
-**** Height
-
-The default size (=25=) makes for a rather narrow mode line. To me, the modeline
-feels a bit comfier if we give it a bit more space. I find =45= adds roughly a
-third of the line height as padding above and below.
-
-#+begin_src emacs-lisp
-(setq doom-modeline-height 45)
-#+end_src
-
-**** File encoding
-
-While we're modifying the modeline, when we have the default file encoding (=LF
-UTF-8=), it really isn't worth noting in the modeline. So, why not conditionally
-hide it?
-
-#+begin_src emacs-lisp
-(defun doom-modeline-conditional-buffer-encoding ()
-  "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
-  (setq-local doom-modeline-buffer-encoding
-              (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
-                                 '(coding-category-undecided coding-category-utf-8))
-                           (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
-                t)))
-
-(add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
-#+end_src
-
-# **** Time
-
-# Moving onto the modeline segments, there's a calendar icon showed next to the
-# current time, which I'm not a fan of. Let's replace that by redefining the
-# segment. Instead of the calendar, it would be much nicer to have an updating
-# analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
-
-# First, we'll need a way to produce svg clocks on-demand.
+# The modeline is very nice and pretty, however I have a few niggles with the
+# defaults. For starters, by default ~red~ text is used to indicate an unsaved file.
+# This makes me feel like something's gone /wrong/, so let's tone that down to
+# orange.
 
 # #+begin_src emacs-lisp
-# (defvar micro-clock-hour-hand-ratio 0.45
-#   "Length of the hour hand as a proportion of the radius.")
-# (defvar micro-clock-minute-hand-ratio 0.7
-#   "Length of the minute hand as a proportion of the radius.")
-
-# (defun micro-clock-svg (hour minute radius color)
-#   "Construct an SVG clock showing the time HOUR:MINUTE.
-# The clock will be of the specified RADIUS and COLOR."
-#   (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-#                    micro-clock-hour-hand-ratio))
-#         (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-#                    micro-clock-hour-hand-ratio))
-#         (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
-#                      micro-clock-minute-hand-ratio))
-#         (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
-#                      micro-clock-minute-hand-ratio))
-#         (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
-#     (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
-#     (svg-circle svg radius radius 1 :fill color :stroke "none")
-#     (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
-#               :stroke-width 2)
-#     (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
-#               :stroke-width 1.5)
-#     svg))
+# (custom-set-faces!
+#   '(doom-modeline-buffer-modified :foreground "orange"))
 # #+end_src
 
-# With that out the way, we need to figure out how to integrate this into the
-# modeline. For the most part this was fairly easy, the tricky part was getting
-# the alignment right. I tried using the =(raise FACTOR)= display property, but that
-# doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
-# descriptors]] though, I came across the =:ascent= property, which looked rather
-# promising. By setting =:ascent center= the image is centred relative to the text,
-# which is exactly what we need. With that sorted, we just add some caching and
-# the obvious customisations and we've got modeline-appropriate clock generation!
+# **** Height
+
+# The default size (=25=) makes for a rather narrow mode line. To me, the modeline
+# feels a bit comfier if we give it a bit more space. I find =45= adds roughly a
+# third of the line height as padding above and below.
 
 # #+begin_src emacs-lisp
-# (require 'svg)
-
-# (defvar +doom-modeline-micro-clock-minute-resolution 1
-#   "The clock will be updated every this many minutes, truncating.")
-# (defvar +doom-modeline-micro-clock-inverse-size 4.8
-#   "The size of the clock, as an inverse proportion to the mode line height.")
-
-# (defvar +doom-modeline-micro-clock--cache nil)
-
-# (defvar +doom-modeline-clock-text-format "%c")
-
-# (defun +doom-modeline--clock-text (&optional _window _object _pos)
-#   (format-time-string +doom-modeline-clock-text-format))
-
-# (defun +doom-modeline-micro-clock ()
-#   "Return a string containing an current analogue clock."
-#   (cdr
-#    (if (equal (truncate (float-time)
-#                         (* +doom-modeline-micro-clock-minute-resolution 60))
-#               (car +doom-modeline-micro-clock--cache))
-#        +doom-modeline-micro-clock--cache
-#      (setq +doom-modeline-micro-clock--cache
-#            (cons (truncate (float-time)
-#                            (* +doom-modeline-micro-clock-minute-resolution 60))
-#                  (with-temp-buffer
-#                    (svg-insert-image
-#                     (micro-clock-svg
-#                      (string-to-number (format-time-string "%-I")) ; hour
-#                      (* (truncate (string-to-number (format-time-string "%-M"))
-#                                   +doom-modeline-micro-clock-minute-resolution)
-#                         +doom-modeline-micro-clock-minute-resolution) ; minute
-#                      (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
-#                      "currentColor"))
-#                    (propertize
-#                     " "
-#                     'display
-#                     (append (get-text-property 0 'display (buffer-string))
-#                             '(:ascent center))
-#                     'face 'doom-modeline-time
-#                     'help-echo #'+doom-modeline--clock-text)))))))
+# (setq doom-modeline-height 45)
 # #+end_src
 
-# With clock generation sorted out, all that's to be done is replacing the =time=
-# modeline segment with our design.
+# **** File encoding
+
+# While we're modifying the modeline, when we have the default file encoding (=LF
+# UTF-8=), it really isn't worth noting in the modeline. So, why not conditionally
+# hide it?
 
 # #+begin_src emacs-lisp
-# (doom-modeline-def-segment time
-#   (when (and doom-modeline-time
-#              (bound-and-true-p display-time-mode)
-#              (not doom-modeline--limited-width-p))
-#     (concat
-#      doom-modeline-spc
-#      (when doom-modeline-time-icon
-#        (concat
-#         (+doom-modeline-micro-clock)
-#         (and (or doom-modeline-icon doom-modeline-unicode-fallback)
-#              doom-modeline-spc)))
-#      (propertize display-time-string
-#                  'face (doom-modeline-face 'doom-modeline-time)))))
+# (defun doom-modeline-conditional-buffer-encoding ()
+#   "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
+#   (setq-local doom-modeline-buffer-encoding
+#               (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
+#                                  '(coding-category-undecided coding-category-utf-8))
+#                            (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
+#                 t)))
+
+# (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
 # #+end_src
 
-# **** PDF modeline
+# # **** Time
 
-# I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
-# however the response was basically "put your preferences in your personal
-# config, the current default is sensible" --- so here we are.
+# # Moving onto the modeline segments, there's a calendar icon showed next to the
+# # current time, which I'm not a fan of. Let's replace that by redefining the
+# # segment. Instead of the calendar, it would be much nicer to have an updating
+# # analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
 
-# First up I'm going to want a segment for just the buffer file name, and a PDF
-# icon. Then we'll redefine two functions used to generate the modeline.
+# # First, we'll need a way to produce svg clocks on-demand.
 
-# #+begin_src emacs-lisp
-# (doom-modeline-def-segment buffer-name
-#   "Display the current buffer's name, without any other information."
-#   (concat
-#    doom-modeline-spc
-#    (doom-modeline--buffer-name)))
+# # #+begin_src emacs-lisp
+# # (defvar micro-clock-hour-hand-ratio 0.45
+# #   "Length of the hour hand as a proportion of the radius.")
+# # (defvar micro-clock-minute-hand-ratio 0.7
+# #   "Length of the minute hand as a proportion of the radius.")
 
-# (doom-modeline-def-segment pdf-icon
-#   "PDF icon from all-the-icons."
-#   (concat
-#    doom-modeline-spc
-#    (doom-modeline-icon 'octicon "file-pdf" nil nil
-#                        :face (if (doom-modeline--active)
-#                                  'all-the-icons-red
-#                                'mode-line-inactive)
-#                        :v-adjust 0.02)))
+# # (defun micro-clock-svg (hour minute radius color)
+# #   "Construct an SVG clock showing the time HOUR:MINUTE.
+# # The clock will be of the specified RADIUS and COLOR."
+# #   (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+# #                    micro-clock-hour-hand-ratio))
+# #         (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+# #                    micro-clock-hour-hand-ratio))
+# #         (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
+# #                      micro-clock-minute-hand-ratio))
+# #         (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
+# #                      micro-clock-minute-hand-ratio))
+# #         (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
+# #     (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
+# #     (svg-circle svg radius radius 1 :fill color :stroke "none")
+# #     (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
+# #               :stroke-width 2)
+# #     (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
+# #               :stroke-width 1.5)
+# #     svg))
+# # #+end_src
 
-# (defun doom-modeline-update-pdf-pages ()
-#   "Update PDF pages."
-#   (setq doom-modeline--pdf-pages
-#         (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
-#               (total-page-str (number-to-string (pdf-cache-number-of-pages))))
-#           (concat
-#            (propertize
-#             (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
-#                     " P" current-page-str)
-#             'face 'mode-line)
-#            (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
+# # With that out the way, we need to figure out how to integrate this into the
+# # modeline. For the most part this was fairly easy, the tricky part was getting
+# # the alignment right. I tried using the =(raise FACTOR)= display property, but that
+# # doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
+# # descriptors]] though, I came across the =:ascent= property, which looked rather
+# # promising. By setting =:ascent center= the image is centred relative to the text,
+# # which is exactly what we need. With that sorted, we just add some caching and
+# # the obvious customisations and we've got modeline-appropriate clock generation!
 
-# (doom-modeline-def-segment pdf-pages
-#   "Display PDF pages."
-#   (if (doom-modeline--active) doom-modeline--pdf-pages
-#     (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
+# # #+begin_src emacs-lisp
+# # (require 'svg)
 
-# (doom-modeline-def-modeline 'pdf
-#   '(bar window-number pdf-pages pdf-icon buffer-name)
-#   '(misc-info matches major-mode process vcs))
-# #+end_src
+# # (defvar +doom-modeline-micro-clock-minute-resolution 1
+# #   "The clock will be updated every this many minutes, truncating.")
+# # (defvar +doom-modeline-micro-clock-inverse-size 4.8
+# #   "The size of the clock, as an inverse proportion to the mode line height.")
+
+# # (defvar +doom-modeline-micro-clock--cache nil)
+
+# # (defvar +doom-modeline-clock-text-format "%c")
+
+# # (defun +doom-modeline--clock-text (&optional _window _object _pos)
+# #   (format-time-string +doom-modeline-clock-text-format))
+
+# # (defun +doom-modeline-micro-clock ()
+# #   "Return a string containing an current analogue clock."
+# #   (cdr
+# #    (if (equal (truncate (float-time)
+# #                         (* +doom-modeline-micro-clock-minute-resolution 60))
+# #               (car +doom-modeline-micro-clock--cache))
+# #        +doom-modeline-micro-clock--cache
+# #      (setq +doom-modeline-micro-clock--cache
+# #            (cons (truncate (float-time)
+# #                            (* +doom-modeline-micro-clock-minute-resolution 60))
+# #                  (with-temp-buffer
+# #                    (svg-insert-image
+# #                     (micro-clock-svg
+# #                      (string-to-number (format-time-string "%-I")) ; hour
+# #                      (* (truncate (string-to-number (format-time-string "%-M"))
+# #                                   +doom-modeline-micro-clock-minute-resolution)
+# #                         +doom-modeline-micro-clock-minute-resolution) ; minute
+# #                      (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
+# #                      "currentColor"))
+# #                    (propertize
+# #                     " "
+# #                     'display
+# #                     (append (get-text-property 0 'display (buffer-string))
+# #                             '(:ascent center))
+# #                     'face 'doom-modeline-time
+# #                     'help-echo #'+doom-modeline--clock-text)))))))
+# # #+end_src
+
+# # With clock generation sorted out, all that's to be done is replacing the =time=
+# # modeline segment with our design.
+
+# # #+begin_src emacs-lisp
+# # (doom-modeline-def-segment time
+# #   (when (and doom-modeline-time
+# #              (bound-and-true-p display-time-mode)
+# #              (not doom-modeline--limited-width-p))
+# #     (concat
+# #      doom-modeline-spc
+# #      (when doom-modeline-time-icon
+# #        (concat
+# #         (+doom-modeline-micro-clock)
+# #         (and (or doom-modeline-icon doom-modeline-unicode-fallback)
+# #              doom-modeline-spc)))
+# #      (propertize display-time-string
+# #                  'face (doom-modeline-face 'doom-modeline-time)))))
+# # #+end_src
+
+# # **** PDF modeline
+
+# # I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
+# # however the response was basically "put your preferences in your personal
+# # config, the current default is sensible" --- so here we are.
+
+# # First up I'm going to want a segment for just the buffer file name, and a PDF
+# # icon. Then we'll redefine two functions used to generate the modeline.
+
+# # #+begin_src emacs-lisp
+# # (doom-modeline-def-segment buffer-name
+# #   "Display the current buffer's name, without any other information."
+# #   (concat
+# #    doom-modeline-spc
+# #    (doom-modeline--buffer-name)))
+
+# # (doom-modeline-def-segment pdf-icon
+# #   "PDF icon from all-the-icons."
+# #   (concat
+# #    doom-modeline-spc
+# #    (doom-modeline-icon 'octicon "file-pdf" nil nil
+# #                        :face (if (doom-modeline--active)
+# #                                  'all-the-icons-red
+# #                                'mode-line-inactive)
+# #                        :v-adjust 0.02)))
+
+# # (defun doom-modeline-update-pdf-pages ()
+# #   "Update PDF pages."
+# #   (setq doom-modeline--pdf-pages
+# #         (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
+# #               (total-page-str (number-to-string (pdf-cache-number-of-pages))))
+# #           (concat
+# #            (propertize
+# #             (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
+# #                     " P" current-page-str)
+# #             'face 'mode-line)
+# #            (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
+
+# # (doom-modeline-def-segment pdf-pages
+# #   "Display PDF pages."
+# #   (if (doom-modeline--active) doom-modeline--pdf-pages
+# #     (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
+
+# # (doom-modeline-def-modeline 'pdf
+# #   '(bar window-number pdf-pages pdf-icon buffer-name)
+# #   '(misc-info matches major-mode process vcs))
+# # #+end_src
 
 *** Keycast
 
@@ -7822,14 +7838,14 @@ correct package statement needed.
 Fontifying =org-mode= buffers to be as pretty as possible is of paramount importance,
 and Minad's lovely =org-modern= goes a long way in this regard.
 
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! org-modern)
-# #+end_src
-
-This is the original version used by TEC.
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
+(package! org-modern)
 #+end_src
+
+# This is the original version used by TEC.
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
+# #+end_src
 
 ...with a touch of configuration...
 
@@ -7847,6 +7863,7 @@ This is the original version used by TEC.
                           (42 . "•")
         org-modern-todo-faces
         '(("TODO" :inverse-video t :inherit org-todo)
+          ("NEXT" :inverse-video t :inherit +org-todo-active)
           ("PROJ" :inverse-video t :inherit +org-todo-project)
           ("STRT" :inverse-video t :inherit +org-todo-active)
           ("[-]"  :inverse-video t :inherit +org-todo-active)
@@ -8168,7 +8185,8 @@ It's nice to be able to link to music
 #+begin_src emacs-lisp
 (setq org-directory "~/org" ; Let's put files here.
       ;;org-agenda-files (list org-directory)                  ; Seems like the obvious place.
-      org-agenda-files (list "~/org/gtd")                  ; Seems like the obvious place.
+      ;;org-agenda-files (list "~/org/gtd")                  ; Seems like the obvious place.
+      org-agenda-files '("~/org/gtd")                  ; Seems like the obvious place.
       org-use-property-inheritance t                         ; It's convenient to have properties inherited.
       org-log-done 'time                                     ; Having the time a item is done sounds convenient.
       org-list-allow-alphabetical t                          ; Have a. A. a) A) list bullets.
@@ -8487,9 +8505,16 @@ functionality as in LaTeX. Let's try viewing possible output files with this.
 #+call: confpkg("!Pkg Org Super Agenda")
 
 The agenda is nice, but a souped up version is nicer.
+
+
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-super-agenda :pin "f4f528985397c833c870967884b013cf91a1da4a")
+(package! org-super-agenda)
 #+end_src
+
+
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! org-super-agenda :pin "f4f528985397c833c870967884b013cf91a1da4a")
+# #+end_src
 
 #+begin_src emacs-lisp
 (use-package! org-super-agenda
@@ -8501,7 +8526,16 @@ The agenda is nice, but a souped up version is nicer.
   (let ((inhibit-message t))
     (org-super-agenda-mode)))
 
-(setq org-agenda-skip-scheduled-if-done t
+
+;; (after! org-agenda
+;;   (org-super-agenda-mode))
+
+(setq org-todo-keywords
+      '((sequence "NEXT(n)" "TODO(t)" "PROJ(p)" "LOOP(r)" "STRT(s)" "WAIT(w)" "HOLD(h)" "IDEA(i)" "|" "DONE(d)" "KILL(k)")
+        (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")
+        (sequence "|" "OKAY(o)" "YES(y)" "NO(n)"))
+      ;;org-todo-keywords-for-agenda '((sequence "CNCL" "DONE" "WAIT" "TODO" "NEXT"))
+      org-agenda-skip-scheduled-if-done t
       org-agenda-skip-deadline-if-done t
       org-agenda-include-deadlines t
       org-agenda-block-separator nil
@@ -8509,116 +8543,155 @@ The agenda is nice, but a souped up version is nicer.
       org-agenda-compact-blocks t)
 
 (setq org-agenda-custom-commands
-      '(("f" "Daily agenda and top priority tasks"
-         ((agenda "" ((org-agenda-overriding-header "testestest")))))
-        ("g" "Scheduled today and all NEXT items...."
-         ((agenda "" ((org-agenda-span 'week)
+      '(
+        ("w" "Weekly review" agenda ""
+         ((org-agenda-span 8)
+          (org-agenda-start-day "-7d")
+          (org-agenda-start-with-log-mode 'only)
+          (org-agenda-log-mode-items '(state clock))))
+        ("d" "Daily review" agenda ""
+         ((org-agenda-span 'day)
+          (org-agenda-start-day nil)
+          (org-agenda-start-on-weekday nil)
+          (org-agenda-start-with-log-mode 'only)
+          (org-agenda-log-mode-items '(state clock))))
+        ("n" "Scheduled today and all NEXT items...."
+         ((agenda "" ((org-agenda-span 3)
                       (org-agenda-start-day nil)))
+          (todo "LOOP" ((org-agenda-overriding-header "Take a break")))
           (todo "NEXT" ((org-agenda-overriding-header "NEXT items")))
           (todo "WAIT" ((org-agenda-todo-ignore-with-date t)
                         (org-agenda-overriding-header "Blocked items")))
           (search "* " ((org-agenda-overriding-header "Inbox")
                         (org-agenda-files '("~/org/gtd/inbox.org"))))))
-        ("o" "Overview"
-         (
-          ;; (agenda "" ((org-agenda-span 'day)
-          ;;             (org-super-agenda-groups
-          ;;              '((:name "Today"
-          ;;                 :time-grid t
-          ;;                 :date today
-          ;;                 :todo "TODAY"
-          ;;                 :scheduled today
-          ;;                 :order 1)))
-          ;;             ))
-          (agenda "" (
-                      ;;(org-agenda-overriding-header "Next three days")
-                      (org-agenda-start-day nil)
-                      (org-agenda-span 2)
-                      (org-super-agenda-groups
-                       '(
-                         ;; (:name "Next 3 days"
-                         ;;  :time-grid t
-                         ;;  :order 1)
-                         (:name ""
-                          :time-grid t
-                          :date today
-                          :todo "TODAY"
-                          :scheduled today
-                          :order 1)
-                         (:name "Habits"
-                          :habit t
-                          :order 2)
-                         (:name "overdue"
-                          :deadline past
-                          :face error
-                          :order 3)
-                         (:name ""
-                          :scheduled past
-                          :order 4)
-                         (:name "due soon"
-                          :deadline future
-                          :order 5)
-                         (:name "Tomorrow"
-                          :date tomorrow
-                          :scheduled tomorrow
-                          :order 6)))
-                      ))
-          ;; (agenda "" (
-          ;;             (org-agenda-start-day nil)
-          ;;             (org-agenda-span 1)))
-          (alltodo "" ((org-agenda-overriding-header "TODO-Items")
-                       (org-super-agenda-groups
-                        '(
-                          ;; (:name "overdue"
-                          ;;  :deadline past
-                          ;;  :face error
-                          ;;  :order 1)
-                          ;; (:name "due today"
-                          ;;  :deadline today
-                          ;;  :order 2)
-                          ;; (:name "due soon"
-                          ;;  :deadline future
-                          ;;  :order 3)
-                          ;; (:name "important"
-                          ;;  :priority "A"
-                          ;;  :order 4)
-                          ;; (:name "Habits"
-                          ;;  :habit t
-                          ;;  :order 5)
-                          (:name "next to do"
-                           :todo "NEXT"
-                           :order 6)
-                          (:name "assignments"
-                           :tag "assignment"
-                           :order 10)
-                          (:name "issues"
-                           :tag "issue"
-                           :order 12)
-                          (:name "emacs"
-                           :tag "emacs"
-                           :order 13)
-                          (:name "projects"
-                           :tag "project"
-                           :order 14)
-                          (:name "research"
-                           :tag "research"
-                           :order 15)
-                          (:name "to read"
-                           :tag "read"
-                           :order 30)
-                          (:name "waiting"
-                           :todo "waiting"
-                           :order 20)
-                          (:name "university"
-                           :tag "uni"
-                           :order 32)
-                          (:name "trivial"
-                           :priority<= "e"
-                           :tag ("trivial" "unimportant")
-                           :todo ("someday" )
-                           :order 90)
-                          (:discard (:tag ("chore" "routine" "daily")))))))
-          ))))
+        )
+      )
+
+
+;; (setq org-agenda-custom-commands
+;;       '(
+;;         ("w" "Weekly review" agenda ""
+;;          ((org-agenda-span 8)
+;;           (org-agenda-start-day "-7d")
+;;           (org-agenda-start-with-log-mode 'only)
+;;           (org-agenda-log-mode-items '(state clock))))
+;;         ("d" "Daily review" agenda ""
+;;          ((org-agenda-span 'day)
+;;           (org-agenda-start-day nil)
+;;           (org-agenda-start-on-weekday nil)
+;;           (org-agenda-start-with-log-mode 'only)
+;;           (org-agenda-log-mode-items '(state clock))))
+;;         ("f" "Daily agenda and top priority tasks"
+;;          ((agenda "" ((org-agenda-overriding-header "testestest")))))
+;;         ("g" "Scheduled today and all NEXT items...."
+;;          ((agenda "" ((org-agenda-span 3)
+;;                       (org-agenda-start-day nil)))
+;;           (todo "LOOP" ((org-agenda-overriding-header "Take a break")))
+;;           (todo "NEXT" ((org-agenda-overriding-header "NEXT items")))
+;;           (todo "WAIT" ((org-agenda-todo-ignore-with-date t)
+;;                         (org-agenda-overriding-header "Blocked items")))
+;;           (search "* " ((org-agenda-overriding-header "Inbox")
+;;                         (org-agenda-files '("~/org/gtd/inbox.org"))))))
+;;         ("o" "Overview"
+;;          (
+;;           ;; (agenda "" ((org-agenda-span 'day)
+;;           ;;             (org-super-agenda-groups
+;;           ;;              '((:name "Today"
+;;           ;;                 :time-grid t
+;;           ;;                 :date today
+;;           ;;                 :todo "TODAY"
+;;           ;;                 :scheduled today
+;;           ;;                 :order 1)))
+;;           ;;             ))
+;;           (agenda "" (
+;;                       ;;(org-agenda-overriding-header "Next three days")
+;;                       (org-agenda-start-day nil)
+;;                       (org-agenda-span 2)
+;;                       (org-super-agenda-groups
+;;                        '(
+;;                          ;; (:name "Next 3 days"
+;;                          ;;  :time-grid t
+;;                          ;;  :order 1)
+;;                          (:name ""
+;;                           :time-grid t
+;;                           :date today
+;;                           :todo "TODAY"
+;;                           :scheduled today
+;;                           :order 1)
+;;                          (:name "Habits"
+;;                           :habit t
+;;                           :order 2)
+;;                          (:name "overdue"
+;;                           :deadline past
+;;                           :face error
+;;                           :order 3)
+;;                          (:name ""
+;;                           :scheduled past
+;;                           :order 4)
+;;                          (:name "due soon"
+;;                           :deadline future
+;;                           :order 5)
+;;                          (:name "Tomorrow"
+;;                           :date tomorrow
+;;                           :scheduled tomorrow
+;;                           :order 6)))
+;;                       ))
+;;           ;; (agenda "" (
+;;           ;;             (org-agenda-start-day nil)
+;;           ;;             (org-agenda-span 1)))
+;;           (alltodo "" ((org-agenda-overriding-header "TODO-Items")
+;;                        (org-super-agenda-groups
+;;                         '(
+;;                           ;; (:name "overdue"
+;;                           ;;  :deadline past
+;;                           ;;  :face error
+;;                           ;;  :order 1)
+;;                           ;; (:name "due today"
+;;                           ;;  :deadline today
+;;                           ;;  :order 2)
+;;                           ;; (:name "due soon"
+;;                           ;;  :deadline future
+;;                           ;;  :order 3)
+;;                           ;; (:name "important"
+;;                           ;;  :priority "A"
+;;                           ;;  :order 4)
+;;                           ;; (:name "Habits"
+;;                           ;;  :habit t
+;;                           ;;  :order 5)
+;;                           (:name "next to do"
+;;                            :todo "NEXT"
+;;                            :order 6)
+;;                           (:name "assignments"
+;;                            :tag "assignment"
+;;                            :order 10)
+;;                           (:name "issues"
+;;                            :tag "issue"
+;;                            :order 12)
+;;                           (:name "emacs"
+;;                            :tag "emacs"
+;;                            :order 13)
+;;                           (:name "projects"
+;;                            :tag "project"
+;;                            :order 14)
+;;                           (:name "research"
+;;                            :tag "research"
+;;                            :order 15)
+;;                           (:name "to read"
+;;                            :tag "read"
+;;                            :order 30)
+;;                           (:name "waiting"
+;;                            :todo "waiting"
+;;                            :order 20)
+;;                           (:name "university"
+;;                            :tag "uni"
+;;                            :order 32)
+;;                           (:name "trivial"
+;;                            :priority<= "e"
+;;                            :tag ("trivial" "unimportant")
+;;                            :todo ("someday" )
+;;                            :order 90)
+;;                           (:discard (:tag ("chore" "routine" "daily")))))))
+;;           ))))
 
 
 ;; (setq org-agenda-custom-commands
@@ -9214,6 +9287,14 @@ It would also be nice to improve how the capture dialogue looks
          "e" #'org-clock-convenience-fill-gap-both))
 #+end_src
 
+**** org-clock-today
+#+call: confpkg("!Pkg org-clock-today", after="org")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-clock-today)
+#+end_src
+
+
 **** GTD
 #+call: confpkg("!Pkg org-gtd", after="org")
 
@@ -9229,7 +9310,8 @@ It would also be nice to improve how the capture dialogue looks
   :config
   (org-edna-mode)
   (setq org-edna-use-inheritance t
-        org-gtd-directory "~/org/gtd")
+        org-gtd-directory "~/org/gtd"
+        org-gtd-organize-hooks '(org-gtd-set-area-of-focus org-set-tags-command))
 
   (map! :prefix ("C-c d" . "org-gtd")
         :desc "Capture"        "c"  #'org-gtd-capture
@@ -10304,13 +10386,13 @@ and out of the LaTeX fragments.
 
 Thankfully, all we need to do to make this happen is use ~org-latex-preview-auto-mode~.
 
-#+begin_src emacs-lisp
-(add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
-#+end_src
-
 # #+begin_src emacs-lisp
-# (setq org-startup-with-latex-preview t)
+# (add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
 # #+end_src
+
+#+begin_src emacs-lisp
+(setq org-startup-with-latex-preview t)
+#+end_src
 
 ***** Prettier rendering
 
