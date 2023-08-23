@@ -20,7 +20,6 @@
 #+latex_header_extra: \usepackage[autooneside=false,automark,headsepline]{scrlayer-scrpage}
 #+latex_header_extra: \clearpairofpagestyles \renewcommand*{\chaptermarkformat}{} \renewcommand*{\sectionmarkformat}{}
 #+latex_header_extra: \ihead{\upshape\scshape\leftmark} \chead{\Ifstr{\leftmark}{\rightmark}{}{\rightmark}} \ohead[\pagemark]{\pagemark}
-#+latex_engraved_theme: doom-one-light
 
 #+begin_export html
 <a href="https://git.tecosaur.net/tec/emacs-config/"
@@ -1303,7 +1302,7 @@ configuration.
     (insert
      ";; -*- no-byte-compile: t; -*-\n\n"
      (pp (quote
-          <<org-pkg-statement()>>
+          ;;<<org-pkg-statement()>>
           )))
     (write-region nil nil "packages.el")))
 
@@ -1379,8 +1378,8 @@ changes Doom makes:
 
 (display-time-mode 1)                             ; Enable time in the mode-line
 
-(unless (string-match-p "^Power N/A" (battery))   ; On laptops...
-  (display-battery-mode 1))                       ; it's nice to know how much power you have
+;;(unless (string-match-p "^Power N/A" (battery))   ; On laptops...
+(display-battery-mode 1)                       ; it's nice to know how much power you have
 
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 (global-emojify-mode-line-mode 1)
@@ -1393,6 +1392,8 @@ changes Doom makes:
       ;; lsp-ui-doc-delay 5
       ;; lsp-ui-doc-use-childframe nil
       company-box-doc-enable nil)
+
+(setq lsp-go-use-gofumpt t)
 
 (setq doom-modeline-persp-name t)
 
@@ -1702,7 +1703,9 @@ vterm                        ; the best terminal emulation in Emacs
 
 #+name: doom-checkers
 #+begin_src emacs-lisp
-(syntax +childframe)         ; tasing you for every semicolon you forget
+(syntax                      ; tasing you for every semicolon you forget
+ +childframe
+ +flymake)
 (spell
  +flyspell
  +hunspell
@@ -2030,152 +2033,152 @@ avoid polluting the output.
 (advice-add 'org-babel-execute-src-block :around #'doom-shut-up-a)
 #+end_src
 
-*** Elisp REPL
+# *** Elisp REPL
 
-I think an elisp REPL sounds like a fun idea, even if not a particularly useful
-one 😛. We can do this by adding a new command in =cli.el=.
+# I think an elisp REPL sounds like a fun idea, even if not a particularly useful
+# one 😛. We can do this by adding a new command in =cli.el=.
 
-#+begin_src emacs-lisp :tangle cli.el :noweb-ref none
-(defcli! repl ((in-rlwrap-p ("--rl") "For internal use only."))
-  "Start an elisp REPL."
-  (require 'core-start)
-  (when (and (executable-find "rlwrap") (not in-rlwrap-p))
-    ;; For autocomplete
-    (setq autocomplete-file "/tmp/doom_elisp_repl_symbols")
-    (unless (file-exists-p autocomplete-file)
-      (princ "\e[0;33mInitialising autocomplete list...\e[0m\n")
-      (with-temp-buffer
-        (cl-do-all-symbols (s)
-          (let ((sym (symbol-name s)))
-            (when (string-match-p "\\`[[:ascii:]][[:ascii:]]+\\'" sym)
-              (insert sym "\n"))))
-        (write-region nil nil autocomplete-file)))
-    (princ "\e[F")
-    (exit! "rlwrap" "-f" autocomplete-file
-           (concat doom-emacs-dir "bin/doom") "repl" "--rl"))
+# #+begin_src emacs-lisp :tangle cli.el :noweb-ref none
+# (defcli! repl ((in-rlwrap-p ("--rl") "For internal use only."))
+#   "Start an elisp REPL."
+#   (require 'core-start)
+#   (when (and (executable-find "rlwrap") (not in-rlwrap-p))
+#     ;; For autocomplete
+#     (setq autocomplete-file "/tmp/doom_elisp_repl_symbols")
+#     (unless (file-exists-p autocomplete-file)
+#       (princ "\e[0;33mInitialising autocomplete list...\e[0m\n")
+#       (with-temp-buffer
+#         (cl-do-all-symbols (s)
+#           (let ((sym (symbol-name s)))
+#             (when (string-match-p "\\`[[:ascii:]][[:ascii:]]+\\'" sym)
+#               (insert sym "\n"))))
+#         (write-region nil nil autocomplete-file)))
+#     (princ "\e[F")
+#     (exit! "rlwrap" "-f" autocomplete-file
+#            (concat doom-emacs-dir "bin/doom") "repl" "--rl"))
 
-  (doom-initialize-packages)
-  (require 'engrave-faces-ansi)
-  (setq engrave-faces-ansi-color-mode '3-bit)
+#   (doom-initialize-packages)
+#   (require 'engrave-faces-ansi)
+#   (setq engrave-faces-ansi-color-mode '3-bit)
 
-  ;; For some reason (require 'parent-mode) doesn't work :(
-  (defun parent-mode-list (mode)
-    "Return a list of MODE and all its parent modes.
+#   ;; For some reason (require 'parent-mode) doesn't work :(
+#   (defun parent-mode-list (mode)
+#     "Return a list of MODE and all its parent modes.
 
-The returned list starts with the parent-most mode and ends with MODE."
-    (let ((result ()))
-      (parent-mode--worker mode (lambda (mode)
-                                  (push mode result)))
-      result))
-  (defun parent-mode--worker (mode func)
-    "For MODE and all its parent modes, call FUNC.
+# The returned list starts with the parent-most mode and ends with MODE."
+#     (let ((result ()))
+#       (parent-mode--worker mode (lambda (mode)
+#                                   (push mode result)))
+#       result))
+#   (defun parent-mode--worker (mode func)
+#     "For MODE and all its parent modes, call FUNC.
 
-FUNC is first called for MODE, then for its parent, then for the parent's
-parent, and so on.
+# FUNC is first called for MODE, then for its parent, then for the parent's
+# parent, and so on.
 
-MODE shall be a symbol referring to a function.
-FUNC shall be a function taking one argument."
-    (funcall func mode)
-    (when (not (fboundp mode))
-      (signal 'void-function (list mode)))
-    (let ((modefunc (symbol-function mode)))
-      (if (symbolp modefunc)
-          ;; Hande all the modes that use (defalias 'foo-parent-mode (stuff)) as
-          ;; their parent
-          (parent-mode--worker modefunc func)
-        (let ((parentmode (get mode 'derived-mode-parent)))
-          (when parentmode
-            (parent-mode--worker parentmode func))))))
-  (provide 'parent-mode)
-  ;; Some extra highlighting (needs parent-mode)
-  (require 'rainbow-delimiters)
-  (require 'highlight-quoted)
-  (require 'highlight-numbers)
-  (setq emacs-lisp-mode-hook '(rainbow-delimiters-mode
-                               highlight-quoted-mode
-                               highlight-numbers-mode))
-  ;; Pretty print
-  (defun pp-sexp (sexp)
-    (with-temp-buffer
-      (cl-prettyprint sexp)
-      (emacs-lisp-mode)
-      (font-lock-ensure)
-      (with-current-buffer (engrave-faces-ansi-buffer)
-        (princ (string-trim (buffer-string)))
-        (kill-buffer (current-buffer)))))
-  ;; Now do the REPL
-  (defvar accumulated-input nil)
-  (while t
-    (condition-case nil
-        (let ((input (if accumulated-input
-                         (read-string "\e[31m .\e[0m  ")
-                       (read-string "\e[31mλ:\e[0m "))))
-          (setq input (concat accumulated-input
-                              (when accumulated-input "\n")
-                              input))
-          (cond
-           ((string-match-p "\\`[[:space:]]*\\'" input)
-            nil)
-           ((string= input "exit")
-            (princ "\n") (kill-emacs 0))
-           (t
-            (condition-case err
-                (let ((input-sexp (car (read-from-string input))))
-                  (setq accumulated-input nil)
-                  (pp-sexp (eval input-sexp))
-                  (princ "\n"))
-              ;; Caused when sexp in unbalanced
-              (end-of-file (setq accumulated-input input))
-              (error
-               (cl-destructuring-bind (backtrace &optional type data . _)
-                   (cons (doom-cli--backtrace) err)
-                 (princ (concat "\e[1;31mERROR:\e[0m " (get type 'error-message)))
-                 (princ "\n       ")
-                 (pp-sexp (cons type data))
-                 (when backtrace
-                   (print! (bold "Backtrace:"))
-                   (print-group!
-                    (dolist (frame (seq-take backtrace 10))
-                      (print!
-                       "%0.74s" (replace-regexp-in-string
-                                 "[\n\r]" "\\\\n"
-                                 (format "%S" frame))))))
-                 (princ "\n")))))))
-      ;; C-d causes an end-of-file error
-      (end-of-file (princ "exit\n") (kill-emacs 0)))
-    (unless accumulated-input (princ "\n"))))
-#+end_src
+# MODE shall be a symbol referring to a function.
+# FUNC shall be a function taking one argument."
+#     (funcall func mode)
+#     (when (not (fboundp mode))
+#       (signal 'void-function (list mode)))
+#     (let ((modefunc (symbol-function mode)))
+#       (if (symbolp modefunc)
+#           ;; Hande all the modes that use (defalias 'foo-parent-mode (stuff)) as
+#           ;; their parent
+#           (parent-mode--worker modefunc func)
+#         (let ((parentmode (get mode 'derived-mode-parent)))
+#           (when parentmode
+#             (parent-mode--worker parentmode func))))))
+#   (provide 'parent-mode)
+#   ;; Some extra highlighting (needs parent-mode)
+#   (require 'rainbow-delimiters)
+#   (require 'highlight-quoted)
+#   (require 'highlight-numbers)
+#   (setq emacs-lisp-mode-hook '(rainbow-delimiters-mode
+#                                highlight-quoted-mode
+#                                highlight-numbers-mode))
+#   ;; Pretty print
+#   (defun pp-sexp (sexp)
+#     (with-temp-buffer
+#       (cl-prettyprint sexp)
+#       (emacs-lisp-mode)
+#       (font-lock-ensure)
+#       (with-current-buffer (engrave-faces-ansi-buffer)
+#         (princ (string-trim (buffer-string)))
+#         (kill-buffer (current-buffer)))))
+#   ;; Now do the REPL
+#   (defvar accumulated-input nil)
+#   (while t
+#     (condition-case nil
+#         (let ((input (if accumulated-input
+#                          (read-string "\e[31m .\e[0m  ")
+#                        (read-string "\e[31mλ:\e[0m "))))
+#           (setq input (concat accumulated-input
+#                               (when accumulated-input "\n")
+#                               input))
+#           (cond
+#            ((string-match-p "\\`[[:space:]]*\\'" input)
+#             nil)
+#            ((string= input "exit")
+#             (princ "\n") (kill-emacs 0))
+#            (t
+#             (condition-case err
+#                 (let ((input-sexp (car (read-from-string input))))
+#                   (setq accumulated-input nil)
+#                   (pp-sexp (eval input-sexp))
+#                   (princ "\n"))
+#               ;; Caused when sexp in unbalanced
+#               (end-of-file (setq accumulated-input input))
+#               (error
+#                (cl-destructuring-bind (backtrace &optional type data . _)
+#                    (cons (doom-cli--backtrace) err)
+#                  (princ (concat "\e[1;31mERROR:\e[0m " (get type 'error-message)))
+#                  (princ "\n       ")
+#                  (pp-sexp (cons type data))
+#                  (when backtrace
+#                    (print! (bold "Backtrace:"))
+#                    (print-group!
+#                     (dolist (frame (seq-take backtrace 10))
+#                       (print!
+#                        "%0.74s" (replace-regexp-in-string
+#                                  "[\n\r]" "\\\\n"
+#                                  (format "%S" frame))))))
+#                  (princ "\n")))))))
+#       ;; C-d causes an end-of-file error
+#       (end-of-file (princ "exit\n") (kill-emacs 0)))
+#     (unless accumulated-input (princ "\n"))))
+# #+end_src
 
-*** Htmlize command
+# *** Htmlize command
 
-Why not have a command to htmlize files? This is basically a little test of my
-engrave-faces package because it somehow seems to work without a GUI, while the
-htmlize package doesn't.
+# Why not have a command to htmlize files? This is basically a little test of my
+# engrave-faces package because it somehow seems to work without a GUI, while the
+# htmlize package doesn't.
 
-#+begin_src emacs-lisp :tangle cli.el :noweb-ref none
-(defcli! htmlize (file)
-  "Export a FILE buffer to HTML."
+# #+begin_src emacs-lisp :tangle cli.el :noweb-ref none
+# (defcli! htmlize (file)
+#   "Export a FILE buffer to HTML."
 
-  (print! "Htmlizing %s" file)
+#   (print! "Htmlizing %s" file)
 
-  (doom-initialize)
-  (require 'highlight-numbers)
-  (require 'highlight-quoted)
-  (require 'rainbow-delimiters)
-  (require 'engrave-faces-html)
+#   (doom-initialize)
+#   (require 'highlight-numbers)
+#   (require 'highlight-quoted)
+#   (require 'rainbow-delimiters)
+#   (require 'engrave-faces-html)
 
-  ;; Lighten org-mode
-  (when (string= "org" (file-name-extension file))
-    (setcdr (assoc 'org after-load-alist) nil)
-    (setq org-load-hook nil)
-    (require 'org)
-    (setq org-mode-hook nil)
-    (add-hook 'engrave-faces-before-hook
-              (lambda () (if (eq major-mode 'org-mode)
-                        (org-show-all)))))
+#   ;; Lighten org-mode
+#   (when (string= "org" (file-name-extension file))
+#     (setcdr (assoc 'org after-load-alist) nil)
+#     (setq org-load-hook nil)
+#     (require 'org)
+#     (setq org-mode-hook nil)
+#     (add-hook 'engrave-faces-before-hook
+#               (lambda () (if (eq major-mode 'org-mode)
+#                         (org-show-all)))))
 
-  (engrave-faces-html-file file))
-#+end_src
+#   (engrave-faces-html-file file))
+# #+end_src
 
 *** Org buffer creation
 
@@ -4029,8 +4032,13 @@ nearby (also means that if I change the 'main' dictionary I keep my addition).
       (write-region "" nil ispell-personal-dictionary nil 0)))
 #+end_src
 
-# ***  Flycheck
-# #+call: confpkg("!Pkg flycheck")
+***  Flycheck
+#+call: confpkg("!Pkg flycheck")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! flycheck-golangci-lint :recipe (:host github :repo "weijiangan/flycheck-golangci-lint")
+  :pin "9def093e416e9a6ddd3cae8590dbb7ff6314925a")
+#+end_src
 
 # #+begin_src emacs-lisp
 # (use-package! flycheck-golangci-lint
@@ -7822,13 +7830,23 @@ correct package statement needed.
 #+end_src
 
 #+begin_src emacs-lisp :tangle packages.el :noweb no-export
-<<org-pkg-statement()>>
+;;<<org-pkg-statement()>>
 (unpin! org) ; there be bugs
+
+(package! org
+  :recipe (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror"
+           :fork (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")))
+
+
 (package! org-contrib
   :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
            :files ("lisp/*.el"))
   :pin "6422b265f1150204f024e33d54f2dcfd8323005c")
 #+end_src
+
+# ;; (package! org
+# ;;   :recipe (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror"
+# ;;            :fork (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")))
 
 **** Visuals
 ***** Org Modern
@@ -10451,8 +10469,8 @@ theme-appropriate foreground.
 We can either render from a ~dvi~ or ~pdf~ file, so let's benchmark ~latex~ and
 ~pdflatex~.
 | ~latex~ time | ~pdflatex~ time |
-|--------------+-----------------|
-| 135 \pm 2 ms   | 215 \pm 3 ms      |
+|------------+---------------|
+| 135 \pm 2 ms | 215 \pm 3 ms    |
 
 On the rendering side, there are two ~.dvi~-to-image converters which I am
 interested in: ~dvipng~ and ~dvisvgm~.
@@ -12487,79 +12505,79 @@ Then we can just hook this in with our clever preamble.
    :order 0.7))
 #+end_src
 
-**** Pretty code blocks
+# **** Pretty code blocks
 
-We could just use minted for syntax highlighting --- however, we can do better!
-The =engrave-faces= package lets us use Emacs' font-lock for syntax highlighting,
-exporting that as LaTeX commands.
+# We could just use minted for syntax highlighting --- however, we can do better!
+# The =engrave-faces= package lets us use Emacs' font-lock for syntax highlighting,
+# exporting that as LaTeX commands.
 
-#+begin_src emacs-lisp :noweb-ref none :tangle packages.el
-(package! engrave-faces :recipe (:local-repo "lisp/engrave-faces"))
-#+end_src
+# #+begin_src emacs-lisp :noweb-ref none :tangle packages.el
+# (package! engrave-faces :recipe (:local-repo "lisp/engrave-faces"))
+# #+end_src
 
-#+begin_src emacs-lisp
-(use-package! engrave-faces-latex
-  :after ox-latex)
-#+end_src
+# #+begin_src emacs-lisp
+# (use-package! engrave-faces-latex
+#   :after ox-latex)
+# #+end_src
 
-Using this as in LaTeX exports is now as easy as
+# Using this as in LaTeX exports is now as easy as
 
-#+begin_src emacs-lisp
-(setq org-latex-listings 'engraved)
-#+end_src
+# #+begin_src emacs-lisp
+# (setq org-latex-listings 'engraved)
+# #+end_src
 
-One little annoyance with this is the interaction between microtype and =Verbatim=
-environments. Protrusion is not desirable here. Thankfully, we can patch the
-=Verbatim= environment to turn off protrusion locally.
+# One little annoyance with this is the interaction between microtype and =Verbatim=
+# environments. Protrusion is not desirable here. Thankfully, we can patch the
+# =Verbatim= environment to turn off protrusion locally.
 
-#+begin_src emacs-lisp
-(org-export-update-features 'latex
-  (no-protrusion-in-code
-   :condition t
-   :when microtype
-   :snippet "\\ifcsname Code\\endcsname\n  \\let\\oldcode\\Code\\renewcommand{\\Code}{\\microtypesetup{protrusion=false}\\oldcode}\n\\fi"
-   :order 98.5))
-#+end_src
+# #+begin_src emacs-lisp
+# (org-export-update-features 'latex
+#   (no-protrusion-in-code
+#    :condition t
+#    :when microtype
+#    :snippet "\\ifcsname Code\\endcsname\n  \\let\\oldcode\\Code\\renewcommand{\\Code}{\\microtypesetup{protrusion=false}\\oldcode}\n\\fi"
+#    :order 98.5))
+# #+end_src
 
-At some point it would be nice to make the box colours easily customisable. At
-the moment it's fairly easy to change the syntax highlighting colours with
-src_elisp{(setq engrave-faces-preset-styles (engrave-faces-generate-preset))},
-but perhaps a toggle which specifies whether to use the default values, the
-current theme, or any named theme could be a good idea. It should also possible
-to set the box background dynamically to match. The named theme could work by
-looking for a style definition with a certain name in a cache dir, and then
-switching to that theme and producing (and saving) the style definition if it
-doesn't exist.
+# At some point it would be nice to make the box colours easily customisable. At
+# the moment it's fairly easy to change the syntax highlighting colours with
+# src_elisp{(setq engrave-faces-preset-styles (engrave-faces-generate-preset))},
+# but perhaps a toggle which specifies whether to use the default values, the
+# current theme, or any named theme could be a good idea. It should also possible
+# to set the box background dynamically to match. The named theme could work by
+# looking for a style definition with a certain name in a cache dir, and then
+# switching to that theme and producing (and saving) the style definition if it
+# doesn't exist.
 
-Now let's have the example block be styled similarly.
+# Now let's have the example block be styled similarly.
 
-#+begin_src emacs-lisp
-(defadvice! org-latex-example-block-engraved (orig-fn example-block contents info)
-  "Like `org-latex-example-block', but supporting an engraved backend"
-  :around #'org-latex-example-block
-  (let ((output-block (funcall orig-fn example-block contents info)))
-    (if (eq 'engraved (plist-get info :latex-listings))
-        (format "\\begin{Code}[alt]\n%s\n\\end{Code}" output-block)
-      output-block)))
-#+end_src
+# #+begin_src emacs-lisp
+# (defadvice! org-latex-example-block-engraved (orig-fn example-block contents info)
+#   "Like `org-latex-example-block', but supporting an engraved backend"
+#   :around #'org-latex-example-block
+#   (let ((output-block (funcall orig-fn example-block contents info)))
+#     (if (eq 'engraved (plist-get info :latex-listings))
+#         (format "\\begin{Code}[alt]\n%s\n\\end{Code}" output-block)
+#       output-block)))
+# #+end_src
 
-In addition to the vastly superior visual output, this should also be much
-faster to compile for code-heavy documents (like this config).
+# In addition to the vastly superior visual output, this should also be much
+# faster to compile for code-heavy documents (like this config).
 
-Performing a little benchmark with this document, I find that this is indeed the
-case.
+# Performing a little benchmark with this document, I find that this is indeed the
+# case.
 
-| LaTeX syntax highlighting backend | Compile time | Overhead | Overhead ratio |
-|-----------------------------------+--------------+----------+----------------|
-| verbatim                          | 12 s         | 0        |            0.0 |
-| lstlistings                       | 15 s         | 3 s      |            0.2 |
-| Engrave                           | 34 s         | 22 s     |            1.8 |
-| Pygments (Minted)                 | 184 s        | 172 s    |           14.3 |
-#+TBLFM: $3=$2-@2$2::$4=$3 / @2$2;%.1f
+# | LaTeX syntax highlighting backend | Compile time | Overhead | Overhead ratio |
+# |-----------------------------------+--------------+----------+----------------|
+# | verbatim                          | 12 s         | 0        |            0.0 |
+# | lstlistings                       | 15 s         | 3 s      |            0.2 |
+# | Engrave                           | 34 s         | 22 s     |            1.8 |
+# | Pygments (Minted)                 | 184 s        | 172 s    |           14.3 |
+# #+TBLFM: $3=$2-@2$2::$4=$3 / @2$2;%.1f
 
-Treating the verbatim (no syntax highlighting) result as a baseline; this
-rudimentary test suggest that =engrave-faces= is around eight times faster than
-=pygments=, and takes three times as long as no syntax highlighting (verbatim).
+# Treating the verbatim (no syntax highlighting) result as a baseline; this
+# rudimentary test suggest that =engrave-faces= is around eight times faster than
+# =pygments=, and takes three times as long as no syntax highlighting (verbatim).
 
 **** Julia code blocks
 
