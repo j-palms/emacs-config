@@ -3345,7 +3345,8 @@ sounds nice to me.
 #+call: confpkg("!Pkg org-noter")
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-noter :recipe (:host github :repo "org-noter/org-noter" :files ("*.el" "modules/*.el")))
+(package! org-noter :recipe (:host github :repo "org-noter/org-noter"
+                             :branch "feature/org-roam-integration"))
 (unpin! org-noter)
 #+end_src
 
@@ -3358,6 +3359,7 @@ sounds nice to me.
         "M-i" #'org-noter-insert-precise-note
         "C-M-i" #'org-noter-insert-precise-note-toggle-no-questions))
 #+end_src
+
 
 *** Djvu (for org-noter)
 
@@ -6124,7 +6126,7 @@ module. Let's just try to patch on the main things I like the look of.
     "title face in elfeed show buffer"
     :group 'elfeed)
   (set-face-attribute 'elfeed-search-title-face nil
-                      :foreground 'nil
+                      :foreground 'unspecified
                       :weight 'light)
 
   (defadvice! +rss-elfeed-wrap-h-nicer ()
@@ -8312,6 +8314,7 @@ Now we'll just add that under the Org mode link localleader for convenience.
 #+begin_quote
 Extending the =:tools biblio= module.
 #+end_quote
+
 
 References in Org are fairly easy now, thanks to =org-cite=. The =:tools biblio=
 module gives a fairly decent basic setup, but it would be nice to take it a bit
@@ -13021,9 +13024,9 @@ able to handle anyway. For them we define a table of LaTeX translations
 | Ψ         | \(\Psi\) |
 | Ω         | \(\Omega\) |
 | א         | \(\aleph\) |
-| ב         | \(\beth\) |
-| ד         | \(\daleth\) |
-| ג         | \(\gimel\) |
+| ב          | \(\beth\)  |
+| ד          | \(\daleth\) |
+| ג          | \(\gimel\) |
 
 #+name: gen-latex-non-ascii-char-substitutions
 #+begin_src emacs-lisp :noweb-ref none :var latex-non-ascii-char-substitutions=latex-non-ascii-char-substitutions
