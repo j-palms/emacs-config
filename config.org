@@ -8372,14 +8372,15 @@ with =citar=, and make the symbols a bit prettier.
         citar-symbols
         `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
           (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " "))))
+          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " "))
+        citar-notes-paths '("~/org/notes")))
 #+end_src
 
 We can also make the Zotero CSL styles available to use.
 
 #+begin_src emacs-lisp
 (after! oc-csl
-  (setq org-cite-csl-styles-dir "~/Zotero/styles"))
+  (setq org-cite-csl-styles-dir "~/Zotero/styles/iso690"))
 #+end_src
 
 Since CSL works so nicely everywhere, we might as well use it as the default
@@ -8387,7 +8388,10 @@ citation export processor for everything.
 
 #+begin_src emacs-lisp
 (after! oc
-  (setq org-cite-export-processors '((t csl))))
+  (setq org-cite-export-processors
+   '((latex biblatex)
+     (t . (csl "iso690-author-date-de.csl"))
+     )))
 #+end_src
 
 Then, for convenience we'll cap things off by putting the citation command under
@@ -8400,36 +8404,12 @@ Org's localleader.
       :desc "Insert citation" "@" #'org-cite-insert)
 #+end_src
 
-Lastly, just in case I come across any old citations of mine, I think it would
-be nice to have a function to convert =org-ref= citations to =org-cite= forms.
-
 #+begin_src emacs-lisp
-(after! oc
-  (defun org-ref-to-org-cite ()
-    "Attempt to convert org-ref citations to org-cite syntax."
-    (interactive)
-    (let* ((cite-conversions '(("cite" . "//b") ("Cite" . "//bc")
-                               ("nocite" . "/n")
-                               ("citep" . "") ("citep*" . "//f")
-                               ("parencite" . "") ("Parencite" . "//c")
-                               ("citeauthor" . "/a/f") ("citeauthor*" . "/a")
-                               ("citeyear" . "/na/b")
-                               ("Citep" . "//c") ("Citealp" . "//bc")
-                               ("Citeauthor" . "/a/cf") ("Citeauthor*" . "/a/c")
-                               ("autocite" . "") ("Autocite" . "//c")
-                               ("notecite" . "/l/b") ("Notecite" . "/l/bc")
-                               ("pnotecite" . "/l") ("Pnotecite" . "/l/bc")))
-           (cite-regexp (rx (regexp (regexp-opt (mapcar #'car cite-conversions) t))
-                            ":" (group (+ (not (any "\n 	,.)]}")))))))
-      (save-excursion
-        (goto-char (point-min))
-        (while (re-search-forward cite-regexp nil t)
-          (message (format "[cite%s:@%s]"
-                                 (cdr (assoc (match-string 1) cite-conversions))
-                                 (match-string 2)))
-          (replace-match (format "[cite%s:@%s]"
-                                 (cdr (assoc (match-string 1) cite-conversions))
-                                 (match-string 2))))))))
+(use-package! citar-org-roam
+  :after (citar org-roam)
+  :config
+  (citar-org-roam-mode)
+  (setq citar-org-roam-capture-template-key "b"))
 #+end_src
 
 ***** cdlatex
@@ -9393,37 +9373,29 @@ It would also be nice to improve how the capture dialogue looks
         :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
         :desc "org-roam-capture" "c" #'org-roam-capture)
   (setq org-roam-directory (file-truename "~/org/notes")
-        org-roam-dailies-directory "journals/")
-        org-roam-database-connector 'sqlite-builtin
-        ;; org-roam-db-gc-threshold most-positive-fixnum
-        ;; org-id-link-to-org-use-id t)
-
+        org-roam-dailies-directory "journals/"
+        org-roam-database-connector 'sqlite-builtin)
   :config
-  ;; (org-roam-db-autosync-mode +1)
-  ;; (set-popup-rules!
-  ;;   `((,(regexp-quote org-roam-buffer) ; persistent org-roam buffer
-  ;;      :side right :width .33 :height .5 :ttl nil :modeline nil :quit nil :slot 1)
-  ;;     ("^\\*org-roam: " ; node dedicated org-roam buffer
-  ;;      :side right :width .33 :height .5 :ttl nil :modeline nil :quit nil :slot 2)))
-  ;; (add-hook 'org-roam-mode-hook #'turn-on-visual-line-mode)
-
+  (org-roam-db-autosync-mode)
   (setq org-roam-capture-templates
-        '(("n" "notes" plain
-           "\n%?"
-           :if-new (file+head "pages/${slug}.org"
+         '(("n" "notes" plain "\n%?"
+            :target
+            (file+head "pages/${slug}.org"
                               "#+title: ${title}\n")
            :immediate-finish t
-           :unnarrowed t)))
-          ;; ("r" "reference" plain "\n%?"
+           :unnarrowed t)
+          ;; ("b" "bibliographic note" plain "\n%?"
           ;;  :if-new
           ;;  (file+head "reference/${slug}.org" "#+title: ${title}\n")
           ;;  :immediate-finish t
-          ;;  :unnarrowed t)
-          ;; ("a" "article" plain "\n%?"
-          ;;  :if-new
-          ;;  (file+head "articles/${slug}.org" "#+title: ${title}\n#+filetags: :article:\n")
-          ;;  :immediate-finish t
           ;;  :unnarrowed t)))
+        ("b" "literature note" plain "\n%?"
+         :target
+         (file+head
+          "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/references/${citar-citekey}.org"
+          "#+title: ${note-title}.\n#+created: %U\n\n")
+         :immediate-finish t
+         :unnarrowed t)))
 
   (defun jethro/tag-new-node-as-draft ()
     (org-roam-tag-add '("draft")))
@@ -9441,25 +9413,6 @@ It would also be nice to improve how the capture dialogue looks
 
   (setq org-roam-node-display-template
         (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag))))
-
-  ;; (require 'citar)
-
-  ;; (defun jethro/org-roam-node-from-cite (keys-entries)
-  ;;   (interactive (list (citar-select-ref)))
-  ;;   (let ((title (citar-format--entry(cdr keys-entries) "${author editor} :: ${title}")))
-  ;;     (org-roam-capture-
-  ;;      :templates
-  ;;      '(("r" "reference" plain "%?" :if-new
-  ;;         (file+head "reference/${citekey}.org"
-  ;;                    ":PROPERTIES:
-  ;;                    :ROAM_REFS: [cite:@${citekey}]
-  ;;                    :END:
-  ;;                    #+title: ${title}\n")
-  ;;      :immediate-finish t
-  ;;      :unnarrowed t))
-  ;;      :info (list :citekey (car keys-entries))
-  ;;      :node (org-roam-node-create :title title)
-  ;;      :props '(:finalize find-file)))))
 #+end_src
 
 
