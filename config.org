@@ -1382,6 +1382,10 @@ changes Doom makes:
 (map! ("C-c C-SPC"
        :desc "Switch perspective" #'+workspace/cycle))
 
+;; use flymake
+(after! lsp-mode
+  (setq lsp-diagnostics-provider :flymake))
+(add-hook! prog-mode #'flymake-mode)
 
 ;; ;; Debugging with python
 ;; (map! :leader
@@ -1671,7 +1675,9 @@ vterm                        ; the best terminal emulation in Emacs
 
 #+name: doom-checkers
 #+begin_src emacs-lisp
-(syntax +childframe)         ; tasing you for every semicolon you forget
+(syntax
+ +flymake
+ +childframe)         ; tasing you for every semicolon you forget
 (spell
  +flyspell
  +hunspell
@@ -9172,7 +9178,7 @@ no modeline.
   :custom
   (org-gtd-directory "~/org/gtd")
   (org-edna-use-inheritance t)
-  (org-gtd-organize-hooks '(org-gtd-set-area-of-focus org-set-tags-command))
+  ;; (org-gtd-organize-hooks '(org-gtd-set-area-of-focus org-set-tags-command))
   :config
   (org-edna-mode)
   (map! :prefix "C-c"
