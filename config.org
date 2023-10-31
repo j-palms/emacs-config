@@ -8144,7 +8144,6 @@ It's nice to be able to link to music
         org-music-track-search-method 'beets
         org-music-beets-db "~/Music/library.db"))
 #+end_src
-
 *** Behaviour
 
 #+call: confpkg("Org Behaviour", after="org")
@@ -14203,4 +14202,93 @@ which is perfect for our needs.
 
 #+begin_src emacs-lisp
 (add-to-list 'magic-mode-alist (cons "\\`GIMP Palette\n" #'gimp-palette-mode))
+#+end_src
+
+
+* Custom Workflow
+** Type Break
+
+#+call: confpkg("!Pkg type-break")
+
+#+begin_src emacs-lisp
+(use-package! type-break
+  :hook ((org-pomodoro-killed . type-break-mode)
+         (org-pomodoro-break-finished . type-break-mode)
+         (org-pomodoro-started . (lambda () (type-break-mode -1)))
+         (after-init . type-break-mode))
+  :init
+  (defun type-break-demo-agenda ()
+    "Display the Org Agenda in read-only mode. Cease the demo as soon as a key is pressed."
+    (let ((buffer-name "*Typing Break Org Agenda*")
+          lines)
+      (condition-case ()
+          (progn
+            (org-agenda-list)
+            (setq buffer-name (buffer-name))
+            ;; Set the buffer to read-only
+            (with-current-buffer buffer-name
+              (read-only-mode 1))
+            ;; Message to be displayed at the bottom
+            (let ((msg (if type-break-terse-messages
+                           ""
+                         "Press any key to resume from typing break")))
+              ;; Loop until key is pressed
+              (while (not (input-pending-p))
+                (sit-for 60))
+              ;; Clean up after key is pressed
+              (read-event)
+              (type-break-catch-up-event)
+              (kill-buffer buffer-name)))
+        (quit
+         (and (get-buffer buffer-name)
+              (kill-buffer buffer-name))))))
+
+  :config
+  ;; Setting interval of that of a pomodoro session
+  (setq type-break-interval (* 25 60) ;; 25 mins
+        type-break-good-rest-interval (* 9 60) ;; 9 mins
+        type-break-good-break-interval (* 5 60) ;; 5 mins
+        type-break-query-mode t
+        type-break-keystroke-threshold '(nil . 2625)
+        type-break-demo-boring-stats t
+        type-break-demo-functions '(type-break-demo-agenda)))
+#+end_src
+
+** Org pomodoro
+
+#+call: confpkg("!Pkg org-pomodoro", after="org")
+
+#+begin_src emacs-lisp
+(use-package! org-pomodoro
+  :after org
+  :bind (("<f12>" . org-pomodoro))
+  :hook ((org-pomodoro-started . gopar/load-window-config-and-close-work-agenda)
+         (org-pomodoro-finished . gopar/save-window-config-and-show-work-agenda))
+  :config
+  (setq org-pomodoro-manual-break t
+        org-pomodoro-short-break-length 20
+        org-pomodoro-long-break-length 30
+        org-pomodoro-length 60)
+  :init
+  (defun gopar/home-pomodoro ()
+    (interactive)
+    (setq org-pomodoro-length 25
+          org-pomodoro-short-break-length 5))
+
+  (defun gopar/work-pomodoro ()
+    (interactive)
+    (setq org-pomodoro-length 60
+          org-pomodoro-short-break-length 20))
+
+  (defun gopar/save-window-config-and-show-work-agenda ()
+    (interactive)
+    (window-configuration-to-register ?`)
+    (delete-other-windows)
+    (org-save-all-org-buffers)
+    (org-agenda "a"))
+
+  (defun gopar/load-window-config-and-close-work-agenda ()
+    (interactive)
+    (org-save-all-org-buffers)
+    (jump-to-register ?`)))
 #+end_src
