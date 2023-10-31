@@ -1326,8 +1326,8 @@ the start of the tangle process. This is done by calling =bootstrap= within the
 
 It's useful to have some basic personal information
 #+begin_src emacs-lisp
-(setq user-full-name "TEC"
-      user-mail-address "contact@tecosaur.net")
+(setq user-full-name "Josua Palmstedt"
+      user-mail-address "palmstedt@posteo.de")
 #+end_src
 Apparently this is used by ~GPG~, and all sorts of other things.
 
@@ -1364,10 +1364,31 @@ changes Doom makes:
       password-cache-expiry nil                   ; I can trust my computers ... can't I?
       ;; scroll-preserve-screen-position 'always     ; Don't have `point' jump around
       scroll-margin 2                             ; It's nice to maintain a little margin
-      display-time-default-load-average nil)      ; I don't think I've ever found this useful
+      display-time-default-load-average nil      ; I don't think I've ever found this useful
+      display-time-format "%H:%M")
 
 (display-time-mode 1)                             ; Enable time in the mode-line
 (global-subword-mode 1)                           ; Iterate through CamelCase words
+
+(setq lsp-headerline-breadcrumb-enable t
+      lsp-headerline-breadcrumb-segments '(project file symbols)
+      lsp-headerline-breadcrumb-icons-enable t
+      ;; lsp-ui-doc-delay 5
+      ;; lsp-ui-doc-use-childframe nil
+      company-box-doc-enable nil)
+
+;; (setq doom-modeline-persp-name t)
+
+(map! ("C-c C-SPC"
+       :desc "Switch perspective" #'+workspace/cycle))
+
+
+;; ;; Debugging with python
+;; (map! :leader
+;;       (:prefix "m"
+;;        :desc "Debug with dap-mode hydra" "d" #'dap-hydra))
+;; (after! dap-mode
+;;   (setq dap-python-debugger 'debugpy))
 #+end_src
 
 When using a device with a battery, it would be nice to display battery
@@ -1458,6 +1479,28 @@ navigation/swapping commands.
       "C-<up>"         #'+evil/window-move-up
       "C-<right>"      #'+evil/window-move-right)
 #+end_src
+
+CUSTOM:
+Hydra for changing split window size.
+
+#+begin_src emacs-lisp
+(defhydra doom-window-resize-hydra (:hint nil)
+  "
+             _k_ increase height
+_h_ decrease width    _l_ increase width
+             _j_ decrease height
+"
+  ("h" evil-window-decrease-width)
+  ("j" evil-window-increase-height)
+  ("k" evil-window-decrease-height)
+  ("l" evil-window-increase-width)
+  ("q" nil))
+
+(map!
+    (:prefix "w"
+      :desc "Hydra resize" :n "SPC" #'doom-window-resize-hydra/body))
+#+end_src
+
 
 *** Buffer defaults
 
@@ -1571,7 +1614,7 @@ doom-quit                    ; DOOM quit-message prompts when you quit Emacs
 ;; (emoji +unicode)          ; 🙂
 ;;fill-column                ; a `fill-column' indicator
 hl-todo                      ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
-;;hydra                      ; quick documentation for related commands
+hydra                      ; quick documentation for related commands
 ;;indent-guides              ; highlighted indent columns, notoriously slow
 (ligatures +extra)           ; ligatures and symbols to make your code pretty again
 ;;minimap                    ; show a map of the code on the side
@@ -1584,7 +1627,7 @@ ophints                      ; highlight the region an operation acts on
  +defaults)                  ; default popup rules
 ;;(tabs                      ; an tab bar for Emacs
 ;;  +centaur-tabs)           ; ... with prettier tabs
-treemacs                     ; a project drawer, like neotree but cooler
+(treemacs +lsp)                     ; a project drawer, like neotree but cooler
 ;;unicode                    ; extended unicode support for various languages
 (vc-gutter +pretty)          ; vcs diff in the fringe
 vi-tilde-fringe              ; fringe tildes to mark beyond EOB
@@ -1598,7 +1641,7 @@ zen                          ; distraction-free coding or writing
 (evil +everywhere)           ; come to the dark side, we have cookies
 file-templates               ; auto-snippets for empty files
 fold                         ; (nigh) universal code folding
-(format)                     ; automated prettiness
+(format +onsave)                     ; automated prettiness
 ;;god                        ; run Emacs commands without modifier keys
 ;;lispy                      ; vim for lisp, for people who don't like vim
 multiple-cursors             ; editing in many places at once
@@ -1628,8 +1671,11 @@ vterm                        ; the best terminal emulation in Emacs
 
 #+name: doom-checkers
 #+begin_src emacs-lisp
-syntax                       ; tasing you for every semicolon you forget
-(:if (executable-find "aspell") spell) ; tasing you for misspelling mispelling
+(syntax +childframe)         ; tasing you for every semicolon you forget
+(spell
+ +flyspell
+ +hunspell
+ +everywhere)
 grammar                      ; tasing grammar mistake every you make
 #+end_src
 
@@ -1637,8 +1683,8 @@ grammar                      ; tasing grammar mistake every you make
 #+begin_src emacs-lisp
 ansible                      ; a crucible for infrastructure as code
 biblio                       ; Writes a PhD for you (citation needed)
-;;debugger                   ; FIXME stepping through code, to help you add bugs
-;;direnv                     ; be direct about your environment
+(debugger +lsp)                   ; FIXME stepping through code, to help you add bugs
+direnv                     ; be direct about your environment
 docker                       ; port everything to containers
 ;;editorconfig               ; let someone else argue about tabs vs spaces
 ;;ein                        ; tame Jupyter notebooks with emacs
@@ -1731,7 +1777,7 @@ nix                          ; I hereby declare "nix geht mehr!"
 ;;php                        ; perl's insecure younger brother
 ;;plantuml                   ; diagrams for confusing people more
 ;;purescript                 ; javascript, but functional
-(python +lsp +pyright)       ; beautiful is better than ugly
+;; (python +lsp +pyright)       ; beautiful is better than ugly
 ;;qt                         ; the 'cutest' gui framework ever
 ;;racket                     ; a DSL for DSLs
 ;;raku                       ; the artist formerly known as perl6
@@ -1778,7 +1824,7 @@ I couldn't resist the Email and Feed modules.
 ;;calendar                   ; A dated approach to timetabling
 ;;emms                       ; Multimedia in Emacs is music to my ears
 everywhere                   ; *leave* Emacs!? You must be joking.
-irc                          ; how neckbeards socialize
+;; irc                          ; how neckbeards socialize
 (rss +org)                   ; emacs as an RSS reader
 ;;twitter                    ; twitter client https://twitter.com/vnought
 #+end_src
@@ -3348,6 +3394,19 @@ Now let's just have this included when an ErgoDox is found via =dmesg=.
 <<avy-detect-colemak()>>
 #+end_src
 
+*** Ace-window
+
+#+call: confpkg("!Pkg ace-window")
+
+#+begin_quote
+From the =:config default= module.
+#+end_quote
+
+#+begin_src emacs-lisp
+(after! ace-window
+  (setq aw-keys '(?n ?e ?i ?o)))
+#+end_src
+
 *** Rotate (window management)
 
 The =rotate= package just adds the ability to rotate window layouts, but that
@@ -3376,7 +3435,7 @@ Doom module.
 (use-package! emacs-everywhere
   :if (daemonp)
   :config
-  (require 'spell-fu)
+  ;;(require 'spell-fu)
   (setq emacs-everywhere-major-mode-function #'org-mode
         emacs-everywhere-frame-name-format "Edit ∷ %s — %s")
   (defadvice! emacs-everywhere-raise-frame ()
@@ -3421,6 +3480,19 @@ let's change that, and do a few other similar tweaks while we're at it.
 [[https://tecosaur.com/lfs/emacs-config/screenshots/whichkey-evil.png]]
 
 ** Tools
+*** Dired
+
+#+call: confpkg("Dired")
+
+#+begin_src emacs-lisp
+;;(defun dired-toggle-hide-files ()
+;;  (interactive)
+(use-package! dired
+  :config
+  (setq dired-omit-files "^\\.[^.]|^\\...+$|\\`[.]?#\\|\\`[.][.]?\\'\\|^\\.DS_Store\\'\\|^\\.project\\(?:ile\\)?\\'\\|^\\.\\(?:svn\\|git\\)\\'\\|^\\.ccls-cache\\'\\|\\(?:\\.js\\)?\\.meta\\'\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'")
+  )
+#+end_src
+
 *** Abbrev
 
 #+call: confpkg("Multi-mode abbrev")
@@ -3883,6 +3955,19 @@ let's improve that memory.
 #+end_src
 We then configure the dictionary we're using in [[*Ispell][Ispell]].
 
+CUSTOM:
+#+begin_src emacs-lisp
+(setq company-ispell-available t)
+
+(defun company-ispell-german ()
+  (interactive)
+  (setq-local company-ispell-dictionary (file-truename "~/.config/doom/misc/german_top10000_clean.txt")))
+
+(defun company-ispell-english ()
+  (interactive)
+  (setq-local company-ispell-dictionary nil))
+#+end_src
+
 **** ESS
 
 ~company-dabbrev-code~ is nice. Let's have it.
@@ -3902,6 +3987,7 @@ Looking at documentation via =SPC h f= and =SPC h v= and looking at the source c
 add package src directories to projectile. This isn't desirable in my opinion.
 
 #+begin_src emacs-lisp
+(setq projectile-project-search-path '("~/code/"))
 (setq projectile-ignored-projects
       (list "~/" "/tmp" (expand-file-name "straight/repos" doom-local-dir)))
 (defun projectile-ignored-project-function (filepath)
@@ -3910,45 +3996,47 @@ add package src directories to projectile. This isn't desirable in my opinion.
 #+end_src
 
 *** Ispell
-**** Downloading dictionaries
+# **** Downloading dictionaries
 
-Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
-the following configuration
-- size :: 80 (huge)
-- spellings :: British(-ise) and Australian
-- spelling variants level :: 0
-- diacritics :: keep
-- extra lists :: hacker, roman numerals
+# Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
+# the following configuration
+# - size :: 80 (huge)
+# - spellings :: British(-ise) and Australian
+# - spelling variants level :: 0
+# - diacritics :: keep
+# - extra lists :: hacker, roman numerals
 
-***** Hunspell
+# ***** Hunspell
 
-#+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
-cd /tmp
-curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
-unzip "hunspell-en-custom.zip"
+# #+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
+# cd /tmp
+# curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
+# unzip "hunspell-en-custom.zip"
 
-sudo chown root:root en-custom.*
-sudo mv en-custom.{aff,dic} /usr/share/myspell/
-#+end_src
+# sudo chown root:root en-custom.*
+# sudo mv en-custom.{aff,dic} /usr/share/myspell/
+# #+end_src
 
-***** Aspell
+# ***** Aspell
 
-#+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
-cd /tmp
-curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
-tar -xjf "aspell6-en-custom.tar.bz2"
+# #+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
+# cd /tmp
+# curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
+# tar -xjf "aspell6-en-custom.tar.bz2"
 
-cd aspell6-en-custom
-./configure && make && sudo make install
-#+end_src
+# cd aspell6-en-custom
+# ./configure && make && sudo make install
+# #+end_src
+
+For now arch packages of hunspell (de, en_us) are required.
 
 **** Configuration
 
 #+call: confpkg("!Pkg Ispell")
 
-#+begin_src emacs-lisp
-(setq ispell-dictionary "en-custom")
-#+end_src
+# #+begin_src emacs-lisp
+# (setq ispell-dictionary "en-custom")
+# #+end_src
 
 Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
 ~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
@@ -3959,9 +4047,28 @@ It seems reasonable to want to keep an eye on my personal dict, let's have it
 nearby (also means that if I change the 'main' dictionary I keep my addition).
 
 #+begin_src emacs-lisp
-(setq ispell-personal-dictionary
+(after! ispell
+    ;; Configure `LANG`, otherwise ispell.el cannot find a 'default
+    ;; dictionary' even though multiple dictionaries will be configured
+    ;; in next line.
+    (setenv "LANG" "en_US.UTF-8")
+    (setq ispell-program-name "hunspell")
+    ;; Configure German, Swiss German, and two variants of English.
+    (setq ispell-dictionary "de_DE,en_US")
+    ;; ispell-set-spellchecker-params has to be called
+    ;; before ispell-hunspell-add-multi-dic will work
+    (ispell-set-spellchecker-params)
+    (ispell-hunspell-add-multi-dic "de_DE,en_US")
+    ;; For saving words to the personal dictionary, don't infer it from
+    ;; the locale, otherwise it would save to ~/.hunspell_de_DE.
+    (setq ispell-personal-dictionary
       (expand-file-name "misc/ispell_personal" doom-private-dir))
+    ;; The personal dictionary file has to exist, otherwise hunspell will
+    ;; silently not use it.
+    (unless (file-exists-p ispell-personal-dictionary)
+      (write-region "" nil ispell-personal-dictionary nil 0)))
 #+end_src
+
 
 *** TRAMP
 
@@ -4297,160 +4404,160 @@ hide it?
 (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
 #+end_src
 
-**** Time
+# **** Time
 
-Moving onto the modeline segments, there's a calendar icon showed next to the
-current time, which I'm not a fan of. Let's replace that by redefining the
-segment. Instead of the calendar, it would be much nicer to have an updating
-analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
+# Moving onto the modeline segments, there's a calendar icon showed next to the
+# current time, which I'm not a fan of. Let's replace that by redefining the
+# segment. Instead of the calendar, it would be much nicer to have an updating
+# analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
 
-First, we'll need a way to produce svg clocks on-demand.
+# First, we'll need a way to produce svg clocks on-demand.
 
-#+begin_src emacs-lisp
-(defvar micro-clock-hour-hand-ratio 0.45
-  "Length of the hour hand as a proportion of the radius.")
-(defvar micro-clock-minute-hand-ratio 0.7
-  "Length of the minute hand as a proportion of the radius.")
+# #+begin_src emacs-lisp
+# (defvar micro-clock-hour-hand-ratio 0.45
+#   "Length of the hour hand as a proportion of the radius.")
+# (defvar micro-clock-minute-hand-ratio 0.7
+#   "Length of the minute hand as a proportion of the radius.")
 
-(defun micro-clock-svg (hour minute radius color)
-  "Construct an SVG clock showing the time HOUR:MINUTE.
-The clock will be of the specified RADIUS and COLOR."
-  (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-                   micro-clock-hour-hand-ratio))
-        (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-                   micro-clock-hour-hand-ratio))
-        (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
-                     micro-clock-minute-hand-ratio))
-        (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
-                     micro-clock-minute-hand-ratio))
-        (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
-    (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
-    (svg-circle svg radius radius 1 :fill color :stroke "none")
-    (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
-              :stroke-width 2)
-    (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
-              :stroke-width 1.5)
-    svg))
-#+end_src
+# (defun micro-clock-svg (hour minute radius color)
+#   "Construct an SVG clock showing the time HOUR:MINUTE.
+# The clock will be of the specified RADIUS and COLOR."
+#   (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+#                    micro-clock-hour-hand-ratio))
+#         (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+#                    micro-clock-hour-hand-ratio))
+#         (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
+#                      micro-clock-minute-hand-ratio))
+#         (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
+#                      micro-clock-minute-hand-ratio))
+#         (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
+#     (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
+#     (svg-circle svg radius radius 1 :fill color :stroke "none")
+#     (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
+#               :stroke-width 2)
+#     (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
+#               :stroke-width 1.5)
+#     svg))
+# #+end_src
 
-With that out the way, we need to figure out how to integrate this into the
-modeline. For the most part this was fairly easy, the tricky part was getting
-the alignment right. I tried using the =(raise FACTOR)= display property, but that
-doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
-descriptors]] though, I came across the =:ascent= property, which looked rather
-promising. By setting =:ascent center= the image is centred relative to the text,
-which is exactly what we need. With that sorted, we just add some caching and
-the obvious customisations and we've got modeline-appropriate clock generation!
+# With that out the way, we need to figure out how to integrate this into the
+# modeline. For the most part this was fairly easy, the tricky part was getting
+# the alignment right. I tried using the =(raise FACTOR)= display property, but that
+# doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
+# descriptors]] though, I came across the =:ascent= property, which looked rather
+# promising. By setting =:ascent center= the image is centred relative to the text,
+# which is exactly what we need. With that sorted, we just add some caching and
+# the obvious customisations and we've got modeline-appropriate clock generation!
 
-#+begin_src emacs-lisp
-(require 'svg)
+# #+begin_src emacs-lisp
+# (require 'svg)
 
-(defvar +doom-modeline-micro-clock-minute-resolution 1
-  "The clock will be updated every this many minutes, truncating.")
-(defvar +doom-modeline-micro-clock-inverse-size 4.8
-  "The size of the clock, as an inverse proportion to the mode line height.")
+# (defvar +doom-modeline-micro-clock-minute-resolution 1
+#   "The clock will be updated every this many minutes, truncating.")
+# (defvar +doom-modeline-micro-clock-inverse-size 4.8
+#   "The size of the clock, as an inverse proportion to the mode line height.")
 
-(defvar +doom-modeline-micro-clock--cache nil)
+# (defvar +doom-modeline-micro-clock--cache nil)
 
-(defvar +doom-modeline-clock-text-format "%c")
+# (defvar +doom-modeline-clock-text-format "%c")
 
-(defun +doom-modeline--clock-text (&optional _window _object _pos)
-  (format-time-string +doom-modeline-clock-text-format))
+# (defun +doom-modeline--clock-text (&optional _window _object _pos)
+#   (format-time-string +doom-modeline-clock-text-format))
 
-(defun +doom-modeline-micro-clock ()
-  "Return a string containing an current analogue clock."
-  (cdr
-   (if (equal (truncate (float-time)
-                        (* +doom-modeline-micro-clock-minute-resolution 60))
-              (car +doom-modeline-micro-clock--cache))
-       +doom-modeline-micro-clock--cache
-     (setq +doom-modeline-micro-clock--cache
-           (cons (truncate (float-time)
-                           (* +doom-modeline-micro-clock-minute-resolution 60))
-                 (with-temp-buffer
-                   (svg-insert-image
-                    (micro-clock-svg
-                     (string-to-number (format-time-string "%-I")) ; hour
-                     (* (truncate (string-to-number (format-time-string "%-M"))
-                                  +doom-modeline-micro-clock-minute-resolution)
-                        +doom-modeline-micro-clock-minute-resolution) ; minute
-                     (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
-                     "currentColor"))
-                   (propertize
-                    " "
-                    'display
-                    (append (get-text-property 0 'display (buffer-string))
-                            '(:ascent center))
-                    'face 'doom-modeline-time
-                    'help-echo #'+doom-modeline--clock-text)))))))
-#+end_src
+# (defun +doom-modeline-micro-clock ()
+#   "Return a string containing an current analogue clock."
+#   (cdr
+#    (if (equal (truncate (float-time)
+#                         (* +doom-modeline-micro-clock-minute-resolution 60))
+#               (car +doom-modeline-micro-clock--cache))
+#        +doom-modeline-micro-clock--cache
+#      (setq +doom-modeline-micro-clock--cache
+#            (cons (truncate (float-time)
+#                            (* +doom-modeline-micro-clock-minute-resolution 60))
+#                  (with-temp-buffer
+#                    (svg-insert-image
+#                     (micro-clock-svg
+#                      (string-to-number (format-time-string "%-I")) ; hour
+#                      (* (truncate (string-to-number (format-time-string "%-M"))
+#                                   +doom-modeline-micro-clock-minute-resolution)
+#                         +doom-modeline-micro-clock-minute-resolution) ; minute
+#                      (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
+#                      "currentColor"))
+#                    (propertize
+#                     " "
+#                     'display
+#                     (append (get-text-property 0 'display (buffer-string))
+#                             '(:ascent center))
+#                     'face 'doom-modeline-time
+#                     'help-echo #'+doom-modeline--clock-text)))))))
+# #+end_src
 
-With clock generation sorted out, all that's to be done is replacing the =time=
-modeline segment with our design.
+# With clock generation sorted out, all that's to be done is replacing the =time=
+# modeline segment with our design.
 
-#+begin_src emacs-lisp
-(doom-modeline-def-segment time
-  (when (and doom-modeline-time
-             (bound-and-true-p display-time-mode)
-             (not doom-modeline--limited-width-p))
-    (concat
-     doom-modeline-spc
-     (when doom-modeline-time-icon
-       (concat
-        (+doom-modeline-micro-clock)
-        (and (or doom-modeline-icon doom-modeline-unicode-fallback)
-             doom-modeline-spc)))
-     (propertize display-time-string
-                 'face (doom-modeline-face 'doom-modeline-time)))))
-#+end_src
+# #+begin_src emacs-lisp
+# (doom-modeline-def-segment time
+#   (when (and doom-modeline-time
+#              (bound-and-true-p display-time-mode)
+#              (not doom-modeline--limited-width-p))
+#     (concat
+#      doom-modeline-spc
+#      (when doom-modeline-time-icon
+#        (concat
+#         (+doom-modeline-micro-clock)
+#         (and (or doom-modeline-icon doom-modeline-unicode-fallback)
+#              doom-modeline-spc)))
+#      (propertize display-time-string
+#                  'face (doom-modeline-face 'doom-modeline-time)))))
+# #+end_src
 
-**** PDF modeline
+# **** PDF modeline
 
-I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
-however the response was basically "put your preferences in your personal
-config, the current default is sensible" --- so here we are.
+# I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
+# however the response was basically "put your preferences in your personal
+# config, the current default is sensible" --- so here we are.
 
-First up I'm going to want a segment for just the buffer file name, and a PDF
-icon. Then we'll redefine two functions used to generate the modeline.
+# First up I'm going to want a segment for just the buffer file name, and a PDF
+# icon. Then we'll redefine two functions used to generate the modeline.
 
-#+begin_src emacs-lisp
-(doom-modeline-def-segment buffer-name
-  "Display the current buffer's name, without any other information."
-  (concat
-   doom-modeline-spc
-   (doom-modeline--buffer-name)))
+# #+begin_src emacs-lisp
+# (doom-modeline-def-segment buffer-name
+#   "Display the current buffer's name, without any other information."
+#   (concat
+#    doom-modeline-spc
+#    (doom-modeline--buffer-name)))
 
-(doom-modeline-def-segment pdf-icon
-  "PDF icon from nerd-icons."
-  (concat
-   doom-modeline-spc
-   (doom-modeline-icon sucicon "nf-seti-pdf" nil nil
-                       :face (if (doom-modeline--active)
-                                 'nerd-icons-red
-                               'mode-line-inactive)
-                       :v-adjust 0.02)))
+# (doom-modeline-def-segment pdf-icon
+#   "PDF icon from nerd-icons."
+#   (concat
+#    doom-modeline-spc
+#    (doom-modeline-icon sucicon "nf-seti-pdf" nil nil
+#                        :face (if (doom-modeline--active)
+#                                  'nerd-icons-red
+#                                'mode-line-inactive)
+#                        :v-adjust 0.02)))
 
-(defun doom-modeline-update-pdf-pages ()
-  "Update PDF pages."
-  (setq doom-modeline--pdf-pages
-        (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
-              (total-page-str (number-to-string (pdf-cache-number-of-pages))))
-          (concat
-           (propertize
-            (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
-                    " P" current-page-str)
-            'face 'mode-line)
-           (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
+# (defun doom-modeline-update-pdf-pages ()
+#   "Update PDF pages."
+#   (setq doom-modeline--pdf-pages
+#         (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
+#               (total-page-str (number-to-string (pdf-cache-number-of-pages))))
+#           (concat
+#            (propertize
+#             (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
+#                     " P" current-page-str)
+#             'face 'mode-line)
+#            (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
 
-(doom-modeline-def-segment pdf-pages
-  "Display PDF pages."
-  (if (doom-modeline--active) doom-modeline--pdf-pages
-    (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
+# (doom-modeline-def-segment pdf-pages
+#   "Display PDF pages."
+#   (if (doom-modeline--active) doom-modeline--pdf-pages
+#     (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
 
-(doom-modeline-def-modeline 'pdf
-  '(bar window-number pdf-pages pdf-icon buffer-name)
-  '(misc-info matches major-mode process vcs))
-#+end_src
+# (doom-modeline-def-modeline 'pdf
+#   '(bar window-number pdf-pages pdf-icon buffer-name)
+#   '(misc-info matches major-mode process vcs))
+# #+end_src
 
 *** Keycast
 
@@ -5313,7 +5420,7 @@ something through Emacs?
 (use-package! calibredb
   :commands calibredb
   :config
-  (setq calibredb-root-dir "~/Desktop/TEC/Other/Ebooks"
+  (setq calibredb-root-dir "~/books"
         calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
   (map! :map calibredb-show-mode-map
         :ne "?" #'calibredb-entry-dispatch
@@ -5587,528 +5694,528 @@ panel.
       (select-window main-window))))
 #+end_src
 
-** IRC
+# ** IRC
 
-#+call: confpkg()
+# #+call: confpkg()
 
-=circe= is a client for IRC in Emacs (hey, isn't that a nice project
-name+acronym), and a greek enchantress who turned humans into animals.
+# =circe= is a client for IRC in Emacs (hey, isn't that a nice project
+# name+acronym), and a greek enchantress who turned humans into animals.
 
-Let's use the former to chat to +recluses+ discerning individuals online.
+# Let's use the former to chat to +recluses+ discerning individuals online.
 
-[[xkcd:1782]]
+# [[xkcd:1782]]
 
-Before we start seeing and sending messages, we need to authenticate with our
-IRC servers. The circe manual provided a snippet for putting some of the auth
-details in =.authinfo.gpg= --- but I think we should go further than that: have
-the entire server info in our authinfo.
+# Before we start seeing and sending messages, we need to authenticate with our
+# IRC servers. The circe manual provided a snippet for putting some of the auth
+# details in =.authinfo.gpg= --- but I think we should go further than that: have
+# the entire server info in our authinfo.
 
-First, a reasonable format by which we can specify:
-+ server
-+ port
-+ SASL username
-+ SASL password
-+ channels to join
+# First, a reasonable format by which we can specify:
+# + server
+# + port
+# + SASL username
+# + SASL password
+# + channels to join
 
-We can have these stored like so
-#+begin_src authinfo
-machine chat.freenode.net login USERNAME password PASSWORD port PORT for irc channels emacs,org-mode
-#+end_src
+# We can have these stored like so
+# #+begin_src authinfo
+# machine chat.freenode.net login USERNAME password PASSWORD port PORT for irc channels emacs,org-mode
+# #+end_src
 
-The ~for irc~ bit is used so we can uniquely identify all IRC auth info. By
-omitting the =#= in channel names we can have a list of channels comma-separated
-(no space!) which the secrets API will return as a single string.
+# The ~for irc~ bit is used so we can uniquely identify all IRC auth info. By
+# omitting the =#= in channel names we can have a list of channels comma-separated
+# (no space!) which the secrets API will return as a single string.
 
-#+name: irc-authinfo-reader
-#+begin_src emacs-lisp :tangle no
-(defun auth-server-pass (server)
-  (if-let ((secret (plist-get (car (auth-source-search :host server)) :secret)))
-      (if (functionp secret)
-          (funcall secret) secret)
-    (error "Could not fetch password for host %s" server)))
+# #+name: irc-authinfo-reader
+# #+begin_src emacs-lisp :tangle no
+# (defun auth-server-pass (server)
+#   (if-let ((secret (plist-get (car (auth-source-search :host server)) :secret)))
+#       (if (functionp secret)
+#           (funcall secret) secret)
+#     (error "Could not fetch password for host %s" server)))
 
-(defun register-irc-auths ()
-  (require 'circe)
-  (require 'dash)
-  (let ((accounts (-filter (lambda (a) (string= "irc" (plist-get a :for)))
-                           (auth-source-search :require '(:for) :max 10))))
-    (appendq! circe-network-options
-              (mapcar (lambda (entry)
-                        (let* ((host (plist-get entry :host))
-                               (label (or (plist-get entry :label) host))
-                               (_ports (mapcar #'string-to-number
-                                               (s-split "," (plist-get entry :port))))
-                               (port (if (= 1 (length _ports)) (car _ports) _ports))
-                               (user (plist-get entry :user))
-                               (nick (or (plist-get entry :nick) user))
-                               (channels (mapcar (lambda (c) (concat "#" c))
-                                                 (s-split "," (plist-get entry :channels)))))
-                          `(,label
-                            :host ,host :port ,port :nick ,nick
-                            :sasl-username ,user :sasl-password auth-server-pass
-                            :channels ,channels)))
-                      accounts))))
-#+end_src
+# (defun register-irc-auths ()
+#   (require 'circe)
+#   (require 'dash)
+#   (let ((accounts (-filter (lambda (a) (string= "irc" (plist-get a :for)))
+#                            (auth-source-search :require '(:for) :max 10))))
+#     (appendq! circe-network-options
+#               (mapcar (lambda (entry)
+#                         (let* ((host (plist-get entry :host))
+#                                (label (or (plist-get entry :label) host))
+#                                (_ports (mapcar #'string-to-number
+#                                                (s-split "," (plist-get entry :port))))
+#                                (port (if (= 1 (length _ports)) (car _ports) _ports))
+#                                (user (plist-get entry :user))
+#                                (nick (or (plist-get entry :nick) user))
+#                                (channels (mapcar (lambda (c) (concat "#" c))
+#                                                  (s-split "," (plist-get entry :channels)))))
+#                           `(,label
+#                             :host ,host :port ,port :nick ,nick
+#                             :sasl-username ,user :sasl-password auth-server-pass
+#                             :channels ,channels)))
+#                       accounts))))
+# #+end_src
 
-We'll just call src_elisp{(register-irc-auths)} on a hook when we start Circe
-up.
+# We'll just call src_elisp{(register-irc-auths)} on a hook when we start Circe
+# up.
 
-Now we're ready to go, let's actually wire-up Circe, with one or two
-configuration tweaks.
-#+begin_src emacs-lisp :noweb no-export
-(after! circe
-  (setq-default circe-use-tls t)
-  (setq circe-notifications-alert-icon "/usr/share/icons/breeze/actions/24/network-connect.svg"
-        lui-logging-directory (expand-file-name "irc" doom-etc-dir)
-        lui-logging-file-format "{buffer}/%Y/%m-%d.txt"
-        circe-format-self-say "{nick:+13s} ┃ {body}")
+# Now we're ready to go, let's actually wire-up Circe, with one or two
+# configuration tweaks.
+# #+begin_src emacs-lisp :noweb no-export
+# (after! circe
+#   (setq-default circe-use-tls t)
+#   (setq circe-notifications-alert-icon "/usr/share/icons/breeze/actions/24/network-connect.svg"
+#         lui-logging-directory (expand-file-name "irc" doom-etc-dir)
+#         lui-logging-file-format "{buffer}/%Y/%m-%d.txt"
+#         circe-format-self-say "{nick:+13s} ┃ {body}")
 
-  (custom-set-faces!
-    '(circe-my-message-face :weight unspecified))
+#   (custom-set-faces!
+#     '(circe-my-message-face :weight unspecified))
 
-  (enable-lui-logging-globally)
-  (enable-circe-display-images)
+#   (enable-lui-logging-globally)
+#   (enable-circe-display-images)
 
-  <<org-emph-to-irc>>
+#   <<org-emph-to-irc>>
 
-  <<circe-emojis>>
-  <<circe-emoji-alists>>
+#   <<circe-emojis>>
+#   <<circe-emoji-alists>>
 
-  (defun named-circe-prompt ()
-    (lui-set-prompt
-     (concat (propertize (format "%13s > " (circe-nick))
-                         'face 'circe-prompt-face)
-             "")))
-  (add-hook 'circe-chat-mode-hook #'named-circe-prompt)
+#   (defun named-circe-prompt ()
+#     (lui-set-prompt
+#      (concat (propertize (format "%13s > " (circe-nick))
+#                          'face 'circe-prompt-face)
+#              "")))
+#   (add-hook 'circe-chat-mode-hook #'named-circe-prompt)
 
-  (appendq! nerd-icons-mode-icon-alist
-            '((circe-channel-mode nerd-icons-mdicon "nf-md-message" :face nerd-icons-lblue)
-              (circe-server-mode nerd-icons-mdicon "nf-md-chat_outline" :face nerd-icons-purple))))
+#   (appendq! nerd-icons-mode-icon-alist
+#             '((circe-channel-mode nerd-icons-mdicon "nf-md-message" :face nerd-icons-lblue)
+#               (circe-server-mode nerd-icons-mdicon "nf-md-chat_outline" :face nerd-icons-purple))))
 
-<<irc-authinfo-reader>>
+# <<irc-authinfo-reader>>
 
-(add-transient-hook! #'=irc (register-irc-auths))
-#+end_src
+# (add-transient-hook! #'=irc (register-irc-auths))
+# #+end_src
 
-*** Org-style emphasis
+# *** Org-style emphasis
 
-Let's do our *bold*, /italic/, and _underline_ in org-syntax, using IRC control characters.
-#+name: org-emph-to-irc
-#+begin_src emacs-lisp
-(defun lui-org-to-irc ()
-  "Examine a buffer with simple org-mode formatting, and converts the empasis:
-,*bold*, /italic/, and _underline_ to IRC semi-standard escape codes.
-=code= is converted to inverse (highlighted) text."
-  (goto-char (point-min))
-  (while (re-search-forward "\\_<\\(?1:[*/_=]\\)\\(?2:[^[:space:]]\\(?:.*?[^[:space:]]\\)?\\)\\1\\_>" nil t)
-    (replace-match
-     (concat (pcase (match-string 1)
-               ("*" "")
-               ("/" "")
-               ("_" "")
-               ("=" ""))
-             (match-string 2)
-             "") nil nil)))
+# Let's do our *bold*, /italic/, and _underline_ in org-syntax, using IRC control characters.
+# #+name: org-emph-to-irc
+# #+begin_src emacs-lisp
+# (defun lui-org-to-irc ()
+#   "Examine a buffer with simple org-mode formatting, and converts the empasis:
+# ,*bold*, /italic/, and _underline_ to IRC semi-standard escape codes.
+# =code= is converted to inverse (highlighted) text."
+#   (goto-char (point-min))
+#   (while (re-search-forward "\\_<\\(?1:[*/_=]\\)\\(?2:[^[:space:]]\\(?:.*?[^[:space:]]\\)?\\)\\1\\_>" nil t)
+#     (replace-match
+#      (concat (pcase (match-string 1)
+#                ("*" "")
+#                ("/" "")
+#                ("_" "")
+#                ("=" ""))
+#              (match-string 2)
+#              "") nil nil)))
 
-(add-hook 'lui-pre-input-hook #'lui-org-to-irc)
-#+end_src
+# (add-hook 'lui-pre-input-hook #'lui-org-to-irc)
+# #+end_src
 
-*** Emojis
+# *** Emojis
 
-Let's setup Circe to use some emojis
-#+name: circe-emojis
-#+begin_src emacs-lisp :tangle no
-(defun lui-ascii-to-emoji ()
-  (goto-char (point-min))
-  (while (re-search-forward "\\( \\)?::?\\([^[:space:]:]+\\):\\( \\)?" nil t)
-    (replace-match
-     (concat
-      (match-string 1)
-      (or (cdr (assoc (match-string 2) lui-emojis-alist))
-          (concat ":" (match-string 2) ":"))
-      (match-string 3))
-     nil nil)))
+# Let's setup Circe to use some emojis
+# #+name: circe-emojis
+# #+begin_src emacs-lisp :tangle no
+# (defun lui-ascii-to-emoji ()
+#   (goto-char (point-min))
+#   (while (re-search-forward "\\( \\)?::?\\([^[:space:]:]+\\):\\( \\)?" nil t)
+#     (replace-match
+#      (concat
+#       (match-string 1)
+#       (or (cdr (assoc (match-string 2) lui-emojis-alist))
+#           (concat ":" (match-string 2) ":"))
+#       (match-string 3))
+#      nil nil)))
 
-(defun lui-emoticon-to-emoji ()
-  (dolist (emoticon lui-emoticons-alist)
-    (goto-char (point-min))
-    (while (re-search-forward (concat " " (car emoticon) "\\( \\)?") nil t)
-      (replace-match (concat " "
-                             (cdr (assoc (cdr emoticon) lui-emojis-alist))
-                             (match-string 1))))))
+# (defun lui-emoticon-to-emoji ()
+#   (dolist (emoticon lui-emoticons-alist)
+#     (goto-char (point-min))
+#     (while (re-search-forward (concat " " (car emoticon) "\\( \\)?") nil t)
+#       (replace-match (concat " "
+#                              (cdr (assoc (cdr emoticon) lui-emojis-alist))
+#                              (match-string 1))))))
 
-(define-minor-mode lui-emojify
-  "Replace :emojis: and ;) emoticons with unicode emoji chars."
-  :global t
-  :init-value t
-  (if lui-emojify
-      (add-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)
-    (remove-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)))
-#+end_src
+# (define-minor-mode lui-emojify
+#   "Replace :emojis: and ;) emoticons with unicode emoji chars."
+#   :global t
+#   :init-value t
+#   (if lui-emojify
+#       (add-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)
+#     (remove-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)))
+# #+end_src
 
-Now, some actual emojis to use.
-#+name: circe-emoji-alists
-#+begin_src emacs-lisp :tangle no
-(defvar lui-emojis-alist
-  '(("grinning"                      . "😀")
-    ("smiley"                        . "😃")
-    ("smile"                         . "😄")
-    ("grin"                          . "😁")
-    ("laughing"                      . "😆")
-    ("sweat_smile"                   . "😅")
-    ("joy"                           . "😂")
-    ("rofl"                          . "🤣")
-    ("relaxed"                       . "☺️")
-    ("blush"                         . "😊")
-    ("innocent"                      . "😇")
-    ("slight_smile"                  . "🙂")
-    ("upside_down"                   . "🙃")
-    ("wink"                          . "😉")
-    ("relieved"                      . "😌")
-    ("heart_eyes"                    . "😍")
-    ("yum"                           . "😋")
-    ("stuck_out_tongue"              . "😛")
-    ("stuck_out_tongue_closed_eyes"  . "😝")
-    ("stuck_out_tongue_wink"         . "😜")
-    ("zanzy"                         . "🤪")
-    ("raised_eyebrow"                . "🤨")
-    ("monocle"                       . "🧐")
-    ("nerd"                          . "🤓")
-    ("cool"                          . "😎")
-    ("star_struck"                   . "🤩")
-    ("party"                         . "🥳")
-    ("smirk"                         . "😏")
-    ("unamused"                      . "😒")
-    ("disapointed"                   . "😞")
-    ("pensive"                       . "😔")
-    ("worried"                       . "😟")
-    ("confused"                      . "😕")
-    ("slight_frown"                  . "🙁")
-    ("frown"                         . "☹️")
-    ("persevere"                     . "😣")
-    ("confounded"                    . "😖")
-    ("tired"                         . "😫")
-    ("weary"                         . "😩")
-    ("pleading"                      . "🥺")
-    ("tear"                          . "😢")
-    ("cry"                           . "😢")
-    ("sob"                           . "😭")
-    ("triumph"                       . "😤")
-    ("angry"                         . "😠")
-    ("rage"                          . "😡")
-    ("exploding_head"                . "🤯")
-    ("flushed"                       . "😳")
-    ("hot"                           . "🥵")
-    ("cold"                          . "🥶")
-    ("scream"                        . "😱")
-    ("fearful"                       . "😨")
-    ("disapointed"                   . "😰")
-    ("relieved"                      . "😥")
-    ("sweat"                         . "😓")
-    ("thinking"                      . "🤔")
-    ("shush"                         . "🤫")
-    ("liar"                          . "🤥")
-    ("blank_face"                    . "😶")
-    ("neutral"                       . "😐")
-    ("expressionless"                . "😑")
-    ("grimace"                       . "😬")
-    ("rolling_eyes"                  . "🙄")
-    ("hushed"                        . "😯")
-    ("frowning"                      . "😦")
-    ("anguished"                     . "😧")
-    ("wow"                           . "😮")
-    ("astonished"                    . "😲")
-    ("sleeping"                      . "😴")
-    ("drooling"                      . "🤤")
-    ("sleepy"                        . "😪")
-    ("dizzy"                         . "😵")
-    ("zipper_mouth"                  . "🤐")
-    ("woozy"                         . "🥴")
-    ("sick"                          . "🤢")
-    ("vomiting"                      . "🤮")
-    ("sneeze"                        . "🤧")
-    ("mask"                          . "😷")
-    ("bandaged_head"                 . "🤕")
-    ("money_face"                    . "🤑")
-    ("cowboy"                        . "🤠")
-    ("imp"                           . "😈")
-    ("ghost"                         . "👻")
-    ("alien"                         . "👽")
-    ("robot"                         . "🤖")
-    ("clap"                          . "👏")
-    ("thumpup"                       . "👍")
-    ("+1"                            . "👍")
-    ("thumbdown"                     . "👎")
-    ("-1"                            . "👎")
-    ("ok"                            . "👌")
-    ("pinch"                         . "🤏")
-    ("left"                          . "👈")
-    ("right"                         . "👉")
-    ("down"                          . "👇")
-    ("wave"                          . "👋")
-    ("pray"                          . "🙏")
-    ("eyes"                          . "👀")
-    ("brain"                         . "🧠")
-    ("facepalm"                      . "🤦")
-    ("tada"                          . "🎉")
-    ("fire"                          . "🔥")
-    ("flying_money"                  . "💸")
-    ("lighbulb"                      . "💡")
-    ("heart"                         . "❤️")
-    ("sparkling_heart"               . "💖")
-    ("heartbreak"                    . "💔")
-    ("100"                           . "💯")))
+# Now, some actual emojis to use.
+# #+name: circe-emoji-alists
+# #+begin_src emacs-lisp :tangle no
+# (defvar lui-emojis-alist
+#   '(("grinning"                      . "😀")
+#     ("smiley"                        . "😃")
+#     ("smile"                         . "😄")
+#     ("grin"                          . "😁")
+#     ("laughing"                      . "😆")
+#     ("sweat_smile"                   . "😅")
+#     ("joy"                           . "😂")
+#     ("rofl"                          . "🤣")
+#     ("relaxed"                       . "☺️")
+#     ("blush"                         . "😊")
+#     ("innocent"                      . "😇")
+#     ("slight_smile"                  . "🙂")
+#     ("upside_down"                   . "🙃")
+#     ("wink"                          . "😉")
+#     ("relieved"                      . "😌")
+#     ("heart_eyes"                    . "😍")
+#     ("yum"                           . "😋")
+#     ("stuck_out_tongue"              . "😛")
+#     ("stuck_out_tongue_closed_eyes"  . "😝")
+#     ("stuck_out_tongue_wink"         . "😜")
+#     ("zanzy"                         . "🤪")
+#     ("raised_eyebrow"                . "🤨")
+#     ("monocle"                       . "🧐")
+#     ("nerd"                          . "🤓")
+#     ("cool"                          . "😎")
+#     ("star_struck"                   . "🤩")
+#     ("party"                         . "🥳")
+#     ("smirk"                         . "😏")
+#     ("unamused"                      . "😒")
+#     ("disapointed"                   . "😞")
+#     ("pensive"                       . "😔")
+#     ("worried"                       . "😟")
+#     ("confused"                      . "😕")
+#     ("slight_frown"                  . "🙁")
+#     ("frown"                         . "☹️")
+#     ("persevere"                     . "😣")
+#     ("confounded"                    . "😖")
+#     ("tired"                         . "😫")
+#     ("weary"                         . "😩")
+#     ("pleading"                      . "🥺")
+#     ("tear"                          . "😢")
+#     ("cry"                           . "😢")
+#     ("sob"                           . "😭")
+#     ("triumph"                       . "😤")
+#     ("angry"                         . "😠")
+#     ("rage"                          . "😡")
+#     ("exploding_head"                . "🤯")
+#     ("flushed"                       . "😳")
+#     ("hot"                           . "🥵")
+#     ("cold"                          . "🥶")
+#     ("scream"                        . "😱")
+#     ("fearful"                       . "😨")
+#     ("disapointed"                   . "😰")
+#     ("relieved"                      . "😥")
+#     ("sweat"                         . "😓")
+#     ("thinking"                      . "🤔")
+#     ("shush"                         . "🤫")
+#     ("liar"                          . "🤥")
+#     ("blank_face"                    . "😶")
+#     ("neutral"                       . "😐")
+#     ("expressionless"                . "😑")
+#     ("grimace"                       . "😬")
+#     ("rolling_eyes"                  . "🙄")
+#     ("hushed"                        . "😯")
+#     ("frowning"                      . "😦")
+#     ("anguished"                     . "😧")
+#     ("wow"                           . "😮")
+#     ("astonished"                    . "😲")
+#     ("sleeping"                      . "😴")
+#     ("drooling"                      . "🤤")
+#     ("sleepy"                        . "😪")
+#     ("dizzy"                         . "😵")
+#     ("zipper_mouth"                  . "🤐")
+#     ("woozy"                         . "🥴")
+#     ("sick"                          . "🤢")
+#     ("vomiting"                      . "🤮")
+#     ("sneeze"                        . "🤧")
+#     ("mask"                          . "😷")
+#     ("bandaged_head"                 . "🤕")
+#     ("money_face"                    . "🤑")
+#     ("cowboy"                        . "🤠")
+#     ("imp"                           . "😈")
+#     ("ghost"                         . "👻")
+#     ("alien"                         . "👽")
+#     ("robot"                         . "🤖")
+#     ("clap"                          . "👏")
+#     ("thumpup"                       . "👍")
+#     ("+1"                            . "👍")
+#     ("thumbdown"                     . "👎")
+#     ("-1"                            . "👎")
+#     ("ok"                            . "👌")
+#     ("pinch"                         . "🤏")
+#     ("left"                          . "👈")
+#     ("right"                         . "👉")
+#     ("down"                          . "👇")
+#     ("wave"                          . "👋")
+#     ("pray"                          . "🙏")
+#     ("eyes"                          . "👀")
+#     ("brain"                         . "🧠")
+#     ("facepalm"                      . "🤦")
+#     ("tada"                          . "🎉")
+#     ("fire"                          . "🔥")
+#     ("flying_money"                  . "💸")
+#     ("lighbulb"                      . "💡")
+#     ("heart"                         . "❤️")
+#     ("sparkling_heart"               . "💖")
+#     ("heartbreak"                    . "💔")
+#     ("100"                           . "💯")))
 
-(defvar lui-emoticons-alist
-  '((":)"   . "slight_smile")
-    (";)"   . "wink")
-    (":D"   . "smile")
-    ("=D"   . "grin")
-    ("xD"   . "laughing")
-    (";("   . "joy")
-    (":P"   . "stuck_out_tongue")
-    (";D"   . "stuck_out_tongue_wink")
-    ("xP"   . "stuck_out_tongue_closed_eyes")
-    (":("   . "slight_frown")
-    (";("   . "cry")
-    (";'("  . "sob")
-    (">:("  . "angry")
-    (">>:(" . "rage")
-    (":o"   . "wow")
-    (":O"   . "astonished")
-    (":/"   . "confused")
-    (":-/"  . "thinking")
-    (":|"   . "neutral")
-    (":-|"  . "expressionless")))
-#+end_src
+# (defvar lui-emoticons-alist
+#   '((":)"   . "slight_smile")
+#     (";)"   . "wink")
+#     (":D"   . "smile")
+#     ("=D"   . "grin")
+#     ("xD"   . "laughing")
+#     (";("   . "joy")
+#     (":P"   . "stuck_out_tongue")
+#     (";D"   . "stuck_out_tongue_wink")
+#     ("xP"   . "stuck_out_tongue_closed_eyes")
+#     (":("   . "slight_frown")
+#     (";("   . "cry")
+#     (";'("  . "sob")
+#     (">:("  . "angry")
+#     (">>:(" . "rage")
+#     (":o"   . "wow")
+#     (":O"   . "astonished")
+#     (":/"   . "confused")
+#     (":-/"  . "thinking")
+#     (":|"   . "neutral")
+#     (":-|"  . "expressionless")))
+# #+end_src
 
-** Newsfeed
+# ** Newsfeed
 
-#+call: confpkg()
+# #+call: confpkg()
 
-RSS feeds are still a thing. Why not make use of them with =elfeed=.
-I really like what [[https://github.com/fuxialexander/doom-emacs-private-xfu/tree/master/modules/app/rss][fuxialexander]] has going on, but I don't think I need a custom
-module. Let's just try to patch on the main things I like the look of.
+# RSS feeds are still a thing. Why not make use of them with =elfeed=.
+# I really like what [[https://github.com/fuxialexander/doom-emacs-private-xfu/tree/master/modules/app/rss][fuxialexander]] has going on, but I don't think I need a custom
+# module. Let's just try to patch on the main things I like the look of.
 
-#+attr_html: :class invertible :alt Example elfeed entry
-[[https://tecosaur.com/lfs/emacs-config/screenshots/elfeed.png]]
+# #+attr_html: :class invertible :alt Example elfeed entry
+# [[https://tecosaur.com/lfs/emacs-config/screenshots/elfeed.png]]
 
-*** Keybindings
+# *** Keybindings
 
-#+begin_src emacs-lisp
-(map! :map elfeed-search-mode-map
-      :after elfeed-search
-      [remap kill-this-buffer] "q"
-      [remap kill-buffer] "q"
-      :n doom-leader-key nil
-      :n "q" #'+rss/quit
-      :n "e" #'elfeed-update
-      :n "r" #'elfeed-search-untag-all-unread
-      :n "u" #'elfeed-search-tag-all-unread
-      :n "s" #'elfeed-search-live-filter
-      :n "RET" #'elfeed-search-show-entry
-      :n "p" #'elfeed-show-pdf
-      :n "+" #'elfeed-search-tag-all
-      :n "-" #'elfeed-search-untag-all
-      :n "S" #'elfeed-search-set-filter
-      :n "b" #'elfeed-search-browse-url
-      :n "y" #'elfeed-search-yank)
-(map! :map elfeed-show-mode-map
-      :after elfeed-show
-      [remap kill-this-buffer] "q"
-      [remap kill-buffer] "q"
-      :n doom-leader-key nil
-      :nm "q" #'+rss/delete-pane
-      :nm "o" #'ace-link-elfeed
-      :nm "RET" #'org-ref-elfeed-add
-      :nm "n" #'elfeed-show-next
-      :nm "N" #'elfeed-show-prev
-      :nm "p" #'elfeed-show-pdf
-      :nm "+" #'elfeed-show-tag
-      :nm "-" #'elfeed-show-untag
-      :nm "s" #'elfeed-show-new-live-search
-      :nm "y" #'elfeed-show-yank)
-#+end_src
+# #+begin_src emacs-lisp
+# (map! :map elfeed-search-mode-map
+#       :after elfeed-search
+#       [remap kill-this-buffer] "q"
+#       [remap kill-buffer] "q"
+#       :n doom-leader-key nil
+#       :n "q" #'+rss/quit
+#       :n "e" #'elfeed-update
+#       :n "r" #'elfeed-search-untag-all-unread
+#       :n "u" #'elfeed-search-tag-all-unread
+#       :n "s" #'elfeed-search-live-filter
+#       :n "RET" #'elfeed-search-show-entry
+#       :n "p" #'elfeed-show-pdf
+#       :n "+" #'elfeed-search-tag-all
+#       :n "-" #'elfeed-search-untag-all
+#       :n "S" #'elfeed-search-set-filter
+#       :n "b" #'elfeed-search-browse-url
+#       :n "y" #'elfeed-search-yank)
+# (map! :map elfeed-show-mode-map
+#       :after elfeed-show
+#       [remap kill-this-buffer] "q"
+#       [remap kill-buffer] "q"
+#       :n doom-leader-key nil
+#       :nm "q" #'+rss/delete-pane
+#       :nm "o" #'ace-link-elfeed
+#       :nm "RET" #'org-ref-elfeed-add
+#       :nm "n" #'elfeed-show-next
+#       :nm "N" #'elfeed-show-prev
+#       :nm "p" #'elfeed-show-pdf
+#       :nm "+" #'elfeed-show-tag
+#       :nm "-" #'elfeed-show-untag
+#       :nm "s" #'elfeed-show-new-live-search
+#       :nm "y" #'elfeed-show-yank)
+# #+end_src
 
-*** Usability enhancements
+# *** Usability enhancements
 
-#+begin_src emacs-lisp
-(after! elfeed-search
-  (set-evil-initial-state! 'elfeed-search-mode 'normal))
-(after! elfeed-show-mode
-  (set-evil-initial-state! 'elfeed-show-mode   'normal))
+# #+begin_src emacs-lisp
+# (after! elfeed-search
+#   (set-evil-initial-state! 'elfeed-search-mode 'normal))
+# (after! elfeed-show-mode
+#   (set-evil-initial-state! 'elfeed-show-mode   'normal))
 
-(after! evil-snipe
-  (push 'elfeed-show-mode   evil-snipe-disabled-modes)
-  (push 'elfeed-search-mode evil-snipe-disabled-modes))
-#+end_src
+# (after! evil-snipe
+#   (push 'elfeed-show-mode   evil-snipe-disabled-modes)
+#   (push 'elfeed-search-mode evil-snipe-disabled-modes))
+# #+end_src
 
-*** Visual enhancements
+# *** Visual enhancements
 
-#+begin_src emacs-lisp
-(after! elfeed
+# #+begin_src emacs-lisp
+# (after! elfeed
 
-  (elfeed-org)
-  (use-package! elfeed-link)
+#   (elfeed-org)
+#   (use-package! elfeed-link)
 
-  (setq elfeed-search-filter "@1-week-ago +unread"
-        elfeed-search-print-entry-function '+rss/elfeed-search-print-entry
-        elfeed-search-title-min-width 80
-        elfeed-show-entry-switch #'pop-to-buffer
-        elfeed-show-entry-delete #'+rss/delete-pane
-        elfeed-show-refresh-function #'+rss/elfeed-show-refresh--better-style
-        shr-max-image-proportion 0.6)
+#   (setq elfeed-search-filter "@1-week-ago +unread"
+#         elfeed-search-print-entry-function '+rss/elfeed-search-print-entry
+#         elfeed-search-title-min-width 80
+#         elfeed-show-entry-switch #'pop-to-buffer
+#         elfeed-show-entry-delete #'+rss/delete-pane
+#         elfeed-show-refresh-function #'+rss/elfeed-show-refresh--better-style
+#         shr-max-image-proportion 0.6)
 
-  (add-hook! 'elfeed-show-mode-hook (hide-mode-line-mode 1))
-  (add-hook! 'elfeed-search-update-hook #'hide-mode-line-mode)
+#   (add-hook! 'elfeed-show-mode-hook (hide-mode-line-mode 1))
+#   (add-hook! 'elfeed-search-update-hook #'hide-mode-line-mode)
 
-  (defface elfeed-show-title-face '((t (:weight ultrabold :slant italic :height 1.5)))
-    "title face in elfeed show buffer"
-    :group 'elfeed)
-  (defface elfeed-show-author-face `((t (:weight light)))
-    "title face in elfeed show buffer"
-    :group 'elfeed)
-  (set-face-attribute 'elfeed-search-title-face nil
-                      :foreground 'nil
-                      :weight 'light)
+#   (defface elfeed-show-title-face '((t (:weight ultrabold :slant italic :height 1.5)))
+#     "title face in elfeed show buffer"
+#     :group 'elfeed)
+#   (defface elfeed-show-author-face `((t (:weight light)))
+#     "title face in elfeed show buffer"
+#     :group 'elfeed)
+#   (set-face-attribute 'elfeed-search-title-face nil
+#                       :foreground 'nil
+#                       :weight 'light)
 
-  (defadvice! +rss-elfeed-wrap-h-nicer ()
-    "Enhances an elfeed entry's readability by wrapping it to a width of
-`fill-column' and centering it with `visual-fill-column-mode'."
-    :override #'+rss-elfeed-wrap-h
-    (setq-local truncate-lines nil
-                shr-width 120
-                visual-fill-column-center-text t
-                default-text-properties '(line-height 1.1))
-    (let ((inhibit-read-only t)
-          (inhibit-modification-hooks t))
-      (visual-fill-column-mode)
-      ;; (setq-local shr-current-font '(:family "Merriweather" :height 1.2))
-      (set-buffer-modified-p nil)))
+#   (defadvice! +rss-elfeed-wrap-h-nicer ()
+#     "Enhances an elfeed entry's readability by wrapping it to a width of
+# `fill-column' and centering it with `visual-fill-column-mode'."
+#     :override #'+rss-elfeed-wrap-h
+#     (setq-local truncate-lines nil
+#                 shr-width 120
+#                 visual-fill-column-center-text t
+#                 default-text-properties '(line-height 1.1))
+#     (let ((inhibit-read-only t)
+#           (inhibit-modification-hooks t))
+#       (visual-fill-column-mode)
+#       ;; (setq-local shr-current-font '(:family "Merriweather" :height 1.2))
+#       (set-buffer-modified-p nil)))
 
-  (defun +rss/elfeed-search-print-entry (entry)
-    "Print ENTRY to the buffer."
-    (let* ((elfeed-goodies/tag-column-width 40)
-           (elfeed-goodies/feed-source-column-width 30)
-           (title (or (elfeed-meta entry :title) (elfeed-entry-title entry) ""))
-           (title-faces (elfeed-search--faces (elfeed-entry-tags entry)))
-           (feed (elfeed-entry-feed entry))
-           (feed-title
-            (when feed
-              (or (elfeed-meta feed :title) (elfeed-feed-title feed))))
-           (tags (mapcar #'symbol-name (elfeed-entry-tags entry)))
-           (tags-str (concat (mapconcat 'identity tags ",")))
-           (title-width (- (window-width) elfeed-goodies/feed-source-column-width
-                           elfeed-goodies/tag-column-width 4))
+#   (defun +rss/elfeed-search-print-entry (entry)
+#     "Print ENTRY to the buffer."
+#     (let* ((elfeed-goodies/tag-column-width 40)
+#            (elfeed-goodies/feed-source-column-width 30)
+#            (title (or (elfeed-meta entry :title) (elfeed-entry-title entry) ""))
+#            (title-faces (elfeed-search--faces (elfeed-entry-tags entry)))
+#            (feed (elfeed-entry-feed entry))
+#            (feed-title
+#             (when feed
+#               (or (elfeed-meta feed :title) (elfeed-feed-title feed))))
+#            (tags (mapcar #'symbol-name (elfeed-entry-tags entry)))
+#            (tags-str (concat (mapconcat 'identity tags ",")))
+#            (title-width (- (window-width) elfeed-goodies/feed-source-column-width
+#                            elfeed-goodies/tag-column-width 4))
 
-           (tag-column (elfeed-format-column
-                        tags-str (elfeed-clamp (length tags-str)
-                                               elfeed-goodies/tag-column-width
-                                               elfeed-goodies/tag-column-width)
-                        :left))
-           (feed-column (elfeed-format-column
-                         feed-title (elfeed-clamp elfeed-goodies/feed-source-column-width
-                                                  elfeed-goodies/feed-source-column-width
-                                                  elfeed-goodies/feed-source-column-width)
-                         :left)))
+#            (tag-column (elfeed-format-column
+#                         tags-str (elfeed-clamp (length tags-str)
+#                                                elfeed-goodies/tag-column-width
+#                                                elfeed-goodies/tag-column-width)
+#                         :left))
+#            (feed-column (elfeed-format-column
+#                          feed-title (elfeed-clamp elfeed-goodies/feed-source-column-width
+#                                                   elfeed-goodies/feed-source-column-width
+#                                                   elfeed-goodies/feed-source-column-width)
+#                          :left)))
 
-      (insert (propertize feed-column 'face 'elfeed-search-feed-face) " ")
-      (insert (propertize tag-column 'face 'elfeed-search-tag-face) " ")
-      (insert (propertize title 'face title-faces 'kbd-help title))
-      (setq-local line-spacing 0.2)))
+#       (insert (propertize feed-column 'face 'elfeed-search-feed-face) " ")
+#       (insert (propertize tag-column 'face 'elfeed-search-tag-face) " ")
+#       (insert (propertize title 'face title-faces 'kbd-help title))
+#       (setq-local line-spacing 0.2)))
 
-  (defun +rss/elfeed-show-refresh--better-style ()
-    "Update the buffer to match the selected entry, using a mail-style."
-    (interactive)
-    (let* ((inhibit-read-only t)
-           (title (elfeed-entry-title elfeed-show-entry))
-           (date (seconds-to-time (elfeed-entry-date elfeed-show-entry)))
-           (author (elfeed-meta elfeed-show-entry :author))
-           (link (elfeed-entry-link elfeed-show-entry))
-           (tags (elfeed-entry-tags elfeed-show-entry))
-           (tagsstr (mapconcat #'symbol-name tags ", "))
-           (nicedate (format-time-string "%a, %e %b %Y %T %Z" date))
-           (content (elfeed-deref (elfeed-entry-content elfeed-show-entry)))
-           (type (elfeed-entry-content-type elfeed-show-entry))
-           (feed (elfeed-entry-feed elfeed-show-entry))
-           (feed-title (elfeed-feed-title feed))
-           (base (and feed (elfeed-compute-base (elfeed-feed-url feed)))))
-      (erase-buffer)
-      (insert "\n")
-      (insert (format "%s\n\n" (propertize title 'face 'elfeed-show-title-face)))
-      (insert (format "%s\t" (propertize feed-title 'face 'elfeed-search-feed-face)))
-      (when (and author elfeed-show-entry-author)
-        (insert (format "%s\n" (propertize author 'face 'elfeed-show-author-face))))
-      (insert (format "%s\n\n" (propertize nicedate 'face 'elfeed-log-date-face)))
-      (when tags
-        (insert (format "%s\n"
-                        (propertize tagsstr 'face 'elfeed-search-tag-face))))
-      ;; (insert (propertize "Link: " 'face 'message-header-name))
-      ;; (elfeed-insert-link link link)
-      ;; (insert "\n")
-      (cl-loop for enclosure in (elfeed-entry-enclosures elfeed-show-entry)
-               do (insert (propertize "Enclosure: " 'face 'message-header-name))
-               do (elfeed-insert-link (car enclosure))
-               do (insert "\n"))
-      (insert "\n")
-      (if content
-          (if (eq type 'html)
-              (elfeed-insert-html content base)
-            (insert content))
-        (insert (propertize "(empty)\n" 'face 'italic)))
-      (goto-char (point-min))))
+#   (defun +rss/elfeed-show-refresh--better-style ()
+#     "Update the buffer to match the selected entry, using a mail-style."
+#     (interactive)
+#     (let* ((inhibit-read-only t)
+#            (title (elfeed-entry-title elfeed-show-entry))
+#            (date (seconds-to-time (elfeed-entry-date elfeed-show-entry)))
+#            (author (elfeed-meta elfeed-show-entry :author))
+#            (link (elfeed-entry-link elfeed-show-entry))
+#            (tags (elfeed-entry-tags elfeed-show-entry))
+#            (tagsstr (mapconcat #'symbol-name tags ", "))
+#            (nicedate (format-time-string "%a, %e %b %Y %T %Z" date))
+#            (content (elfeed-deref (elfeed-entry-content elfeed-show-entry)))
+#            (type (elfeed-entry-content-type elfeed-show-entry))
+#            (feed (elfeed-entry-feed elfeed-show-entry))
+#            (feed-title (elfeed-feed-title feed))
+#            (base (and feed (elfeed-compute-base (elfeed-feed-url feed)))))
+#       (erase-buffer)
+#       (insert "\n")
+#       (insert (format "%s\n\n" (propertize title 'face 'elfeed-show-title-face)))
+#       (insert (format "%s\t" (propertize feed-title 'face 'elfeed-search-feed-face)))
+#       (when (and author elfeed-show-entry-author)
+#         (insert (format "%s\n" (propertize author 'face 'elfeed-show-author-face))))
+#       (insert (format "%s\n\n" (propertize nicedate 'face 'elfeed-log-date-face)))
+#       (when tags
+#         (insert (format "%s\n"
+#                         (propertize tagsstr 'face 'elfeed-search-tag-face))))
+#       ;; (insert (propertize "Link: " 'face 'message-header-name))
+#       ;; (elfeed-insert-link link link)
+#       ;; (insert "\n")
+#       (cl-loop for enclosure in (elfeed-entry-enclosures elfeed-show-entry)
+#                do (insert (propertize "Enclosure: " 'face 'message-header-name))
+#                do (elfeed-insert-link (car enclosure))
+#                do (insert "\n"))
+#       (insert "\n")
+#       (if content
+#           (if (eq type 'html)
+#               (elfeed-insert-html content base)
+#             (insert content))
+#         (insert (propertize "(empty)\n" 'face 'italic)))
+#       (goto-char (point-min))))
 
-  )
-#+end_src
+#   )
+# #+end_src
 
-*** Functionality enhancements
+# *** Functionality enhancements
 
-#+begin_src emacs-lisp
-(after! elfeed-show
-  (require 'url)
+# #+begin_src emacs-lisp
+# (after! elfeed-show
+#   (require 'url)
 
-  (defvar elfeed-pdf-dir
-    (expand-file-name "pdfs/"
-                      (file-name-directory (directory-file-name elfeed-enclosure-default-dir))))
+#   (defvar elfeed-pdf-dir
+#     (expand-file-name "pdfs/"
+#                       (file-name-directory (directory-file-name elfeed-enclosure-default-dir))))
 
-  (defvar elfeed-link-pdfs
-    '(("https://www.jstatsoft.org/index.php/jss/article/view/v0\\([^/]+\\)" . "https://www.jstatsoft.org/index.php/jss/article/view/v0\\1/v\\1.pdf")
-      ("http://arxiv.org/abs/\\([^/]+\\)" . "https://arxiv.org/pdf/\\1.pdf"))
-    "List of alists of the form (REGEX-FOR-LINK . FORM-FOR-PDF)")
+#   (defvar elfeed-link-pdfs
+#     '(("https://www.jstatsoft.org/index.php/jss/article/view/v0\\([^/]+\\)" . "https://www.jstatsoft.org/index.php/jss/article/view/v0\\1/v\\1.pdf")
+#       ("http://arxiv.org/abs/\\([^/]+\\)" . "https://arxiv.org/pdf/\\1.pdf"))
+#     "List of alists of the form (REGEX-FOR-LINK . FORM-FOR-PDF)")
 
-  (defun elfeed-show-pdf (entry)
-    (interactive
-     (list (or elfeed-show-entry (elfeed-search-selected :ignore-region))))
-    (let ((link (elfeed-entry-link entry))
-          (feed-name (plist-get (elfeed-feed-meta (elfeed-entry-feed entry)) :title))
-          (title (elfeed-entry-title entry))
-          (file-view-function
-           (lambda (f)
-             (when elfeed-show-entry
-               (elfeed-kill-buffer))
-             (pop-to-buffer (find-file-noselect f))))
-          pdf)
+#   (defun elfeed-show-pdf (entry)
+#     (interactive
+#      (list (or elfeed-show-entry (elfeed-search-selected :ignore-region))))
+#     (let ((link (elfeed-entry-link entry))
+#           (feed-name (plist-get (elfeed-feed-meta (elfeed-entry-feed entry)) :title))
+#           (title (elfeed-entry-title entry))
+#           (file-view-function
+#            (lambda (f)
+#              (when elfeed-show-entry
+#                (elfeed-kill-buffer))
+#              (pop-to-buffer (find-file-noselect f))))
+#           pdf)
 
-      (let ((file (expand-file-name
-                   (concat (subst-char-in-string ?/ ?, title) ".pdf")
-                   (expand-file-name (subst-char-in-string ?/ ?, feed-name)
-                                     elfeed-pdf-dir))))
-        (if (file-exists-p file)
-            (funcall file-view-function file)
-          (dolist (link-pdf elfeed-link-pdfs)
-            (when (and (string-match-p (car link-pdf) link)
-                       (not pdf))
-              (setq pdf (replace-regexp-in-string (car link-pdf) (cdr link-pdf) link))))
-          (if (not pdf)
-              (message "No associated PDF for entry")
-            (message "Fetching %s" pdf)
-            (unless (file-exists-p (file-name-directory file))
-              (make-directory (file-name-directory file) t))
-            (url-copy-file pdf file)
-            (funcall file-view-function file))))))
+#       (let ((file (expand-file-name
+#                    (concat (subst-char-in-string ?/ ?, title) ".pdf")
+#                    (expand-file-name (subst-char-in-string ?/ ?, feed-name)
+#                                      elfeed-pdf-dir))))
+#         (if (file-exists-p file)
+#             (funcall file-view-function file)
+#           (dolist (link-pdf elfeed-link-pdfs)
+#             (when (and (string-match-p (car link-pdf) link)
+#                        (not pdf))
+#               (setq pdf (replace-regexp-in-string (car link-pdf) (cdr link-pdf) link))))
+#           (if (not pdf)
+#               (message "No associated PDF for entry")
+#             (message "Fetching %s" pdf)
+#             (unless (file-exists-p (file-name-directory file))
+#               (make-directory (file-name-directory file) t))
+#             (url-copy-file pdf file)
+#             (funcall file-view-function file))))))
 
-  )
-#+end_src
+#   )
+# #+end_src
 
 ** Dictionary
 
@@ -6295,6 +6402,19 @@ Prevents a series of redisplays from being called (when set to an appropriate va
       (when new-request
         (run-at-time (* 1.1 mu4e-reindex-request-min-seperation) nil
                      #'mu4e-reindex-maybe)))))
+
+(setq
+  mu4e-sent-folder   "/Sent"       ;; folder for sent messages
+  mu4e-drafts-folder "/Drafts"     ;; unfinished messages
+  mu4e-trash-folder  "/Trash"      ;; trashed messages
+  mu4e-refile-folder "/Archive")   ;; saved messages
+
+(setq mu4e-maildir-shortcuts
+  '( (:maildir "/INBOX"     :key  ?i)
+     (:maildir "/Sent"      :key  ?s)
+     (:maildir "/Drafts"     :key  ?d)
+     (:maildir "/Trash"      :key  ?t)
+     (:maildir "/Archive"   :key  ?a)))
 #+end_src
 
 **** Config transcoding & service management
@@ -7010,7 +7130,7 @@ We also want to define ~mu4e-compose-from-mailto~.
 
 It would also be nice to change the name pre-filled in =From:= when drafting.
 #+begin_src emacs-lisp
-(defvar mu4e-from-name "Timothy"
+(defvar mu4e-from-name "Josua"
   "Name used in \"From:\" template.")
 (defadvice! mu4e~draft-from-construct-renamed (orig-fn)
   "Wrap `mu4e~draft-from-construct-renamed' to change the name."
@@ -7044,7 +7164,7 @@ I've got a few extra addresses I'd like ~+mu4e-set-from-address-h~ to be aware o
                         (lambda (alias)
                           (replace-regexp-in-string
                            "\\`\\(.*\\)@" alias primary-address t t 1))
-                        '("contact" "timothy")))))))
+                        '("contact" "josua")))))))
 
 (add-transient-hook! 'mu4e-compose-pre-hook
   (+mu4e-update-personal-addresses))
@@ -7060,9 +7180,9 @@ account-specific sent directory, not the catch-all.
                 (save-restriction
                   (mail-narrow-to-head)
                   (mail-fetch-field "from")))))
-    (if (and from (string-match-p "@tecosaur\\.net>?\\'" from))
-        "/tecosaur-net/Sent"
-      "/sent")))
+    (if (and from (string-match-p "@posteo\\.de>?\\'" from))
+        "/posteo-de/Sent"
+      "/Sent")))
 (setq mu4e-sent-folder #'+mu4e-account-sent-folder)
 #+end_src
 
@@ -7337,8 +7457,8 @@ Now let's set up that signature.
 #+begin_src emacs-lisp
 (defvar +mu4e-org-ml-signature
   (cons
-   "All the best,
-Timothy
+   "Viele Grüße,
+Josua
 
 -- \
 Timothy (‘tecosaur’/‘TEC’), Org mode contributor.
@@ -7346,8 +7466,8 @@ Learn more about Org mode at <https://orgmode.org/>.
 Support Org development at <https://liberapay.com/org-mode>,
 or support my work at <https://liberapay.com/tec>.
 "
-   "All the best,\\\\
-@@html:<b>@@Timothy@@html:</b>@@
+   "Viele Grüße,\\\\
+@@html:<b>@@Josua@@html:</b>@@
 
 -\u200b- \\\\
 Timothy (‘tecosaur’/‘TEC’), Org mode contributor.\\\\
@@ -7370,8 +7490,8 @@ Doom does a fantastic stuff with the defaults with this, so we only make a few
 minor tweaks. First, some stylistic things:
 
 #+begin_src emacs-lisp
-(setq org-msg-greeting-fmt "\nHi%s,\n\n"
-      org-msg-signature "\n\n#+begin_signature\nAll the best,\\\\\n@@html:<b>@@Timothy@@html:</b>@@\n#+end_signature")
+(setq org-msg-greeting-fmt "\nHallo%s,\n\n"
+      org-msg-signature "\n\n#+begin_signature\nViele Grüße,\\\\\n@@html:<b>@@Josua@@html:</b>@@\n#+end_signature")
 #+end_src
 
 We also want to set the accent colour used in the Doom =mu4e= module's
@@ -7774,10 +7894,10 @@ and Minad's lovely =org-modern= goes a long way in this regard.
 Since =org-modern='s tag face supplants Org's tag face, we need to adjust the
 spell-check face ignore list
 
-#+begin_src emacs-lisp
-(after! spell-fu
-  (cl-pushnew 'org-modern-tag (alist-get 'org-mode +spell-excluded-faces-alist)))
-#+end_src
+# #+begin_src emacs-lisp
+# (after! spell-fu
+#   (cl-pushnew 'org-modern-tag (alist-get 'org-mode +spell-excluded-faces-alist)))
+# #+end_src
 
 ***** Emphasis markers
 
@@ -8028,8 +8148,9 @@ It's nice to be able to link to music
 **** Tweaking defaults
 
 #+begin_src emacs-lisp
-(setq org-directory (expand-file-name "org" (xdg-data-home)) ; Let's put files here.
-      org-agenda-files (list org-directory)                  ; Seems like the obvious place.
+(setq org-directory "~/org" ; Let's put files here.
+      ;;org-agenda-files (list org-directory)                  ; Seems like the obvious place.
+      org-agenda-files (list "~/org/gtd")                  ; Seems like the obvious place.
       org-use-property-inheritance t                         ; It's convenient to have properties inherited.
       org-log-done 'time                                     ; Having the time a item is done sounds convenient.
       org-list-allow-alphabetical t                          ; Have a. A. a) A) list bullets.
@@ -8180,6 +8301,9 @@ packages already loaded. For starters, we can make use of the my Zotero files
 with =citar=, and make the symbols a bit prettier.
 
 #+begin_src emacs-lisp
+(map! :leader
+      (:prefix "n"
+       :desc "File from bibliographic note" "B" #'citar-open-files))
 (after! citar
   (setq org-cite-global-bibliography
         (let ((libfile-search-names '("library.json" "Library.json" "library.bib" "Library.bib"))
@@ -8279,7 +8403,7 @@ Now, by default, LSPs don't really function at all in ~src~ blocks.
 (cl-defmacro lsp-org-babel-enable (lang)
   "Support LANG in org source code block."
   (setq centaur-lsp 'lsp-mode)
-  (cl-check-type lang stringp)
+  (cl-check-type lang string)
   (let* ((edit-pre (intern (format "org-babel-edit-prep:%s" lang)))
          (intern-pre (intern (format "lsp--%s" (symbol-name edit-pre)))))
     `(progn
@@ -8367,64 +8491,193 @@ The agenda is nice, but a souped up version is nicer.
       org-agenda-compact-blocks t)
 
 (setq org-agenda-custom-commands
-      '(("o" "Overview"
-         ((agenda "" ((org-agenda-span 'day)
+      '(("f" "Daily agenda and top priority tasks"
+         ((agenda "" ((org-agenda-overriding-header "testestest")))))
+        ("g" "Scheduled today and all NEXT items...."
+         ((agenda "" ((org-agenda-span 'week)
+                      (org-agenda-start-day nil)))
+          (todo "NEXT" ((org-agenda-overriding-header "NEXT items")))
+          (todo "WAIT" ((org-agenda-todo-ignore-with-date t)
+                        (org-agenda-overriding-header "Blocked items")))
+          (search "* " ((org-agenda-overriding-header "Inbox")
+                        (org-agenda-files '("~/org/gtd/inbox.org"))))))
+        ("n" "NEXT items"
+         (
+          ;; (agenda "" ((org-agenda-span 'day)
+          ;;             (org-super-agenda-groups
+          ;;              '((:name "Today"
+          ;;                 :time-grid t
+          ;;                 :date today
+          ;;                 :todo "TODAY"
+          ;;                 :scheduled today
+          ;;                 :order 1)))
+          ;;             ))
+          (agenda "" (
+                      ;;(org-agenda-overriding-header "Next three days")
+                      (org-agenda-start-day nil)
+                      (org-agenda-span 2)
                       (org-super-agenda-groups
-                       '((:name "Today"
+                       '(
+                         ;; (:name "Next 3 days"
+                         ;;  :time-grid t
+                         ;;  :order 1)
+                         (:name ""
                           :time-grid t
                           :date today
                           :todo "TODAY"
                           :scheduled today
-                          :order 1)))))
-          (alltodo "" ((org-agenda-overriding-header "")
+                          :order 1)
+                         (:name "Habits"
+                          :habit t
+                          :order 2)
+                         (:name "overdue"
+                          :deadline past
+                          :face error
+                          :order 3)
+                         (:name ""
+                          :scheduled past
+                          :order 4)
+                         (:name "due soon"
+                          :deadline future
+                          :order 5)
+                         (:name "Tomorrow"
+                          :date tomorrow
+                          :scheduled tomorrow
+                          :order 6)))
+                      ))
+          ;; (agenda "" (
+          ;;             (org-agenda-start-day nil)
+          ;;             (org-agenda-span 1)))
+          (alltodo "" ((org-agenda-overriding-header "TODO-Items")
                        (org-super-agenda-groups
-                        '((:name "Next to do"
-                           :todo "NEXT"
-                           :order 1)
-                          (:name "Important"
-                           :tag "Important"
+                        '(
+                          ;; (:name "overdue"
+                          ;;  :deadline past
+                          ;;  :face error
+                          ;;  :order 1)
+                          ;; (:name "due today"
+                          ;;  :deadline today
+                          ;;  :order 2)
+                          ;; (:name "due soon"
+                          ;;  :deadline future
+                          ;;  :order 3)
+                          (:name "important"
                            :priority "A"
-                           :order 6)
-                          (:name "Due Today"
-                           :deadline today
-                           :order 2)
-                          (:name "Due Soon"
-                           :deadline future
-                           :order 8)
-                          (:name "Overdue"
-                           :deadline past
-                           :face error
+                           :order 4)
+                          (:name "chores"
+                           :tag "chore"
+                           :todo "NEXT"
                            :order 7)
-                          (:name "Assignments"
-                           :tag "Assignment"
+                          (:name "organize"
+                           :tag "orga"
+                           :todo "NEXT"
+                           :order 8)
+                          (:name "call/write"
+                           :todo "NEXT"
+                           :tag "call"
+                           :tag "write"
+                           :order 9)
+                          (:name "sell/buy"
+                           :todo "NEXT"
+                           :tag "sell"
+                           :tag "buy"
                            :order 10)
-                          (:name "Issues"
-                           :tag "Issue"
-                           :order 12)
-                          (:name "Emacs"
-                           :tag "Emacs"
+                          (:name "next to do"
+                           :todo "NEXT"
+                           :order 11)
+                          (:name "emacs"
+                           :tag "emacs"
                            :order 13)
-                          (:name "Projects"
-                           :tag "Project"
+                          (:name "projects"
+                           :tag "project"
                            :order 14)
-                          (:name "Research"
-                           :tag "Research"
+                          (:name "research"
+                           :tag "research"
                            :order 15)
-                          (:name "To read"
-                           :tag "Read"
+                          (:name "to read/watch"
+                           :tag "read"
+                           :tag "watch"
                            :order 30)
-                          (:name "Waiting"
-                           :todo "WAITING"
+                          (:name "waiting"
+                           :todo "waiting"
                            :order 20)
-                          (:name "University"
+                          (:name "university"
                            :tag "uni"
                            :order 32)
-                          (:name "Trivial"
-                           :priority<= "E"
-                           :tag ("Trivial" "Unimportant")
-                           :todo ("SOMEDAY" )
+                          (:name "trivial"
+                           :priority<= "e"
+                           :tag ("trivial" "unimportant")
+                           :todo ("someday" )
                            :order 90)
-                          (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+                          ;;(:discard (:tag ("chore" "routine" "daily")))
+                          (:discard (:todo "TODO"))
+                          ))))
+          (todo "WAIT" ((org-agenda-todo-ignore-with-date t)
+                        (org-agenda-overriding-header "Blocked items")))
+          (search "* " ((org-agenda-overriding-header "Inbox")
+                        (org-agenda-files '("~/org/gtd/inbox.org"))))
+          ))))
+
+
+;; (setq org-agenda-custom-commands
+;;       '(("o" "Overview"
+;;          ((agenda "" ((org-agenda-span 'day)
+;;                       (org-super-agenda-groups
+;;                        '((:name "Today"
+;;                           :time-grid t
+;;                           :date today
+;;                           :todo "TODAY"
+;;                           :scheduled today
+;;                           :order 1)))))
+;;           (alltodo "" ((org-agenda-overriding-header "")
+;;                        (org-super-agenda-groups
+;;                         '((:name "Next to do"
+;;                            :todo "NEXT"
+;;                            :order 1)
+;;                           (:name "Important"
+;;                            :tag "Important"
+;;                            :priority "A"
+;;                            :order 6)
+;;                           (:name "Due Today"
+;;                            :deadline today
+;;                            :order 2)
+;;                           (:name "Due Soon"
+;;                            :deadline future
+;;                            :order 8)
+;;                           (:name "Overdue"
+;;                            :deadline past
+;;                            :face error
+;;                            :order 7)
+;;                           (:name "Assignments"
+;;                            :tag "Assignment"
+;;                            :order 10)
+;;                           (:name "Issues"
+;;                            :tag "Issue"
+;;                            :order 12)
+;;                           (:name "Emacs"
+;;                            :tag "Emacs"
+;;                            :order 13)
+;;                           (:name "Projects"
+;;                            :tag "Project"
+;;                            :order 14)
+;;                           (:name "Research"
+;;                            :tag "Research"
+;;                            :order 15)
+;;                           (:name "To read"
+;;                            :tag "Read"
+;;                            :order 30)
+;;                           (:name "Waiting"
+;;                            :todo "WAITING"
+;;                            :order 20)
+;;                           (:name "University"
+;;                            :tag "uni"
+;;                            :order 32)
+;;                           (:name "Trivial"
+;;                            :priority<= "E"
+;;                            :tag ("Trivial" "Unimportant")
+;;                            :todo ("SOMEDAY" )
+;;                            :order 90)
+;;                           (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
 #+end_src
 
 **** Capture
@@ -8729,26 +8982,330 @@ no modeline.
         (org-capture)))
 #+end_src
 
+# **** GTD-jethro
+
+# #+begin_src emacs-lisp
+# (defun jethro/org-archive-done-tasks ()
+#   "Archive all done tasks."
+#   (interactive)
+#   (org-map-entries 'org-archive-subtree "/DONE" 'file))
+
+# (require 'find-lisp)
+# (setq jethro/org-agenda-directory
+#       (expand-file-name "gtd/" org-directory))
+# (setq org-agenda-files
+#       (find-lisp-find-files jethro/org-agenda-directory "\.org$"))
+
+# (setq org-capture-templates
+#       `(("i" "Inbox" entry  (file "gtd/inbox.org")
+#          ,(concat "* TODO %?\n"
+#                   "/Entered on/ %U"))
+#         ("s" "Slipbox" entry  (file "braindump/org/inbox.org")
+#          "* %?\n")))
+
+# (defun jethro/org-capture-inbox ()
+#   (interactive)
+#   (org-capture nil "i"))
+
+# (defun jethro/org-capture-slipbox ()
+#   (interactive)
+#   (org-capture nil "s"))
+
+# (defun jethro/org-agenda ()
+#   (interactive)
+#   (org-agenda nil " "))
+
+# (bind-key "C-c <tab>" #'jethro/org-capture-inbox)
+# (bind-key "C-c SPC" #'jethro/org-agenda)
+
+# (setq org-todo-keywords
+#       '((sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "|" "DONE(d)" "|" "Cancelled(c)")))
+
+# (defun log-todo-next-creation-date (&rest ignore)
+#   "Log NEXT creation time in the property drawer under the key 'ACTIVATED'"
+#   (when (and (string= (org-get-todo-state) "NEXT")
+#              (not (org-entry-get nil "ACTIVATED")))
+#     (org-entry-put nil "ACTIVATED" (format-time-string "[%Y-%m-%d]"))))
+# (add-hook 'org-after-todo-state-change-hook #'log-todo-next-creation-date)
+
+# (setq org-log-done 'time
+#       org-log-into-drawer t
+#       org-log-state-notes-insert-after-drawers nil)
+
+# (setq org-tag-alist '(("@errand" . ?e)
+#                       ("@office" . ?o)
+#                       ("@home" . ?h)))
+
+# (setq org-fast-tag-selection-single-key nil)
+# (setq org-refile-use-outline-path 'file
+#       org-outline-path-complete-in-steps nil)
+# (setq org-refile-allow-creating-parent-nodes 'confirm
+#       org-refile-targets '(("projects.org" . (:level . 1))))
+
+# (defun jethro/org-process-inbox ()
+#   "Called in org-agenda-mode, processes all inbox items."
+#   (interactive)
+#   (org-agenda-bulk-mark-regexp "inbox:")
+#   (jethro/bulk-process-entries))
+
+# (defvar jethro/org-current-effort "1:00"
+#   "Current effort for agenda items.")
+
+# (defun jethro/my-org-agenda-set-effort (effort)
+#   "Set the effort property for the current headline."
+#   (interactive
+#    (list (read-string (format "Effort [%s]: " jethro/org-current-effort) nil nil jethro/org-current-effort)))
+#   (setq jethro/org-current-effort effort)
+#   (org-agenda-check-no-diary)
+#   (let* ((hdmarker (or (org-get-at-bol 'org-hd-marker)
+#                        (org-agenda-error)))
+#          (buffer (marker-buffer hdmarker))
+#          (pos (marker-position hdmarker))
+#          (inhibit-read-only t)
+#          newhead)
+#     (org-with-remote-undo buffer
+#       (with-current-buffer buffer
+#         (widen)
+#         (goto-char pos)
+#         (org-show-context 'agenda)
+#         (funcall-interactively 'org-set-effort nil jethro/org-current-effort)
+#         (end-of-line 1)
+#         (setq newhead (org-get-heading)))
+#       (org-agenda-change-all-lines newhead hdmarker))))
+
+# (defun jethro/org-agenda-process-inbox-item ()
+#   "Process a single item in the org-agenda."
+#   (org-with-wide-buffer
+#    (org-agenda-set-tags)
+#    (org-agenda-priority)
+#    (call-interactively 'jethro/my-org-agenda-set-effort)
+#    (org-agenda-refile nil nil t)))
+
+# (defun jethro/bulk-process-entries ()
+#   (let ())
+#   (if (not (null org-agenda-bulk-marked-entries))
+#       (let ((entries (reverse org-agenda-bulk-marked-entries))
+#             (processed 0)
+#             (skipped 0))
+#         (dolist (e entries)
+#           (let ((pos (text-property-any (point-min) (point-max) 'org-hd-marker e)))
+#             (if (not pos)
+#                 (progn (message "Skipping removed entry at %s" e)
+#                        (cl-incf skipped))
+#               (goto-char pos)
+#               (let (org-loop-over-headlines-in-active-region) (funcall 'jethro/org-agenda-process-inbox-item))
+#               ;; `post-command-hook' is not run yet.  We make sure any
+#               ;; pending log note is processed.
+#               (when (or (memq 'org-add-log-note (default-value 'post-command-hook))
+#                         (memq 'org-add-log-note post-command-hook))
+#                 (org-add-log-note))
+#               (cl-incf processed))))
+#         (org-agenda-redo)
+#         (unless org-agenda-persistent-marks (org-agenda-bulk-unmark-all))
+#         (message "Acted on %d entries%s%s"
+#                  processed
+#                  (if (= skipped 0)
+#                      ""
+#                    (format ", skipped %d (disappeared before their turn)"
+#                            skipped))
+#                  (if (not org-agenda-persistent-marks) "" " (kept marked)")))))
+
+# (defun jethro/org-inbox-capture ()
+#   (interactive)
+#   "Capture a task in agenda mode."
+#   (org-capture nil "i"))
+
+# (map! :map org-agenda-mode-map
+#       "i" #'org-agenda-clock-in
+#       "I" #'jethro/clock-in-and-advance
+#       "r" #'jethro/org-process-inbox
+#       "R" #'org-agenda-refile
+#       "c" #'jethro/org-inbox-capture)
+
+# (defun jethro/advance-todo ()
+#   (org-todo 'right)
+#   (remove-hook 'org-clock-in-hook #'jethro/advance-todo))
+
+# (defun jethro/clock-in-and-advance ()
+#   (interactive)
+#   (add-hook 'org-clock-in-hook 'jethro/advance-todo)
+#   (org-agenda-clock-in))
+
+# (use-package! org-clock-convenience
+#   :bind (:map org-agenda-mode-map
+#          ("<S-up>" . org-clock-convenience-timestamp-up)
+#          ("<S-down>" . org-clock-convenience-timestamp-down)
+#          ("o" . org-clock-convenience-fill-gap)
+#          ("e" . org-clock-convenience-fill-gap-both)))
+# #+end_src
+
+**** org-clock-convenience
+#+call: confpkg("!Pkg org-clock-convenience", after="org")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-clock-convenience)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! org-clock-convenience
+   :after org
+   :config
+   (map! :map org-agenda-mode-map
+         "<S-up>" #'org-clock-convenience-timestamp-up
+         "<S-down>" #'org-clock-convenience-timestamp-down
+         "o" #'org-clock-convenience-fill-gap
+         "e" #'org-clock-convenience-fill-gap-both))
+#+end_src
+
+**** GTD
+#+call: confpkg("!Pkg org-gtd", after="org")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-gtd)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! org-gtd
+  :after org
+  :init
+  (setq org-gtd-update-ack "3.0.0")
+  :custom
+  (org-gtd-directory "~/org/gtd")
+  (org-edna-use-inheritance t)
+  (org-gtd-organize-hooks '(org-gtd-set-area-of-focus org-set-tags-command))
+  :config
+  (org-edna-mode)
+  (map! :prefix "C-c"
+        "d c" #'org-gtd-capture
+        "d e" #'org-gtd-engage
+        "d p" #'org-gtd-process-inbox)
+        ;; "d n" #'org-gtd-show-all-next
+        ;; "d s" #'org-gtd-show-stuck-projects
+        ;; "d a" #'org-gtd-archive-completed-items))
+  (map! :map org-gtd-clarify-map
+        "C-c c" #'org-gtd-organize))
+#+end_src
+
+#+begin_src emacs-lisp
+;; (setq org-capture-templates
+;;       `(("s" "Slipbox" entry  (file "notes/inbox.org")
+;;          "* %?\n")))
+
+;; (defun josua/set-org-capture-templates ()
+;;   (interactive)
+;;   (setq org-capture-templates
+;;       `(("i" "Inbox" entry  (file "gtd/inbox.org")
+;;          (concat "* %?\n"
+;;                  ;;":PROPERTIES:\n"
+;;                  ;;":CATEGORY: %\1 %\\1 \n"
+;;                  ;;":END:\n"
+;;                   "/Entered on/ %U"))
+;;         ("s" "Slipbox" entry  (file "notes/inbox.org")
+;;          "* %?\n"))))
+
+;; (josua/set-org-capture-templates)
+
+;; (map! "C-c C" #'org-capture)
+
+;; (defun jethro/org-capture-inbox ()
+;;   (interactive)
+;;   (org-capture nil "i"))
+
+;; (defun jethro/org-capture-slipbox ()
+;;   (interactive)
+;;   (org-capture nil "s"))
+#+end_src
+
+
 **** Roam
 
 #+call: confpkg("!Pkg org-roam", after="org-roam")
 
-***** Basic settings
-
-I'll just set this to be within =Organisation= folder for now, in the future it
-could be worth seeing if I could hook this up to a [[https://nextcloud.com/][Nextcloud]] instance.
+****** CUSTOM: from jethrokuan
 
 #+begin_src emacs-lisp
-(setq org-roam-directory "~/Desktop/TEC/Organisation/Roam/")
+
+(use-package! org-roam
+  :init
+  (map! :leader
+        :prefix "n"
+        :desc "org-roam" "l" #'org-roam-buffer-toggle
+        :desc "org-roam-node-insert" "i" #'org-roam-node-insert
+        :desc "org-roam-node-find" "f" #'org-roam-node-find
+        :desc "org-roam-ref-find" "r" #'org-roam-ref-find
+        :desc "org-roam-show-graph" "g" #'org-roam-show-graph
+        :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
+        :desc "org-roam-capture" "c" #'org-roam-capture)
+  (setq org-roam-directory (file-truename "~/org/notes")
+        org-roam-dailies-directory "journals/")
+        org-roam-database-connector 'sqlite-builtin
+        ;; org-roam-db-gc-threshold most-positive-fixnum
+        ;; org-id-link-to-org-use-id t)
+
+  :config
+  ;; (org-roam-db-autosync-mode +1)
+  ;; (set-popup-rules!
+  ;;   `((,(regexp-quote org-roam-buffer) ; persistent org-roam buffer
+  ;;      :side right :width .33 :height .5 :ttl nil :modeline nil :quit nil :slot 1)
+  ;;     ("^\\*org-roam: " ; node dedicated org-roam buffer
+  ;;      :side right :width .33 :height .5 :ttl nil :modeline nil :quit nil :slot 2)))
+  ;; (add-hook 'org-roam-mode-hook #'turn-on-visual-line-mode)
+
+  (setq org-roam-capture-templates
+        '(("n" "notes" plain
+           "\n%?"
+           :if-new (file+head "pages/${slug}.org"
+                              "#+title: ${title}\n")
+           :immediate-finish t
+           :unnarrowed t)))
+          ;; ("r" "reference" plain "\n%?"
+          ;;  :if-new
+          ;;  (file+head "reference/${slug}.org" "#+title: ${title}\n")
+          ;;  :immediate-finish t
+          ;;  :unnarrowed t)
+          ;; ("a" "article" plain "\n%?"
+          ;;  :if-new
+          ;;  (file+head "articles/${slug}.org" "#+title: ${title}\n#+filetags: :article:\n")
+          ;;  :immediate-finish t
+          ;;  :unnarrowed t)))
+
+  (defun jethro/tag-new-node-as-draft ()
+    (org-roam-tag-add '("draft")))
+
+  (add-hook 'org-roam-capture-new-node-hook #'jethro/tag-new-node-as-draft)
+
+  (cl-defmethod org-roam-node-type ((node org-roam-node))
+    "Return the TYPE of NODE."
+    (condition-case nil
+        (file-name-nondirectory
+         (directory-file-name
+          (file-name-directory
+           (file-relative-name (org-roam-node-file node) org-roam-directory))))
+      (error "")))
+
+  (setq org-roam-node-display-template
+        (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag))))
+
+  ;; (require 'citar)
+
+  ;; (defun jethro/org-roam-node-from-cite (keys-entries)
+  ;;   (interactive (list (citar-select-ref)))
+  ;;   (let ((title (citar-format--entry(cdr keys-entries) "${author editor} :: ${title}")))
+  ;;     (org-roam-capture-
+  ;;      :templates
+  ;;      '(("r" "reference" plain "%?" :if-new
+  ;;         (file+head "reference/${citekey}.org"
+  ;;                    ":PROPERTIES:
+  ;;                    :ROAM_REFS: [cite:@${citekey}]
+  ;;                    :END:
+  ;;                    #+title: ${title}\n")
+  ;;      :immediate-finish t
+  ;;      :unnarrowed t))
+  ;;      :info (list :citekey (car keys-entries))
+  ;;      :node (org-roam-node-create :title title)
+  ;;      :props '(:finalize find-file)))))
 #+end_src
 
-That said, if the directory doesn't exist we likely don't want to be using roam.
-Since we don't want to trigger errors (which will happen as soon as roam tries
-to initialise), let's not load roam.
-
-#+begin_src emacs-lisp :noweb-ref none :tangle (if (file-exists-p "~/Desktop/TEC/Organisation/Roam/") "no" "packages.el")
-(package! org-roam :disable t)
-#+end_src
 
 ***** Modeline file name
 
@@ -9345,107 +9902,107 @@ cause issues. Let's make their failure less eventful.
   (ignore-errors (apply orig-fn args)))
 #+end_src
 
-**** Flycheck with org-lint
+# **** Flycheck  with org-lint
 
-#+call: confpkg("Flycheck org-lint", after="org")
+# #+call: confpkg("Flycheck org-lint", after="org")
 
-Org may be simple, but that doesn't mean there's no such thing as malformed Org.
-Thankfully, malformed Org is a much less annoying affair than malformed zipped
-XML (looks at DOCX/ODT...), particularly because there's a rather helpful little
-tool called ~org-lint~ bundled with Org that can tell you about your mistakes.
+# Org may be simple, but that doesn't mean there's no such thing as malformed Org.
+# Thankfully, malformed Org is a much less annoying affair than malformed zipped
+# XML (looks at DOCX/ODT...), particularly because there's a rather helpful little
+# tool called ~org-lint~ bundled with Org that can tell you about your mistakes.
 
-[[xkcd:2109]]
+# [[xkcd:2109]]
 
-Flycheck doesn't currently support Org, and there's aren't any packages to do so
-☹. However, in an issue on ~org-lint~ there is [[https://github.com/flycheck/flycheck/issues/1757#issuecomment-759546940][some code]] which apparently works.
-Surely this is what the clipboard was invented for? With that said, let's
-regurgitate the code, cross our fingers, and hope it works.
+# Flycheck doesn't currently support Org, and there's aren't any packages to do so
+# ☹. However, in an issue on ~org-lint~ there is [[https://github.com/flycheck/flycheck/issues/1757#issuecomment-759546940][some code]] which apparently works.
+# Surely this is what the clipboard was invented for? With that said, let's
+# regurgitate the code, cross our fingers, and hope it works.
 
-#+begin_src emacs-lisp
-(defconst flycheck-org-lint-form
-  (flycheck-prepare-emacs-lisp-form
-    (require 'org)
-    (require 'org-attach)
-    (let ((source (car command-line-args-left))
-          (process-default-directory default-directory))
-      (with-temp-buffer
-        (insert-file-contents source 'visit)
-        (setq buffer-file-name source)
-        (setq default-directory process-default-directory)
-        (delay-mode-hooks (org-mode))
-        (setq delayed-mode-hooks nil)
-        (dolist (err (org-lint))
-          (let ((inf (cl-second err)))
-            (princ (elt inf 0))
-            (princ ": ")
-            (princ (elt inf 2))
-            (terpri)))))))
+# #+begin_src emacs-lisp
+# (defconst flycheck-org-lint-form
+#   (flycheck-prepare-emacs-lisp-form
+#     (require 'org)
+#     (require 'org-attach)
+#     (let ((source (car command-line-args-left))
+#           (process-default-directory default-directory))
+#       (with-temp-buffer
+#         (insert-file-contents source 'visit)
+#         (setq buffer-file-name source)
+#         (setq default-directory process-default-directory)
+#         (delay-mode-hooks (org-mode))
+#         (setq delayed-mode-hooks nil)
+#         (dolist (err (org-lint))
+#           (let ((inf (cl-second err)))
+#             (princ (elt inf 0))
+#             (princ ": ")
+#             (princ (elt inf 2))
+#             (terpri)))))))
 
-(defconst flycheck-org-lint-variables
-  '(org-directory
-    org-id-locations
-    org-id-locations-file
-    org-attach-id-dir
-    org-attach-use-inheritance
-    org-attach-id-to-path-function-list
-    org-link-parameters)
-  "Variables inherited by the org-lint subprocess.")
+# (defconst flycheck-org-lint-variables
+#   '(org-directory
+#     org-id-locations
+#     org-id-locations-file
+#     org-attach-id-dir
+#     org-attach-use-inheritance
+#     org-attach-id-to-path-function-list
+#     org-link-parameters)
+#   "Variables inherited by the org-lint subprocess.")
 
-(defun flycheck-org-lint-variables-form ()
-  (require 'org-attach)  ; Needed to make variables available
-  `(progn
-     ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
-                (seq-filter #'boundp flycheck-org-lint-variables))))
+# (defun flycheck-org-lint-variables-form ()
+#   (require 'org-attach)  ; Needed to make variables available
+#   `(progn
+#      ,@(seq-map (lambda (opt) `(setq-default ,opt ',(symbol-value opt)))
+#                 (seq-filter #'boundp flycheck-org-lint-variables))))
 
-(eval ; To preveant eager macro expansion form loading flycheck early.
- '(flycheck-define-checker org-lint
-   "Org buffer checker using `org-lint'."
-   :command ("emacs" (eval flycheck-emacs-args)
-             "--eval" (eval (concat "(add-to-list 'load-path \""
-                                    (file-name-directory (locate-library "org"))
-                                    "\")"))
-             "--eval" (eval (flycheck-sexp-to-string
-                             (flycheck-org-lint-variables-form)))
-             "--eval" (eval (flycheck-sexp-to-string
-                             (flycheck-org-lint-customisations-form)))
-             "--eval" (eval flycheck-org-lint-form)
-             "--" source)
-   :error-patterns
-   ((error line-start line ": " (message) line-end))
-   :modes org-mode))
-#+end_src
+# (eval ; To preveant eager macro expansion form loading flycheck early.
+#  '(flycheck-define-checker org-lint
+#    "Org buffer checker using `org-lint'."
+#    :command ("emacs" (eval flycheck-emacs-args)
+#              "--eval" (eval (concat "(add-to-list 'load-path \""
+#                                     (file-name-directory (locate-library "org"))
+#                                     "\")"))
+#              "--eval" (eval (flycheck-sexp-to-string
+#                              (flycheck-org-lint-variables-form)))
+#              "--eval" (eval (flycheck-sexp-to-string
+#                              (flycheck-org-lint-customisations-form)))
+#              "--eval" (eval flycheck-org-lint-form)
+#              "--" source)
+#    :error-patterns
+#    ((error line-start line ": " (message) line-end))
+#    :modes org-mode))
+# #+end_src
 
-Turns out it almost works. Running =M-x flycheck-verify-setup= after running that
-snippet produces the following:
-#+begin_example
-The following syntax checkers are not registered:
-  - org-lint
-Try adding these syntax checkers to `flycheck-checkers'.
-#+end_example
+# Turns out it almost works. Running =M-x flycheck-verify-setup= after running that
+# snippet produces the following:
+# #+begin_example
+# The following syntax checkers are not registered:
+#   - org-lint
+# Try adding these syntax checkers to `flycheck-checkers'.
+# #+end_example
 
-Well that's very nice and helpful. We'll just do that 🙂.
-#+begin_src emacs-lisp
-(add-to-list 'flycheck-checkers 'org-lint)
-#+end_src
+# Well that's very nice and helpful. We'll just do that 🙂.
+# #+begin_src emacs-lisp
+# (add-to-list 'flycheck-checkers 'org-lint)
+# #+end_src
 
-It was missing custom link types, but that's easily fixed just by adding
-~org-link-parameters~ to ~flycheck-org-lint-variables~.
+# It was missing custom link types, but that's easily fixed just by adding
+# ~org-link-parameters~ to ~flycheck-org-lint-variables~.
 
-One remaining little annoyance is that it reports extra =#+options= that I've
-added to Org as errors. So we need to tell ~org-lint~ about them without having it
-load my whole config. Code duplication isn't great, but at least this isn't
-much.
+# One remaining little annoyance is that it reports extra =#+options= that I've
+# added to Org as errors. So we need to tell ~org-lint~ about them without having it
+# load my whole config. Code duplication isn't great, but at least this isn't
+# much.
 
-#+name: org-syntax-modifications
-#+begin_src emacs-lisp :tangle no
-(defun flycheck-org-lint-customisations-form ()
-  `(progn
-     (require 'ox)
-     (cl-pushnew '(:latex-cover-page nil "coverpage" nil)
-                 (org-export-backend-options (org-export-get-backend 'latex)))
-     (cl-pushnew '(:latex-font-set nil "fontset" nil)
-                 (org-export-backend-options (org-export-get-backend 'latex)))))
-#+end_src
+# #+name: org-syntax-modifications
+# #+begin_src emacs-lisp :tangle no
+# (defun flycheck-org-lint-customisations-form ()
+#   `(progn
+#      (require 'ox)
+#      (cl-pushnew '(:latex-cover-page nil "coverpage" nil)
+#                  (org-export-backend-options (org-export-get-backend 'latex)))
+#      (cl-pushnew '(:latex-font-set nil "fontset" nil)
+#                  (org-export-backend-options (org-export-get-backend 'latex)))))
+# #+end_src
 
 *** Visuals
 
@@ -12316,7 +12873,7 @@ able to handle anyway. For them we define a table of LaTeX translations
 | γ         | \(\gamma\) |
 | δ         | \(\delta\) |
 | ε         | \(\epsilon\) |
-| ϵ         | \(\varepsilon\) |
+| ϵ          | \(\varepsilon\) |
 | ζ         | \(\zeta\) |
 | η         | \(\eta\) |
 | θ         | \(\theta\) |
@@ -12353,7 +12910,7 @@ able to handle anyway. For them we define a table of LaTeX translations
 | א         | \(\aleph\) |
 | ב         | \(\beth\) |
 | ד         | \(\daleth\) |
-| ג         | \(\gimel\) |
+| ג          | \(\gimel\) |
 
 #+name: gen-latex-non-ascii-char-substitutions
 #+begin_src emacs-lisp :noweb-ref none :var latex-non-ascii-char-substitutions=latex-non-ascii-char-substitutions
@@ -13307,10 +13864,10 @@ In case of Emacs28,
 Since I'm using =mypyls=, as suggested in [[file:~/.config/emacs/modules/lang/python/README.org::*Language Server Protocol Support][:lang python LSP support]] I'll tweak the
 priority of =mypyls=
 
-#+begin_src emacs-lisp
-(after! lsp-python-ms
-  (set-lsp-priority! 'mspyls 1))
-#+end_src
+# #+begin_src emacs-lisp
+# (after! lsp-python-ms
+#   (set-lsp-priority! 'mspyls 1))
+# #+end_src
 
 ** PDF
 *** MuPDF
@@ -13361,7 +13918,7 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
   :config
   (unless (display-graphic-p) (after! pdf-tools (pdftotext-install)))
   ;; For prettyness
-  (add-hook 'pdftotext-mode-hook #'spell-fu-mode-disable)
+  ;;(add-hook 'pdftotext-mode-hook #'spell-fu-mode-disable)
   (add-hook 'pdftotext-mode-hook (lambda () (page-break-lines-mode 1)))
   ;; I have no idea why this is needed
   (map! :map pdftotext-mode-map
