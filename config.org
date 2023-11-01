@@ -20,6 +20,7 @@
 #+latex_header_extra: \usepackage[autooneside=false,automark,headsepline]{scrlayer-scrpage}
 #+latex_header_extra: \clearpairofpagestyles \renewcommand*{\chaptermarkformat}{} \renewcommand*{\sectionmarkformat}{}
 #+latex_header_extra: \ihead{\upshape\scshape\leftmark} \chead{\Ifstr{\leftmark}{\rightmark}{}{\rightmark}} \ohead[\pagemark]{\pagemark}
+#+latex_engraved_theme: doom-one-light
 
 #+begin_export html
 <a href="https://git.tecosaur.net/tec/emacs-config/"
@@ -1302,7 +1303,7 @@ configuration.
     (insert
      ";; -*- no-byte-compile: t; -*-\n\n"
      (pp (quote
-          ;;<<org-pkg-statement()>>
+          <<org-pkg-statement()>>
           )))
     (write-region nil nil "packages.el")))
 
@@ -1340,16 +1341,6 @@ my home machine is pretty safe, and my laptop is shutdown a lot.
       auth-source-cache-expiry nil) ; default is 7200 (2h)
 #+end_src
 
-
-** DEBUGGING
-
-#+begin_src emacs-lisp :tangle packages.el
-(package! closql
-  ;;:recipe (:host github :repo "magit/closql" :files ("*.el"))
-  :pin "0a7226331ff1f96142199915c0ac7940bac4afdd")
-#+end_src
-
-
 ** Better defaults
 
 #+call: confpkg()
@@ -1377,10 +1368,6 @@ changes Doom makes:
       display-time-format "%H:%M")
 
 (display-time-mode 1)                             ; Enable time in the mode-line
-
-;;(unless (string-match-p "^Power N/A" (battery))   ; On laptops...
-;;(display-battery-mode 1)                       ; it's nice to know how much power you have
-
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 (global-emojify-mode-line-mode 1)
 
@@ -1403,12 +1390,10 @@ changes Doom makes:
 (map! ("C-c C-SPC"
        :desc "Switch perspective" #'+workspace/cycle))
 
-(setq max-specpdl-size 13000)
-
-(setq doom-themes-treemacs-enable-variable-pitch nil)
-
-;; (add-hook! +dap-running-session-mode
-;;   (set-window-buffer nil (current-buffer)))
+;; use flymake
+(after! lsp-mode
+  (setq lsp-diagnostics-provider :flymake))
+(add-hook! prog-mode #'flymake-mode)
 
 (map! :leader
       (:prefix "m"
@@ -1443,6 +1428,28 @@ changes Doom makes:
          (org-mode . (lambda () (push '(?M . ("\\[" . "\\]")) evil-surround-pairs-alist))))
   :config
   (global-evil-surround-mode 1)) ;; globally enable evil-surround
+#+end_src
+
+When using a device with a battery, it would be nice to display battery
+ information. We can check for a battery during tangle via noweb, and only call
+ ~display-battery-mode~ when relevant. From a look at the various status functions
+ in =battery.el=, it seems like the ~?L~ key is consistently =N/A= when there is no
+ battery, so we'll test on that.
+
+#+name: battery-status-setup
+#+begin_src emacs-lisp :noweb-ref none
+(require 'battery)
+(if (and battery-status-function
+         (not (equal (alist-get ?L (funcall battery-status-function))
+                     "N/A")))
+    (prin1-to-string `(display-battery-mode 1))
+  "")
+#+end_src
+
+Now with noweb we' use the result.
+
+#+begin_src emacs-lisp :noweb no-export 
+<<battery-status-setup()>>
 #+end_src
 
 *** Frame sizing
@@ -1703,9 +1710,9 @@ vterm                        ; the best terminal emulation in Emacs
 
 #+name: doom-checkers
 #+begin_src emacs-lisp
-(syntax                      ; tasing you for every semicolon you forget
- +childframe
- +flymake)
+(syntax
+ +flymake
+ +childframe)         ; tasing you for every semicolon you forget
 (spell
  +flyspell
  +hunspell
@@ -1805,7 +1812,7 @@ nix                          ; I hereby declare "nix geht mehr!"
  +jupyter                    ; ipython/jupyter support for babel
  +pandoc                     ; export-with-pandoc support
  +gnuplot                    ; who doesn't like pretty pictures
- ;;+pomodoro                 ; be fruitful with the tomato technique
+ +pomodoro                 ; be fruitful with the tomato technique
  +present                    ; using org-mode for presentations
  +roam2)                     ; wander around notes
 ;;php                        ; perl's insecure younger brother
@@ -1858,7 +1865,7 @@ I couldn't resist the Email and Feed modules.
 ;;calendar                   ; A dated approach to timetabling
 ;;emms                       ; Multimedia in Emacs is music to my ears
 everywhere                   ; *leave* Emacs!? You must be joking.
-irc                          ; how neckbeards socialize
+;; irc                          ; how neckbeards socialize
 (rss +org)                   ; emacs as an RSS reader
 ;;twitter                    ; twitter client https://twitter.com/vnought
 #+end_src
@@ -1899,6 +1906,7 @@ near-minimal new config:
 
 *** Visual Settings
 **** Font Face
+***** Setting fonts
 
 'Fira Code' is nice, and 'Overpass' makes for a nice sans companion. We just need to
 fiddle with the font sizes a tad so that they visually match. Just for fun I'm
@@ -1914,6 +1922,7 @@ aspects are nice, but on others I prefer Fira.
       ;;doom-variable-pitch-font (font-spec :family "Metropolis" :size 28 :weight 'light)
       ;;doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 28 :weight 'light)
       doom-unicode-font (font-spec :family "JuliaMono")
+      doom-emoji-font (font-spec :family "Twitter Color Emoji") ; Just used by me
       doom-serif-font (font-spec :family "IBM Plex Mono" :size 22 :weight 'light))
 #+end_src
 
@@ -1924,12 +1933,95 @@ In addition to these fonts, Merriweather is used with =nov.el=, and Alegreya as 
 serifed proportional font used by =mixed-pitch-mode= for =writeroom-mode= with Org
 files.
 
+***** Emojis
+
+Lastly, it would be good to sort out emojis. All that's really needed here is to
+apply =doom-emoji-font=, which needs to be done here because it's not /actually/ a
+Doom font variable, but rather my own addition.
+
+#+begin_src emacs-lisp
+(add-hook! 'after-setting-font-hook
+  (defun +emoji-set-font ()
+    (set-fontset-font t 'emoji doom-emoji-font nil 'prepend)))
+
+#+end_src
+
+We might as well also construct a regexp to make identifying emojis if buffers
+more convenient.
+
+#+begin_src emacs-lisp
+(defvar +emoji-rx
+  (let (emojis)
+    (map-char-table
+     (lambda (char set)
+       (when (eq set 'emoji)
+         (push (copy-tree char) emojis)))
+     char-script-table)
+    (rx-to-string `(any ,@emojis)))
+  "A regexp to find all emoji-script characters.")
+#+end_src
+
+For the sake of convenient insertion, we'll also register some emoji aliases
+based on common usage.
+
+#+begin_src emacs-lisp
+(setq emoji-alternate-names
+      '(("🙂" ":)")
+        ("😄" ":D")
+        ("😉" ";)")
+        ("🙁" ":(")
+        ("😆" "laughing face" "xD")
+        ("🤣" "ROFL face")
+        ("😢" ":'(")
+        ("🥲" ":')")
+        ("😮" ":o")
+        ("😑" ":|")
+        ("😎" "cool face")
+        ("🤪" "goofy face")
+        ("🤥" "pinnochio face" "liar face")
+        ("😠" ">:(")
+        ("😡" "angry+ face")
+        ("🤬" "swearing face")
+        ("🤢" "sick face")
+        ("😈" "smiling imp")
+        ("👿" "frowning imp")
+        ("❤️" "<3")
+        ("🫡" "o7")
+        ("👍" "+1")
+        ("👎" "-1")
+        ("👈" "left")
+        ("👉" "right")
+        ("👆" "up")
+        ("💯" "100")
+        ("💸" "flying money")))
+#+end_src
+
+Lastly, when using Emacs 28+ it would be nice to open the nice emoji dispatch
+with the leader key as well as =C-x 8 e=. Since =SPC e= is unclaimed, let's just use
+that until we have a better use for it (we could also split up the insertion and
+querying commands in other parts of the map).
+
+#+begin_src emacs-lisp
+(when (>= emacs-major-version 29)
+  (map! :leader
+        (:prefix ("e" . "Emoji")
+         :desc "Search" "s" #'emoji-search
+         :desc "Recent" "r" #'emoji-recent
+         :desc "List" "l" #'emoji-list
+         :desc "Describe" "d" #'emoji-describe
+         :desc "Insert" "i" #'emoji-insert
+         :desc "Insert" "e" #'emoji-insert)))
+#+end_src
+
+***** Checking the system
+
 Because we care about how things look let's add a check to make sure we're told
 if the system doesn't have any of those fonts.
 
 #+name: detect-missing-fonts
-#+begin_src emacs-lisp :tangle no
-(defvar required-fonts '("JetBrainsMono Nerd Font.*" "Overpass" "JuliaMono" "IBM Plex Mono" "Merriweather" "Alegreya"))
+#+begin_src emacs-lisp :tangle no :noweb-ref none
+(defvar required-fonts '("JetBrainsMono Nerd Font*" "Overpass" "JuliaMono" "IBM Plex Mono"
+                         "Merriweather" "Alegreya" "Twitter Color Emoji"))
 
 (defvar available-fonts
   (delete-dups (or (font-family-list)
@@ -1970,10 +2062,39 @@ listing the missing fonts should appear for at least half a second.
 
 **** Theme
 
-~doom-one~ is nice and all, but I find the ~vibrant~ variant nicer.
+The ~doom-one~ theme is nice and all, but I find the ~vibrant~ variant nicer. With
+the light themes, I rather like ~doom-tomorrow-day~. I'd like to pick the default
+from them based on the system theme. We can detect this with a ~gdbus~ call, which
+is a Gnome CLI tool but often present on KDE systems for GTK support.
 
-#+begin_src emacs-lisp
-(setq doom-theme 'doom-vibrant)
+#+name: default-theme
+#+begin_src emacs-lisp :noweb-ref none
+(let ((light-theme 'doom-tomorrow-day)
+      (dark-theme 'doom-vibrant)
+      (system-light-p
+       (and
+        (executable-find "gdbus")
+        (string= "<<uint32 2>>"
+                 (with-temp-buffer
+                   (call-process "gdbus" nil t nil
+                                 "call" "--session"
+                                 "--timeout=1000"
+                                 "--dest=org.freedesktop.portal.Desktop"
+                                 "--object-path" "/org/freedesktop/portal/desktop"
+                                 "--method" "org.freedesktop.portal.Settings.Read"
+                                 "org.freedesktop.appearance" "color-scheme")
+                   (string-trim (buffer-string) "(" ",)\n"))))))
+  (if system-light-p light-theme dark-theme))
+#+end_src
+
+We'll use the appropriate theme as the default, but let's also accept the theme
+as an envvar for fun.
+
+#+begin_src emacs-lisp :noweb yes
+(setq doom-theme
+      (if (getenv "DOOM_THEME")
+          (intern (getenv "DOOM_THEME"))
+        '<<default-theme()>>))
 #+end_src
 
 Oh, and with the nice selection doom provides there's no reason for me to want
@@ -2033,152 +2154,152 @@ avoid polluting the output.
 (advice-add 'org-babel-execute-src-block :around #'doom-shut-up-a)
 #+end_src
 
-# *** Elisp REPL
+*** Elisp REPL
 
-# I think an elisp REPL sounds like a fun idea, even if not a particularly useful
-# one 😛. We can do this by adding a new command in =cli.el=.
+I think an elisp REPL sounds like a fun idea, even if not a particularly useful
+one 😛. We can do this by adding a new command in =cli.el=.
 
-# #+begin_src emacs-lisp :tangle cli.el :noweb-ref none
-# (defcli! repl ((in-rlwrap-p ("--rl") "For internal use only."))
-#   "Start an elisp REPL."
-#   (require 'core-start)
-#   (when (and (executable-find "rlwrap") (not in-rlwrap-p))
-#     ;; For autocomplete
-#     (setq autocomplete-file "/tmp/doom_elisp_repl_symbols")
-#     (unless (file-exists-p autocomplete-file)
-#       (princ "\e[0;33mInitialising autocomplete list...\e[0m\n")
-#       (with-temp-buffer
-#         (cl-do-all-symbols (s)
-#           (let ((sym (symbol-name s)))
-#             (when (string-match-p "\\`[[:ascii:]][[:ascii:]]+\\'" sym)
-#               (insert sym "\n"))))
-#         (write-region nil nil autocomplete-file)))
-#     (princ "\e[F")
-#     (exit! "rlwrap" "-f" autocomplete-file
-#            (concat doom-emacs-dir "bin/doom") "repl" "--rl"))
+#+begin_src emacs-lisp :tangle cli.el :noweb-ref none
+(defcli! repl ((in-rlwrap-p ("--rl") "For internal use only."))
+  "Start an elisp REPL."
+  (require 'core-start)
+  (when (and (executable-find "rlwrap") (not in-rlwrap-p))
+    ;; For autocomplete
+    (setq autocomplete-file "/tmp/doom_elisp_repl_symbols")
+    (unless (file-exists-p autocomplete-file)
+      (princ "\e[0;33mInitialising autocomplete list...\e[0m\n")
+      (with-temp-buffer
+        (cl-do-all-symbols (s)
+          (let ((sym (symbol-name s)))
+            (when (string-match-p "\\`[[:ascii:]][[:ascii:]]+\\'" sym)
+              (insert sym "\n"))))
+        (write-region nil nil autocomplete-file)))
+    (princ "\e[F")
+    (exit! "rlwrap" "-f" autocomplete-file
+           (concat doom-emacs-dir "bin/doom") "repl" "--rl"))
 
-#   (doom-initialize-packages)
-#   (require 'engrave-faces-ansi)
-#   (setq engrave-faces-ansi-color-mode '3-bit)
+  (doom-initialize-packages)
+  (require 'engrave-faces-ansi)
+  (setq engrave-faces-ansi-color-mode '3-bit)
 
-#   ;; For some reason (require 'parent-mode) doesn't work :(
-#   (defun parent-mode-list (mode)
-#     "Return a list of MODE and all its parent modes.
+  ;; For some reason (require 'parent-mode) doesn't work :(
+  (defun parent-mode-list (mode)
+    "Return a list of MODE and all its parent modes.
 
-# The returned list starts with the parent-most mode and ends with MODE."
-#     (let ((result ()))
-#       (parent-mode--worker mode (lambda (mode)
-#                                   (push mode result)))
-#       result))
-#   (defun parent-mode--worker (mode func)
-#     "For MODE and all its parent modes, call FUNC.
+The returned list starts with the parent-most mode and ends with MODE."
+    (let ((result ()))
+      (parent-mode--worker mode (lambda (mode)
+                                  (push mode result)))
+      result))
+  (defun parent-mode--worker (mode func)
+    "For MODE and all its parent modes, call FUNC.
 
-# FUNC is first called for MODE, then for its parent, then for the parent's
-# parent, and so on.
+FUNC is first called for MODE, then for its parent, then for the parent's
+parent, and so on.
 
-# MODE shall be a symbol referring to a function.
-# FUNC shall be a function taking one argument."
-#     (funcall func mode)
-#     (when (not (fboundp mode))
-#       (signal 'void-function (list mode)))
-#     (let ((modefunc (symbol-function mode)))
-#       (if (symbolp modefunc)
-#           ;; Hande all the modes that use (defalias 'foo-parent-mode (stuff)) as
-#           ;; their parent
-#           (parent-mode--worker modefunc func)
-#         (let ((parentmode (get mode 'derived-mode-parent)))
-#           (when parentmode
-#             (parent-mode--worker parentmode func))))))
-#   (provide 'parent-mode)
-#   ;; Some extra highlighting (needs parent-mode)
-#   (require 'rainbow-delimiters)
-#   (require 'highlight-quoted)
-#   (require 'highlight-numbers)
-#   (setq emacs-lisp-mode-hook '(rainbow-delimiters-mode
-#                                highlight-quoted-mode
-#                                highlight-numbers-mode))
-#   ;; Pretty print
-#   (defun pp-sexp (sexp)
-#     (with-temp-buffer
-#       (cl-prettyprint sexp)
-#       (emacs-lisp-mode)
-#       (font-lock-ensure)
-#       (with-current-buffer (engrave-faces-ansi-buffer)
-#         (princ (string-trim (buffer-string)))
-#         (kill-buffer (current-buffer)))))
-#   ;; Now do the REPL
-#   (defvar accumulated-input nil)
-#   (while t
-#     (condition-case nil
-#         (let ((input (if accumulated-input
-#                          (read-string "\e[31m .\e[0m  ")
-#                        (read-string "\e[31mλ:\e[0m "))))
-#           (setq input (concat accumulated-input
-#                               (when accumulated-input "\n")
-#                               input))
-#           (cond
-#            ((string-match-p "\\`[[:space:]]*\\'" input)
-#             nil)
-#            ((string= input "exit")
-#             (princ "\n") (kill-emacs 0))
-#            (t
-#             (condition-case err
-#                 (let ((input-sexp (car (read-from-string input))))
-#                   (setq accumulated-input nil)
-#                   (pp-sexp (eval input-sexp))
-#                   (princ "\n"))
-#               ;; Caused when sexp in unbalanced
-#               (end-of-file (setq accumulated-input input))
-#               (error
-#                (cl-destructuring-bind (backtrace &optional type data . _)
-#                    (cons (doom-cli--backtrace) err)
-#                  (princ (concat "\e[1;31mERROR:\e[0m " (get type 'error-message)))
-#                  (princ "\n       ")
-#                  (pp-sexp (cons type data))
-#                  (when backtrace
-#                    (print! (bold "Backtrace:"))
-#                    (print-group!
-#                     (dolist (frame (seq-take backtrace 10))
-#                       (print!
-#                        "%0.74s" (replace-regexp-in-string
-#                                  "[\n\r]" "\\\\n"
-#                                  (format "%S" frame))))))
-#                  (princ "\n")))))))
-#       ;; C-d causes an end-of-file error
-#       (end-of-file (princ "exit\n") (kill-emacs 0)))
-#     (unless accumulated-input (princ "\n"))))
-# #+end_src
+MODE shall be a symbol referring to a function.
+FUNC shall be a function taking one argument."
+    (funcall func mode)
+    (when (not (fboundp mode))
+      (signal 'void-function (list mode)))
+    (let ((modefunc (symbol-function mode)))
+      (if (symbolp modefunc)
+          ;; Hande all the modes that use (defalias 'foo-parent-mode (stuff)) as
+          ;; their parent
+          (parent-mode--worker modefunc func)
+        (let ((parentmode (get mode 'derived-mode-parent)))
+          (when parentmode
+            (parent-mode--worker parentmode func))))))
+  (provide 'parent-mode)
+  ;; Some extra highlighting (needs parent-mode)
+  (require 'rainbow-delimiters)
+  (require 'highlight-quoted)
+  (require 'highlight-numbers)
+  (setq emacs-lisp-mode-hook '(rainbow-delimiters-mode
+                               highlight-quoted-mode
+                               highlight-numbers-mode))
+  ;; Pretty print
+  (defun pp-sexp (sexp)
+    (with-temp-buffer
+      (cl-prettyprint sexp)
+      (emacs-lisp-mode)
+      (font-lock-ensure)
+      (with-current-buffer (engrave-faces-ansi-buffer)
+        (princ (string-trim (buffer-string)))
+        (kill-buffer (current-buffer)))))
+  ;; Now do the REPL
+  (defvar accumulated-input nil)
+  (while t
+    (condition-case nil
+        (let ((input (if accumulated-input
+                         (read-string "\e[31m .\e[0m  ")
+                       (read-string "\e[31mλ:\e[0m "))))
+          (setq input (concat accumulated-input
+                              (when accumulated-input "\n")
+                              input))
+          (cond
+           ((string-match-p "\\`[[:space:]]*\\'" input)
+            nil)
+           ((string= input "exit")
+            (princ "\n") (kill-emacs 0))
+           (t
+            (condition-case err
+                (let ((input-sexp (car (read-from-string input))))
+                  (setq accumulated-input nil)
+                  (pp-sexp (eval input-sexp))
+                  (princ "\n"))
+              ;; Caused when sexp in unbalanced
+              (end-of-file (setq accumulated-input input))
+              (error
+               (cl-destructuring-bind (backtrace &optional type data . _)
+                   (cons (doom-cli--backtrace) err)
+                 (princ (concat "\e[1;31mERROR:\e[0m " (get type 'error-message)))
+                 (princ "\n       ")
+                 (pp-sexp (cons type data))
+                 (when backtrace
+                   (print! (bold "Backtrace:"))
+                   (print-group!
+                    (dolist (frame (seq-take backtrace 10))
+                      (print!
+                       "%0.74s" (replace-regexp-in-string
+                                 "[\n\r]" "\\\\n"
+                                 (format "%S" frame))))))
+                 (princ "\n")))))))
+      ;; C-d causes an end-of-file error
+      (end-of-file (princ "exit\n") (kill-emacs 0)))
+    (unless accumulated-input (princ "\n"))))
+#+end_src
 
-# *** Htmlize command
+*** Htmlize command
 
-# Why not have a command to htmlize files? This is basically a little test of my
-# engrave-faces package because it somehow seems to work without a GUI, while the
-# htmlize package doesn't.
+Why not have a command to htmlize files? This is basically a little test of my
+engrave-faces package because it somehow seems to work without a GUI, while the
+htmlize package doesn't.
 
-# #+begin_src emacs-lisp :tangle cli.el :noweb-ref none
-# (defcli! htmlize (file)
-#   "Export a FILE buffer to HTML."
+#+begin_src emacs-lisp :tangle cli.el :noweb-ref none
+(defcli! htmlize (file)
+  "Export a FILE buffer to HTML."
 
-#   (print! "Htmlizing %s" file)
+  (print! "Htmlizing %s" file)
 
-#   (doom-initialize)
-#   (require 'highlight-numbers)
-#   (require 'highlight-quoted)
-#   (require 'rainbow-delimiters)
-#   (require 'engrave-faces-html)
+  (doom-initialize)
+  (require 'highlight-numbers)
+  (require 'highlight-quoted)
+  (require 'rainbow-delimiters)
+  (require 'engrave-faces-html)
 
-#   ;; Lighten org-mode
-#   (when (string= "org" (file-name-extension file))
-#     (setcdr (assoc 'org after-load-alist) nil)
-#     (setq org-load-hook nil)
-#     (require 'org)
-#     (setq org-mode-hook nil)
-#     (add-hook 'engrave-faces-before-hook
-#               (lambda () (if (eq major-mode 'org-mode)
-#                         (org-show-all)))))
+  ;; Lighten org-mode
+  (when (string= "org" (file-name-extension file))
+    (setcdr (assoc 'org after-load-alist) nil)
+    (setq org-load-hook nil)
+    (require 'org)
+    (setq org-mode-hook nil)
+    (add-hook 'engrave-faces-before-hook
+              (lambda () (if (eq major-mode 'org-mode)
+                        (org-show-all)))))
 
-#   (engrave-faces-html-file file))
-# #+end_src
+  (engrave-faces-html-file file))
+#+end_src
 
 *** Org buffer creation
 
@@ -3137,40 +3258,40 @@ alias mt="m -t"
 alias et="e -t"
 #+end_src
 
-# *** Prompt to run setup script
+*** Prompt to run setup script
 
-# #+call: confpkg("Setup script prompt")
+#+call: confpkg("Setup script prompt")
 
-# At various points in this config, content is conditionally tangled to
-# =./setup.sh=. It's no good just putting content there if it isn't run though.
-# To help remind me to run it when needed, let's add a little prompt when there's
-# anything to be run.
+At various points in this config, content is conditionally tangled to
+=./setup.sh=. It's no good just putting content there if it isn't run though.
+To help remind me to run it when needed, let's add a little prompt when there's
+anything to be run.
 
-# #+name: run-setup
-# #+begin_src emacs-lisp :tangle no
-# (if (file-exists-p "setup.sh")
-#     (if (string-empty-p (string-trim (with-temp-buffer (insert-file-contents "setup.sh") (buffer-string)) "#!/usr/bin/env bash"))
-#         (message ";; Setup script is empty")
-#       (message ";; Detected content in the setup script")
-#       (pp-to-string
-#        `(unless noninteractive
-#           (defun +config-run-setup ()
-#             (when (yes-or-no-p (format "%s The setup script has content. Check and run the script?"
-#                                        (propertize "Warning!" 'face '(bold warning))))
-#               (find-file (expand-file-name "setup.sh" doom-private-dir))
-#               (when (yes-or-no-p "Would you like to run this script?")
-#                 (async-shell-command "./setup.sh"))))
-#           (add-hook! 'doom-init-ui-hook
-#             (run-at-time nil nil #'+config-run-setup)))))
-#   (message ";; setup.sh did not exist during tangle. Tangle again.")
-#   (pp-to-string
-#    `(unless noninteractive
-#       (add-hook! 'doom-init-ui-hook #'+literate-tangle-async-h))))
-# #+end_src
+#+name: run-setup
+#+begin_src emacs-lisp :tangle no
+(if (file-exists-p "setup.sh")
+    (if (string-empty-p (string-trim (with-temp-buffer (insert-file-contents "setup.sh") (buffer-string)) "#!/usr/bin/env bash"))
+        (message ";; Setup script is empty")
+      (message ";; Detected content in the setup script")
+      (pp-to-string
+       `(unless noninteractive
+          (defun +config-run-setup ()
+            (when (yes-or-no-p (format "%s The setup script has content. Check and run the script?"
+                                       (propertize "Warning!" 'face '(bold warning))))
+              (find-file (expand-file-name "setup.sh" doom-private-dir))
+              (when (yes-or-no-p "Would you like to run this script?")
+                (async-shell-command "./setup.sh"))))
+          (add-hook! 'doom-init-ui-hook
+            (run-at-time nil nil #'+config-run-setup)))))
+  (message ";; setup.sh did not exist during tangle. Tangle again.")
+  (pp-to-string
+   `(unless noninteractive
+      (add-hook! 'doom-init-ui-hook #'+literate-tangle-async-h))))
+#+end_src
 
-# #+begin_src emacs-lisp :noweb no-export
-# <<run-setup()>>
-# #+end_src
+#+begin_src emacs-lisp :noweb no-export
+<<run-setup()>>
+#+end_src
 
 *** Grabbing source block content as a string
 
@@ -3377,10 +3498,10 @@ sounds nice to me.
 The name says it all. It's loaded and set up (a bit) by =:app everywhere=, however
 as I develop this I want the unpinned version I have as a submodule.
 
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! emacs-everywhere :recipe (:host github :repo "tecosaur/emacs-everywhere"))
-# (unpin! emacs-everywhere)
-# #+end_src
+#+begin_src emacs-lisp :tangle packages.el
+(package! emacs-everywhere :recipe (:local-repo "lisp/emacs-everywhere"))
+(unpin! emacs-everywhere)
+#+end_src
 
 Additionally, I'm going to make some personal choices that aren't made in the
 Doom module.
@@ -3434,6 +3555,19 @@ let's change that, and do a few other similar tweaks while we're at it.
 [[https://tecosaur.com/lfs/emacs-config/screenshots/whichkey-evil.png]]
 
 ** Tools
+*** Dired
+
+#+call: confpkg("Dired")
+
+#+begin_src emacs-lisp
+;;(defun dired-toggle-hide-files ()
+;;  (interactive)
+(use-package! dired
+  :config
+  (setq dired-omit-files "^\\.[^.]|^\\...+$|\\`[.]?#\\|\\`[.][.]?\\'\\|^\\.DS_Store\\'\\|^\\.project\\(?:ile\\)?\\'\\|^\\.\\(?:svn\\|git\\)\\'\\|^\\.ccls-cache\\'\\|\\(?:\\.js\\)?\\.meta\\'\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'")
+  )
+#+end_src
+
 *** Abbrev
 
 #+call: confpkg("Multi-mode abbrev")
@@ -3885,20 +4019,15 @@ let's improve that memory.
 
 ~Ispell~ is nice, let's have it in ~text~, ~markdown~, and ~GFM~.
 #+begin_src emacs-lisp
-(set-company-backend! 'text-mode '(company-wordfreq))
-#+end_src
-
-#+begin_src emacs-lisp
 (set-company-backend!
-  '(;;text-mode
+  '(text-mode
     markdown-mode
     gfm-mode)
   '(:seperate
-   ;;company-ispell
-   company-files
-   company-yasnippet))
+    company-ispell
+    company-files
+    company-yasnippet))
 #+end_src
-
 We then configure the dictionary we're using in [[*Ispell][Ispell]].
 
 CUSTOM:
@@ -3907,7 +4036,7 @@ CUSTOM:
 
 (defun company-ispell-german ()
   (interactive)
-  (setq-local company-ispell-dictionary (file-truename "~/.config/dictionaries/wordlist_german.txt")))
+  (setq-local company-ispell-dictionary (file-truename "~/.config/doom/misc/german_top10000_clean.txt")))
 
 (defun company-ispell-english ()
   (interactive)
@@ -3920,25 +4049,6 @@ CUSTOM:
 #+begin_src emacs-lisp
 (set-company-backend! 'ess-r-mode '(company-R-args company-R-objects company-dabbrev-code :separate))
 #+end_src
-*** Company-wordfreq
-
-#+call: confpkg("!Pkg company-wordfreq")
-
-#+begin_src emacs-lisp :tangle packages.el
-(package! company-wordfreq)
-#+end_src
-
-#+begin_src emacs-lisp
-(defun +set-company-backend-company-wordfreq ()
-  (setq-local company-backends '(company-wordfreq))
-  (setq-local company-transformers nil))
-#+end_src
-
-
-#+begin_src emacs-lisp
-(add-hook 'org-mode-hook #'+set-company-backend-company-wordfreq)
-#+end_src
-
 
 *** Projectile
 
@@ -4335,280 +4445,208 @@ situations decently.
   (setq simple-comment-markup-set '(org markdown-code)))
 #+end_src
 
-*** Emojify
+*** Doom modeline
 
-#+call: confpkg("!Pkg emojify")
+#+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
 
 #+begin_quote
-From the =:ui emoji= module.
+From the =:ui modeline= module.
 #+end_quote
 
+**** Modified buffer colour
 
-For starters, twitter's emojis look nicer than emoji-one.
-Other than that, this is pretty great OOTB 😀.
-
-#+begin_src emacs-lisp
-(setq emojify-emoji-set "twemoji-v2")
-#+end_src
-
-One minor annoyance is the use of emojis over the default character
-when the default is actually preferred. This occurs with overlay symbols I use
-in Org mode, such as checkbox state, and a few other miscellaneous cases.
-
-We can accommodate our preferences by deleting those entries from the emoji hash
-table
+The modeline is very nice and pretty, however I have a few niggles with the
+defaults. For starters, by default ~red~ text is used to indicate an unsaved file.
+This makes me feel like something's gone /wrong/, so let's tone that down to
+orange.
 
 #+begin_src emacs-lisp
-(defvar emojify-disabled-emojis
-  '(;; Org
-    "◼" "☑" "☸" "⚙" "⏩" "⏪" "⬆" "⬇" "❓" "↔"
-    ;; Terminal powerline
-    "✔"
-    ;; Box drawing
-    "▶" "◀"
-    ;; I just want to see this as text
-    "©" "™")
-  "Characters that should never be affected by `emojify-mode'.")
-
-(defadvice! emojify-delete-from-data ()
-  "Ensure `emojify-disabled-emojis' don't appear in `emojify-emojis'."
-  :after #'emojify-set-emoji-data
-  (dolist (emoji emojify-disabled-emojis)
-    (remhash emoji emojify-emojis)))
+(custom-set-faces!
+  '(doom-modeline-buffer-modified :foreground "orange"))
 #+end_src
 
-Now, it would be good to have a minor mode which allowed you to type ascii/gh
-emojis and get them converted to unicode. Let's make one.
+**** Height
+
+The default size (=25=) makes for a rather narrow mode line. To me, the modeline
+feels a bit comfier if we give it a bit more space. I find =45= adds roughly a
+third of the line height as padding above and below.
+
 #+begin_src emacs-lisp
-(defun emojify--replace-text-with-emoji (orig-fn emoji text buffer start end &optional target)
-  "Modify `emojify--propertize-text-for-emoji' to replace ascii/github emoticons with unicode emojis, on the fly."
-  (if (or (not emoticon-to-emoji) (= 1 (length text)))
-      (funcall orig-fn emoji text buffer start end target)
-    (delete-region start end)
-    (insert (ht-get emoji "unicode"))))
-
-(define-minor-mode emoticon-to-emoji
-  "Write ascii/gh emojis, and have them converted to unicode live."
-  :global nil
-  :init-value nil
-  (if emoticon-to-emoji
-      (progn
-        (setq-local emojify-emoji-styles '(ascii github unicode))
-        (advice-add 'emojify--propertize-text-for-emoji :around #'emojify--replace-text-with-emoji)
-        (unless emojify-mode
-          (emojify-turn-on-emojify-mode)))
-    (setq-local emojify-emoji-styles (default-value 'emojify-emoji-styles))
-    (advice-remove 'emojify--propertize-text-for-emoji #'emojify--replace-text-with-emoji)))
+(setq doom-modeline-height 45)
 #+end_src
 
-This new minor mode of ours will be nice for messages, so let's hook it in for
-Email and IRC.
+**** File encoding
+
+While we're modifying the modeline, when we have the default file encoding (=LF
+UTF-8=), it really isn't worth noting in the modeline. So, why not conditionally
+hide it?
+
 #+begin_src emacs-lisp
-(add-hook! '(mu4e-compose-mode org-msg-edit-mode circe-channel-mode) (emoticon-to-emoji 1))
+(defun doom-modeline-conditional-buffer-encoding ()
+  "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
+  (setq-local doom-modeline-buffer-encoding
+              (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
+                                 '(coding-category-undecided coding-category-utf-8))
+                           (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
+                t)))
+
+(add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
 #+end_src
 
-# *** Doom modeline
+# **** Time
 
-# #+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
+# Moving onto the modeline segments, there's a calendar icon showed next to the
+# current time, which I'm not a fan of. Let's replace that by redefining the
+# segment. Instead of the calendar, it would be much nicer to have an updating
+# analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
 
-# #+begin_quote
-# From the =:ui modeline= module.
-# #+end_quote
-
-# **** Modified buffer colour
-
-# The modeline is very nice and pretty, however I have a few niggles with the
-# defaults. For starters, by default ~red~ text is used to indicate an unsaved file.
-# This makes me feel like something's gone /wrong/, so let's tone that down to
-# orange.
+# First, we'll need a way to produce svg clocks on-demand.
 
 # #+begin_src emacs-lisp
-# (custom-set-faces!
-#   '(doom-modeline-buffer-modified :foreground "orange"))
+# (defvar micro-clock-hour-hand-ratio 0.45
+#   "Length of the hour hand as a proportion of the radius.")
+# (defvar micro-clock-minute-hand-ratio 0.7
+#   "Length of the minute hand as a proportion of the radius.")
+
+# (defun micro-clock-svg (hour minute radius color)
+#   "Construct an SVG clock showing the time HOUR:MINUTE.
+# The clock will be of the specified RADIUS and COLOR."
+#   (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+#                    micro-clock-hour-hand-ratio))
+#         (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+#                    micro-clock-hour-hand-ratio))
+#         (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
+#                      micro-clock-minute-hand-ratio))
+#         (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
+#                      micro-clock-minute-hand-ratio))
+#         (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
+#     (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
+#     (svg-circle svg radius radius 1 :fill color :stroke "none")
+#     (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
+#               :stroke-width 2)
+#     (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
+#               :stroke-width 1.5)
+#     svg))
 # #+end_src
 
-# **** Height
-
-# The default size (=25=) makes for a rather narrow mode line. To me, the modeline
-# feels a bit comfier if we give it a bit more space. I find =45= adds roughly a
-# third of the line height as padding above and below.
+# With that out the way, we need to figure out how to integrate this into the
+# modeline. For the most part this was fairly easy, the tricky part was getting
+# the alignment right. I tried using the =(raise FACTOR)= display property, but that
+# doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
+# descriptors]] though, I came across the =:ascent= property, which looked rather
+# promising. By setting =:ascent center= the image is centred relative to the text,
+# which is exactly what we need. With that sorted, we just add some caching and
+# the obvious customisations and we've got modeline-appropriate clock generation!
 
 # #+begin_src emacs-lisp
-# (setq doom-modeline-height 45)
+# (require 'svg)
+
+# (defvar +doom-modeline-micro-clock-minute-resolution 1
+#   "The clock will be updated every this many minutes, truncating.")
+# (defvar +doom-modeline-micro-clock-inverse-size 4.8
+#   "The size of the clock, as an inverse proportion to the mode line height.")
+
+# (defvar +doom-modeline-micro-clock--cache nil)
+
+# (defvar +doom-modeline-clock-text-format "%c")
+
+# (defun +doom-modeline--clock-text (&optional _window _object _pos)
+#   (format-time-string +doom-modeline-clock-text-format))
+
+# (defun +doom-modeline-micro-clock ()
+#   "Return a string containing an current analogue clock."
+#   (cdr
+#    (if (equal (truncate (float-time)
+#                         (* +doom-modeline-micro-clock-minute-resolution 60))
+#               (car +doom-modeline-micro-clock--cache))
+#        +doom-modeline-micro-clock--cache
+#      (setq +doom-modeline-micro-clock--cache
+#            (cons (truncate (float-time)
+#                            (* +doom-modeline-micro-clock-minute-resolution 60))
+#                  (with-temp-buffer
+#                    (svg-insert-image
+#                     (micro-clock-svg
+#                      (string-to-number (format-time-string "%-I")) ; hour
+#                      (* (truncate (string-to-number (format-time-string "%-M"))
+#                                   +doom-modeline-micro-clock-minute-resolution)
+#                         +doom-modeline-micro-clock-minute-resolution) ; minute
+#                      (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
+#                      "currentColor"))
+#                    (propertize
+#                     " "
+#                     'display
+#                     (append (get-text-property 0 'display (buffer-string))
+#                             '(:ascent center))
+#                     'face 'doom-modeline-time
+#                     'help-echo #'+doom-modeline--clock-text)))))))
 # #+end_src
 
-# **** File encoding
-
-# While we're modifying the modeline, when we have the default file encoding (=LF
-# UTF-8=), it really isn't worth noting in the modeline. So, why not conditionally
-# hide it?
+# With clock generation sorted out, all that's to be done is replacing the =time=
+# modeline segment with our design.
 
 # #+begin_src emacs-lisp
-# (defun doom-modeline-conditional-buffer-encoding ()
-#   "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
-#   (setq-local doom-modeline-buffer-encoding
-#               (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
-#                                  '(coding-category-undecided coding-category-utf-8))
-#                            (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
-#                 t)))
-
-# (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
+# (doom-modeline-def-segment time
+#   (when (and doom-modeline-time
+#              (bound-and-true-p display-time-mode)
+#              (not doom-modeline--limited-width-p))
+#     (concat
+#      doom-modeline-spc
+#      (when doom-modeline-time-icon
+#        (concat
+#         (+doom-modeline-micro-clock)
+#         (and (or doom-modeline-icon doom-modeline-unicode-fallback)
+#              doom-modeline-spc)))
+#      (propertize display-time-string
+#                  'face (doom-modeline-face 'doom-modeline-time)))))
 # #+end_src
 
-# # **** Time
+# **** PDF modeline
 
-# # Moving onto the modeline segments, there's a calendar icon showed next to the
-# # current time, which I'm not a fan of. Let's replace that by redefining the
-# # segment. Instead of the calendar, it would be much nicer to have an updating
-# # analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
+# I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
+# however the response was basically "put your preferences in your personal
+# config, the current default is sensible" --- so here we are.
 
-# # First, we'll need a way to produce svg clocks on-demand.
+# First up I'm going to want a segment for just the buffer file name, and a PDF
+# icon. Then we'll redefine two functions used to generate the modeline.
 
-# # #+begin_src emacs-lisp
-# # (defvar micro-clock-hour-hand-ratio 0.45
-# #   "Length of the hour hand as a proportion of the radius.")
-# # (defvar micro-clock-minute-hand-ratio 0.7
-# #   "Length of the minute hand as a proportion of the radius.")
+# #+begin_src emacs-lisp
+# (doom-modeline-def-segment buffer-name
+#   "Display the current buffer's name, without any other information."
+#   (concat
+#    doom-modeline-spc
+#    (doom-modeline--buffer-name)))
 
-# # (defun micro-clock-svg (hour minute radius color)
-# #   "Construct an SVG clock showing the time HOUR:MINUTE.
-# # The clock will be of the specified RADIUS and COLOR."
-# #   (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-# #                    micro-clock-hour-hand-ratio))
-# #         (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-# #                    micro-clock-hour-hand-ratio))
-# #         (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
-# #                      micro-clock-minute-hand-ratio))
-# #         (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
-# #                      micro-clock-minute-hand-ratio))
-# #         (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
-# #     (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
-# #     (svg-circle svg radius radius 1 :fill color :stroke "none")
-# #     (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
-# #               :stroke-width 2)
-# #     (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
-# #               :stroke-width 1.5)
-# #     svg))
-# # #+end_src
+# (doom-modeline-def-segment pdf-icon
+#   "PDF icon from nerd-icons."
+#   (concat
+#    doom-modeline-spc
+#    (doom-modeline-icon sucicon "nf-seti-pdf" nil nil
+#                        :face (if (doom-modeline--active)
+#                                  'nerd-icons-red
+#                                'mode-line-inactive)
+#                        :v-adjust 0.02)))
 
-# # With that out the way, we need to figure out how to integrate this into the
-# # modeline. For the most part this was fairly easy, the tricky part was getting
-# # the alignment right. I tried using the =(raise FACTOR)= display property, but that
-# # doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
-# # descriptors]] though, I came across the =:ascent= property, which looked rather
-# # promising. By setting =:ascent center= the image is centred relative to the text,
-# # which is exactly what we need. With that sorted, we just add some caching and
-# # the obvious customisations and we've got modeline-appropriate clock generation!
+# (defun doom-modeline-update-pdf-pages ()
+#   "Update PDF pages."
+#   (setq doom-modeline--pdf-pages
+#         (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
+#               (total-page-str (number-to-string (pdf-cache-number-of-pages))))
+#           (concat
+#            (propertize
+#             (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
+#                     " P" current-page-str)
+#             'face 'mode-line)
+#            (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
 
-# # #+begin_src emacs-lisp
-# # (require 'svg)
+# (doom-modeline-def-segment pdf-pages
+#   "Display PDF pages."
+#   (if (doom-modeline--active) doom-modeline--pdf-pages
+#     (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
 
-# # (defvar +doom-modeline-micro-clock-minute-resolution 1
-# #   "The clock will be updated every this many minutes, truncating.")
-# # (defvar +doom-modeline-micro-clock-inverse-size 4.8
-# #   "The size of the clock, as an inverse proportion to the mode line height.")
-
-# # (defvar +doom-modeline-micro-clock--cache nil)
-
-# # (defvar +doom-modeline-clock-text-format "%c")
-
-# # (defun +doom-modeline--clock-text (&optional _window _object _pos)
-# #   (format-time-string +doom-modeline-clock-text-format))
-
-# # (defun +doom-modeline-micro-clock ()
-# #   "Return a string containing an current analogue clock."
-# #   (cdr
-# #    (if (equal (truncate (float-time)
-# #                         (* +doom-modeline-micro-clock-minute-resolution 60))
-# #               (car +doom-modeline-micro-clock--cache))
-# #        +doom-modeline-micro-clock--cache
-# #      (setq +doom-modeline-micro-clock--cache
-# #            (cons (truncate (float-time)
-# #                            (* +doom-modeline-micro-clock-minute-resolution 60))
-# #                  (with-temp-buffer
-# #                    (svg-insert-image
-# #                     (micro-clock-svg
-# #                      (string-to-number (format-time-string "%-I")) ; hour
-# #                      (* (truncate (string-to-number (format-time-string "%-M"))
-# #                                   +doom-modeline-micro-clock-minute-resolution)
-# #                         +doom-modeline-micro-clock-minute-resolution) ; minute
-# #                      (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
-# #                      "currentColor"))
-# #                    (propertize
-# #                     " "
-# #                     'display
-# #                     (append (get-text-property 0 'display (buffer-string))
-# #                             '(:ascent center))
-# #                     'face 'doom-modeline-time
-# #                     'help-echo #'+doom-modeline--clock-text)))))))
-# # #+end_src
-
-# # With clock generation sorted out, all that's to be done is replacing the =time=
-# # modeline segment with our design.
-
-# # #+begin_src emacs-lisp
-# # (doom-modeline-def-segment time
-# #   (when (and doom-modeline-time
-# #              (bound-and-true-p display-time-mode)
-# #              (not doom-modeline--limited-width-p))
-# #     (concat
-# #      doom-modeline-spc
-# #      (when doom-modeline-time-icon
-# #        (concat
-# #         (+doom-modeline-micro-clock)
-# #         (and (or doom-modeline-icon doom-modeline-unicode-fallback)
-# #              doom-modeline-spc)))
-# #      (propertize display-time-string
-# #                  'face (doom-modeline-face 'doom-modeline-time)))))
-# # #+end_src
-
-# # **** PDF modeline
-
-# # I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
-# # however the response was basically "put your preferences in your personal
-# # config, the current default is sensible" --- so here we are.
-
-# # First up I'm going to want a segment for just the buffer file name, and a PDF
-# # icon. Then we'll redefine two functions used to generate the modeline.
-
-# # #+begin_src emacs-lisp
-# # (doom-modeline-def-segment buffer-name
-# #   "Display the current buffer's name, without any other information."
-# #   (concat
-# #    doom-modeline-spc
-# #    (doom-modeline--buffer-name)))
-
-# # (doom-modeline-def-segment pdf-icon
-# #   "PDF icon from all-the-icons."
-# #   (concat
-# #    doom-modeline-spc
-# #    (doom-modeline-icon 'octicon "file-pdf" nil nil
-# #                        :face (if (doom-modeline--active)
-# #                                  'all-the-icons-red
-# #                                'mode-line-inactive)
-# #                        :v-adjust 0.02)))
-
-# # (defun doom-modeline-update-pdf-pages ()
-# #   "Update PDF pages."
-# #   (setq doom-modeline--pdf-pages
-# #         (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
-# #               (total-page-str (number-to-string (pdf-cache-number-of-pages))))
-# #           (concat
-# #            (propertize
-# #             (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
-# #                     " P" current-page-str)
-# #             'face 'mode-line)
-# #            (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
-
-# # (doom-modeline-def-segment pdf-pages
-# #   "Display PDF pages."
-# #   (if (doom-modeline--active) doom-modeline--pdf-pages
-# #     (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
-
-# # (doom-modeline-def-modeline 'pdf
-# #   '(bar window-number pdf-pages pdf-icon buffer-name)
-# #   '(misc-info matches major-mode process vcs))
-# # #+end_src
+# (doom-modeline-def-modeline 'pdf
+#   '(bar window-number pdf-pages pdf-icon buffer-name)
+#   '(misc-info matches major-mode process vcs))
+# #+end_src
 
 *** Keycast
 
@@ -4728,7 +4766,7 @@ subsequent face definition). This was created for writeroom mode.
 (autoload #'mixed-pitch-serif-mode "mixed-pitch"
   "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
 
-(setq! variable-pitch-serif-font (font-spec :family "Source Serif 4" :size 27))
+(setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
 
 (after! mixed-pitch
   (setq mixed-pitch-set-height t)
@@ -4868,21 +4906,22 @@ well somehow, so let's switch to 'P22 Underground Book'; it looks much nicer.
 ;; (setq x-underline-at-descent-line t)
 #+end_src
 
-*** All the icons
+*** Nerd Icons
 
-#+call: confpkg("!Pkg All the Icons")
+#+call: confpkg("!Pkg Nerd Icons")
 
 #+begin_quote
 From the =:core packages= module.
 #+end_quote
 
-=all-the-icons= does a generally great job giving file names icons. One minor
+=nerd-icons= does a generally great job giving file names icons. One minor
 niggle I have is that when /I/ open a =.m= file, it's much more likely to be Matlab
 than Objective-C. As such, it'll be switching the icon associated with =.m=.
+
 #+begin_src emacs-lisp
-(after! all-the-icons
-  (setcdr (assoc "m" all-the-icons-extension-icon-alist)
-          (cdr (assoc "matlab" all-the-icons-extension-icon-alist))))
+(after! nerd-icons
+  (setcdr (assoc "m" nerd-icons-extension-icon-alist)
+          (cdr (assoc "matlab" nerd-icons-extension-icon-alist))))
 #+end_src
 
 *** Prettier page breaks
@@ -5744,528 +5783,528 @@ panel.
       (select-window main-window))))
 #+end_src
 
-** IRC
+# ** IRC
 
-#+call: confpkg()
+# #+call: confpkg()
 
-=circe= is a client for IRC in Emacs (hey, isn't that a nice project
-name+acronym), and a greek enchantress who turned humans into animals.
+# =circe= is a client for IRC in Emacs (hey, isn't that a nice project
+# name+acronym), and a greek enchantress who turned humans into animals.
 
-Let's use the former to chat to +recluses+ discerning individuals online.
+# Let's use the former to chat to +recluses+ discerning individuals online.
 
-[[xkcd:1782]]
+# [[xkcd:1782]]
 
-Before we start seeing and sending messages, we need to authenticate with our
-IRC servers. The circe manual provided a snippet for putting some of the auth
-details in =.authinfo.gpg= --- but I think we should go further than that: have
-the entire server info in our authinfo.
+# Before we start seeing and sending messages, we need to authenticate with our
+# IRC servers. The circe manual provided a snippet for putting some of the auth
+# details in =.authinfo.gpg= --- but I think we should go further than that: have
+# the entire server info in our authinfo.
 
-First, a reasonable format by which we can specify:
-+ server
-+ port
-+ SASL username
-+ SASL password
-+ channels to join
+# First, a reasonable format by which we can specify:
+# + server
+# + port
+# + SASL username
+# + SASL password
+# + channels to join
 
-We can have these stored like so
-#+begin_src authinfo
-machine chat.freenode.net login USERNAME password PASSWORD port PORT for irc channels emacs,org-mode
-#+end_src
+# We can have these stored like so
+# #+begin_src authinfo
+# machine chat.freenode.net login USERNAME password PASSWORD port PORT for irc channels emacs,org-mode
+# #+end_src
 
-The ~for irc~ bit is used so we can uniquely identify all IRC auth info. By
-omitting the =#= in channel names we can have a list of channels comma-separated
-(no space!) which the secrets API will return as a single string.
+# The ~for irc~ bit is used so we can uniquely identify all IRC auth info. By
+# omitting the =#= in channel names we can have a list of channels comma-separated
+# (no space!) which the secrets API will return as a single string.
 
-#+name: irc-authinfo-reader
-#+begin_src emacs-lisp :tangle no
-(defun auth-server-pass (server)
-  (if-let ((secret (plist-get (car (auth-source-search :host server)) :secret)))
-      (if (functionp secret)
-          (funcall secret) secret)
-    (error "Could not fetch password for host %s" server)))
+# #+name: irc-authinfo-reader
+# #+begin_src emacs-lisp :tangle no
+# (defun auth-server-pass (server)
+#   (if-let ((secret (plist-get (car (auth-source-search :host server)) :secret)))
+#       (if (functionp secret)
+#           (funcall secret) secret)
+#     (error "Could not fetch password for host %s" server)))
 
-(defun register-irc-auths ()
-  (require 'circe)
-  (require 'dash)
-  (let ((accounts (-filter (lambda (a) (string= "irc" (plist-get a :for)))
-                           (auth-source-search :require '(:for) :max 10))))
-    (appendq! circe-network-options
-              (mapcar (lambda (entry)
-                        (let* ((host (plist-get entry :host))
-                               (label (or (plist-get entry :label) host))
-                               (_ports (mapcar #'string-to-number
-                                               (s-split "," (plist-get entry :port))))
-                               (port (if (= 1 (length _ports)) (car _ports) _ports))
-                               (user (plist-get entry :user))
-                               (nick (or (plist-get entry :nick) user))
-                               (channels (mapcar (lambda (c) (concat "#" c))
-                                                 (s-split "," (plist-get entry :channels)))))
-                          `(,label
-                            :host ,host :port ,port :nick ,nick
-                            :sasl-username ,user :sasl-password auth-server-pass
-                            :channels ,channels)))
-                      accounts))))
-#+end_src
+# (defun register-irc-auths ()
+#   (require 'circe)
+#   (require 'dash)
+#   (let ((accounts (-filter (lambda (a) (string= "irc" (plist-get a :for)))
+#                            (auth-source-search :require '(:for) :max 10))))
+#     (appendq! circe-network-options
+#               (mapcar (lambda (entry)
+#                         (let* ((host (plist-get entry :host))
+#                                (label (or (plist-get entry :label) host))
+#                                (_ports (mapcar #'string-to-number
+#                                                (s-split "," (plist-get entry :port))))
+#                                (port (if (= 1 (length _ports)) (car _ports) _ports))
+#                                (user (plist-get entry :user))
+#                                (nick (or (plist-get entry :nick) user))
+#                                (channels (mapcar (lambda (c) (concat "#" c))
+#                                                  (s-split "," (plist-get entry :channels)))))
+#                           `(,label
+#                             :host ,host :port ,port :nick ,nick
+#                             :sasl-username ,user :sasl-password auth-server-pass
+#                             :channels ,channels)))
+#                       accounts))))
+# #+end_src
 
-We'll just call src_elisp{(register-irc-auths)} on a hook when we start Circe
-up.
+# We'll just call src_elisp{(register-irc-auths)} on a hook when we start Circe
+# up.
 
-Now we're ready to go, let's actually wire-up Circe, with one or two
-configuration tweaks.
-#+begin_src emacs-lisp :noweb no-export
-(after! circe
-  (setq-default circe-use-tls t)
-  (setq circe-notifications-alert-icon "/usr/share/icons/breeze/actions/24/network-connect.svg"
-        lui-logging-directory (expand-file-name "irc" doom-etc-dir)
-        lui-logging-file-format "{buffer}/%Y/%m-%d.txt"
-        circe-format-self-say "{nick:+13s} ┃ {body}")
+# Now we're ready to go, let's actually wire-up Circe, with one or two
+# configuration tweaks.
+# #+begin_src emacs-lisp :noweb no-export
+# (after! circe
+#   (setq-default circe-use-tls t)
+#   (setq circe-notifications-alert-icon "/usr/share/icons/breeze/actions/24/network-connect.svg"
+#         lui-logging-directory (expand-file-name "irc" doom-etc-dir)
+#         lui-logging-file-format "{buffer}/%Y/%m-%d.txt"
+#         circe-format-self-say "{nick:+13s} ┃ {body}")
 
-  (custom-set-faces!
-    '(circe-my-message-face :weight unspecified))
+#   (custom-set-faces!
+#     '(circe-my-message-face :weight unspecified))
 
-  (enable-lui-logging-globally)
-  (enable-circe-display-images)
+#   (enable-lui-logging-globally)
+#   (enable-circe-display-images)
 
-  <<org-emph-to-irc>>
+#   <<org-emph-to-irc>>
 
-  <<circe-emojis>>
-  <<circe-emoji-alists>>
+#   <<circe-emojis>>
+#   <<circe-emoji-alists>>
 
-  (defun named-circe-prompt ()
-    (lui-set-prompt
-     (concat (propertize (format "%13s > " (circe-nick))
-                         'face 'circe-prompt-face)
-             "")))
-  (add-hook 'circe-chat-mode-hook #'named-circe-prompt)
+#   (defun named-circe-prompt ()
+#     (lui-set-prompt
+#      (concat (propertize (format "%13s > " (circe-nick))
+#                          'face 'circe-prompt-face)
+#              "")))
+#   (add-hook 'circe-chat-mode-hook #'named-circe-prompt)
 
-  (appendq! all-the-icons-mode-icon-alist
-            '((circe-channel-mode all-the-icons-material "message" :face all-the-icons-lblue)
-              (circe-server-mode all-the-icons-material "chat_bubble_outline" :face all-the-icons-purple))))
+#   (appendq! nerd-icons-mode-icon-alist
+#             '((circe-channel-mode nerd-icons-mdicon "nf-md-message" :face nerd-icons-lblue)
+#               (circe-server-mode nerd-icons-mdicon "nf-md-chat_outline" :face nerd-icons-purple))))
 
-<<irc-authinfo-reader>>
+# <<irc-authinfo-reader>>
 
-(add-transient-hook! #'=irc (register-irc-auths))
-#+end_src
+# (add-transient-hook! #'=irc (register-irc-auths))
+# #+end_src
 
-*** Org-style emphasis
+# *** Org-style emphasis
 
-Let's do our *bold*, /italic/, and _underline_ in org-syntax, using IRC control characters.
-#+name: org-emph-to-irc
-#+begin_src emacs-lisp
-(defun lui-org-to-irc ()
-  "Examine a buffer with simple org-mode formatting, and converts the empasis:
-,*bold*, /italic/, and _underline_ to IRC semi-standard escape codes.
-=code= is converted to inverse (highlighted) text."
-  (goto-char (point-min))
-  (while (re-search-forward "\\_<\\(?1:[*/_=]\\)\\(?2:[^[:space:]]\\(?:.*?[^[:space:]]\\)?\\)\\1\\_>" nil t)
-    (replace-match
-     (concat (pcase (match-string 1)
-               ("*" "")
-               ("/" "")
-               ("_" "")
-               ("=" ""))
-             (match-string 2)
-             "") nil nil)))
+# Let's do our *bold*, /italic/, and _underline_ in org-syntax, using IRC control characters.
+# #+name: org-emph-to-irc
+# #+begin_src emacs-lisp
+# (defun lui-org-to-irc ()
+#   "Examine a buffer with simple org-mode formatting, and converts the empasis:
+# ,*bold*, /italic/, and _underline_ to IRC semi-standard escape codes.
+# =code= is converted to inverse (highlighted) text."
+#   (goto-char (point-min))
+#   (while (re-search-forward "\\_<\\(?1:[*/_=]\\)\\(?2:[^[:space:]]\\(?:.*?[^[:space:]]\\)?\\)\\1\\_>" nil t)
+#     (replace-match
+#      (concat (pcase (match-string 1)
+#                ("*" "")
+#                ("/" "")
+#                ("_" "")
+#                ("=" ""))
+#              (match-string 2)
+#              "") nil nil)))
 
-(add-hook 'lui-pre-input-hook #'lui-org-to-irc)
-#+end_src
+# (add-hook 'lui-pre-input-hook #'lui-org-to-irc)
+# #+end_src
 
-*** Emojis
+# *** Emojis
 
-Let's setup Circe to use some emojis
-#+name: circe-emojis
-#+begin_src emacs-lisp :tangle no
-(defun lui-ascii-to-emoji ()
-  (goto-char (point-min))
-  (while (re-search-forward "\\( \\)?::?\\([^[:space:]:]+\\):\\( \\)?" nil t)
-    (replace-match
-     (concat
-      (match-string 1)
-      (or (cdr (assoc (match-string 2) lui-emojis-alist))
-          (concat ":" (match-string 2) ":"))
-      (match-string 3))
-     nil nil)))
+# Let's setup Circe to use some emojis
+# #+name: circe-emojis
+# #+begin_src emacs-lisp :tangle no
+# (defun lui-ascii-to-emoji ()
+#   (goto-char (point-min))
+#   (while (re-search-forward "\\( \\)?::?\\([^[:space:]:]+\\):\\( \\)?" nil t)
+#     (replace-match
+#      (concat
+#       (match-string 1)
+#       (or (cdr (assoc (match-string 2) lui-emojis-alist))
+#           (concat ":" (match-string 2) ":"))
+#       (match-string 3))
+#      nil nil)))
 
-(defun lui-emoticon-to-emoji ()
-  (dolist (emoticon lui-emoticons-alist)
-    (goto-char (point-min))
-    (while (re-search-forward (concat " " (car emoticon) "\\( \\)?") nil t)
-      (replace-match (concat " "
-                             (cdr (assoc (cdr emoticon) lui-emojis-alist))
-                             (match-string 1))))))
+# (defun lui-emoticon-to-emoji ()
+#   (dolist (emoticon lui-emoticons-alist)
+#     (goto-char (point-min))
+#     (while (re-search-forward (concat " " (car emoticon) "\\( \\)?") nil t)
+#       (replace-match (concat " "
+#                              (cdr (assoc (cdr emoticon) lui-emojis-alist))
+#                              (match-string 1))))))
 
-(define-minor-mode lui-emojify
-  "Replace :emojis: and ;) emoticons with unicode emoji chars."
-  :global t
-  :init-value t
-  (if lui-emojify
-      (add-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)
-    (remove-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)))
-#+end_src
+# (define-minor-mode lui-emojify
+#   "Replace :emojis: and ;) emoticons with unicode emoji chars."
+#   :global t
+#   :init-value t
+#   (if lui-emojify
+#       (add-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)
+#     (remove-hook! lui-pre-input #'lui-ascii-to-emoji #'lui-emoticon-to-emoji)))
+# #+end_src
 
-Now, some actual emojis to use.
-#+name: circe-emoji-alists
-#+begin_src emacs-lisp :tangle no
-(defvar lui-emojis-alist
-  '(("grinning"                      . "😀")
-    ("smiley"                        . "😃")
-    ("smile"                         . "😄")
-    ("grin"                          . "😁")
-    ("laughing"                      . "😆")
-    ("sweat_smile"                   . "😅")
-    ("joy"                           . "😂")
-    ("rofl"                          . "🤣")
-    ("relaxed"                       . "☺️")
-    ("blush"                         . "😊")
-    ("innocent"                      . "😇")
-    ("slight_smile"                  . "🙂")
-    ("upside_down"                   . "🙃")
-    ("wink"                          . "😉")
-    ("relieved"                      . "😌")
-    ("heart_eyes"                    . "😍")
-    ("yum"                           . "😋")
-    ("stuck_out_tongue"              . "😛")
-    ("stuck_out_tongue_closed_eyes"  . "😝")
-    ("stuck_out_tongue_wink"         . "😜")
-    ("zanzy"                         . "🤪")
-    ("raised_eyebrow"                . "🤨")
-    ("monocle"                       . "🧐")
-    ("nerd"                          . "🤓")
-    ("cool"                          . "😎")
-    ("star_struck"                   . "🤩")
-    ("party"                         . "🥳")
-    ("smirk"                         . "😏")
-    ("unamused"                      . "😒")
-    ("disapointed"                   . "😞")
-    ("pensive"                       . "😔")
-    ("worried"                       . "😟")
-    ("confused"                      . "😕")
-    ("slight_frown"                  . "🙁")
-    ("frown"                         . "☹️")
-    ("persevere"                     . "😣")
-    ("confounded"                    . "😖")
-    ("tired"                         . "😫")
-    ("weary"                         . "😩")
-    ("pleading"                      . "🥺")
-    ("tear"                          . "😢")
-    ("cry"                           . "😢")
-    ("sob"                           . "😭")
-    ("triumph"                       . "😤")
-    ("angry"                         . "😠")
-    ("rage"                          . "😡")
-    ("exploding_head"                . "🤯")
-    ("flushed"                       . "😳")
-    ("hot"                           . "🥵")
-    ("cold"                          . "🥶")
-    ("scream"                        . "😱")
-    ("fearful"                       . "😨")
-    ("disapointed"                   . "😰")
-    ("relieved"                      . "😥")
-    ("sweat"                         . "😓")
-    ("thinking"                      . "🤔")
-    ("shush"                         . "🤫")
-    ("liar"                          . "🤥")
-    ("blank_face"                    . "😶")
-    ("neutral"                       . "😐")
-    ("expressionless"                . "😑")
-    ("grimace"                       . "😬")
-    ("rolling_eyes"                  . "🙄")
-    ("hushed"                        . "😯")
-    ("frowning"                      . "😦")
-    ("anguished"                     . "😧")
-    ("wow"                           . "😮")
-    ("astonished"                    . "😲")
-    ("sleeping"                      . "😴")
-    ("drooling"                      . "🤤")
-    ("sleepy"                        . "😪")
-    ("dizzy"                         . "😵")
-    ("zipper_mouth"                  . "🤐")
-    ("woozy"                         . "🥴")
-    ("sick"                          . "🤢")
-    ("vomiting"                      . "🤮")
-    ("sneeze"                        . "🤧")
-    ("mask"                          . "😷")
-    ("bandaged_head"                 . "🤕")
-    ("money_face"                    . "🤑")
-    ("cowboy"                        . "🤠")
-    ("imp"                           . "😈")
-    ("ghost"                         . "👻")
-    ("alien"                         . "👽")
-    ("robot"                         . "🤖")
-    ("clap"                          . "👏")
-    ("thumpup"                       . "👍")
-    ("+1"                            . "👍")
-    ("thumbdown"                     . "👎")
-    ("-1"                            . "👎")
-    ("ok"                            . "👌")
-    ("pinch"                         . "🤏")
-    ("left"                          . "👈")
-    ("right"                         . "👉")
-    ("down"                          . "👇")
-    ("wave"                          . "👋")
-    ("pray"                          . "🙏")
-    ("eyes"                          . "👀")
-    ("brain"                         . "🧠")
-    ("facepalm"                      . "🤦")
-    ("tada"                          . "🎉")
-    ("fire"                          . "🔥")
-    ("flying_money"                  . "💸")
-    ("lighbulb"                      . "💡")
-    ("heart"                         . "❤️")
-    ("sparkling_heart"               . "💖")
-    ("heartbreak"                    . "💔")
-    ("100"                           . "💯")))
+# Now, some actual emojis to use.
+# #+name: circe-emoji-alists
+# #+begin_src emacs-lisp :tangle no
+# (defvar lui-emojis-alist
+#   '(("grinning"                      . "😀")
+#     ("smiley"                        . "😃")
+#     ("smile"                         . "😄")
+#     ("grin"                          . "😁")
+#     ("laughing"                      . "😆")
+#     ("sweat_smile"                   . "😅")
+#     ("joy"                           . "😂")
+#     ("rofl"                          . "🤣")
+#     ("relaxed"                       . "☺️")
+#     ("blush"                         . "😊")
+#     ("innocent"                      . "😇")
+#     ("slight_smile"                  . "🙂")
+#     ("upside_down"                   . "🙃")
+#     ("wink"                          . "😉")
+#     ("relieved"                      . "😌")
+#     ("heart_eyes"                    . "😍")
+#     ("yum"                           . "😋")
+#     ("stuck_out_tongue"              . "😛")
+#     ("stuck_out_tongue_closed_eyes"  . "😝")
+#     ("stuck_out_tongue_wink"         . "😜")
+#     ("zanzy"                         . "🤪")
+#     ("raised_eyebrow"                . "🤨")
+#     ("monocle"                       . "🧐")
+#     ("nerd"                          . "🤓")
+#     ("cool"                          . "😎")
+#     ("star_struck"                   . "🤩")
+#     ("party"                         . "🥳")
+#     ("smirk"                         . "😏")
+#     ("unamused"                      . "😒")
+#     ("disapointed"                   . "😞")
+#     ("pensive"                       . "😔")
+#     ("worried"                       . "😟")
+#     ("confused"                      . "😕")
+#     ("slight_frown"                  . "🙁")
+#     ("frown"                         . "☹️")
+#     ("persevere"                     . "😣")
+#     ("confounded"                    . "😖")
+#     ("tired"                         . "😫")
+#     ("weary"                         . "😩")
+#     ("pleading"                      . "🥺")
+#     ("tear"                          . "😢")
+#     ("cry"                           . "😢")
+#     ("sob"                           . "😭")
+#     ("triumph"                       . "😤")
+#     ("angry"                         . "😠")
+#     ("rage"                          . "😡")
+#     ("exploding_head"                . "🤯")
+#     ("flushed"                       . "😳")
+#     ("hot"                           . "🥵")
+#     ("cold"                          . "🥶")
+#     ("scream"                        . "😱")
+#     ("fearful"                       . "😨")
+#     ("disapointed"                   . "😰")
+#     ("relieved"                      . "😥")
+#     ("sweat"                         . "😓")
+#     ("thinking"                      . "🤔")
+#     ("shush"                         . "🤫")
+#     ("liar"                          . "🤥")
+#     ("blank_face"                    . "😶")
+#     ("neutral"                       . "😐")
+#     ("expressionless"                . "😑")
+#     ("grimace"                       . "😬")
+#     ("rolling_eyes"                  . "🙄")
+#     ("hushed"                        . "😯")
+#     ("frowning"                      . "😦")
+#     ("anguished"                     . "😧")
+#     ("wow"                           . "😮")
+#     ("astonished"                    . "😲")
+#     ("sleeping"                      . "😴")
+#     ("drooling"                      . "🤤")
+#     ("sleepy"                        . "😪")
+#     ("dizzy"                         . "😵")
+#     ("zipper_mouth"                  . "🤐")
+#     ("woozy"                         . "🥴")
+#     ("sick"                          . "🤢")
+#     ("vomiting"                      . "🤮")
+#     ("sneeze"                        . "🤧")
+#     ("mask"                          . "😷")
+#     ("bandaged_head"                 . "🤕")
+#     ("money_face"                    . "🤑")
+#     ("cowboy"                        . "🤠")
+#     ("imp"                           . "😈")
+#     ("ghost"                         . "👻")
+#     ("alien"                         . "👽")
+#     ("robot"                         . "🤖")
+#     ("clap"                          . "👏")
+#     ("thumpup"                       . "👍")
+#     ("+1"                            . "👍")
+#     ("thumbdown"                     . "👎")
+#     ("-1"                            . "👎")
+#     ("ok"                            . "👌")
+#     ("pinch"                         . "🤏")
+#     ("left"                          . "👈")
+#     ("right"                         . "👉")
+#     ("down"                          . "👇")
+#     ("wave"                          . "👋")
+#     ("pray"                          . "🙏")
+#     ("eyes"                          . "👀")
+#     ("brain"                         . "🧠")
+#     ("facepalm"                      . "🤦")
+#     ("tada"                          . "🎉")
+#     ("fire"                          . "🔥")
+#     ("flying_money"                  . "💸")
+#     ("lighbulb"                      . "💡")
+#     ("heart"                         . "❤️")
+#     ("sparkling_heart"               . "💖")
+#     ("heartbreak"                    . "💔")
+#     ("100"                           . "💯")))
 
-(defvar lui-emoticons-alist
-  '((":)"   . "slight_smile")
-    (";)"   . "wink")
-    (":D"   . "smile")
-    ("=D"   . "grin")
-    ("xD"   . "laughing")
-    (";("   . "joy")
-    (":P"   . "stuck_out_tongue")
-    (";D"   . "stuck_out_tongue_wink")
-    ("xP"   . "stuck_out_tongue_closed_eyes")
-    (":("   . "slight_frown")
-    (";("   . "cry")
-    (";'("  . "sob")
-    (">:("  . "angry")
-    (">>:(" . "rage")
-    (":o"   . "wow")
-    (":O"   . "astonished")
-    (":/"   . "confused")
-    (":-/"  . "thinking")
-    (":|"   . "neutral")
-    (":-|"  . "expressionless")))
-#+end_src
+# (defvar lui-emoticons-alist
+#   '((":)"   . "slight_smile")
+#     (";)"   . "wink")
+#     (":D"   . "smile")
+#     ("=D"   . "grin")
+#     ("xD"   . "laughing")
+#     (";("   . "joy")
+#     (":P"   . "stuck_out_tongue")
+#     (";D"   . "stuck_out_tongue_wink")
+#     ("xP"   . "stuck_out_tongue_closed_eyes")
+#     (":("   . "slight_frown")
+#     (";("   . "cry")
+#     (";'("  . "sob")
+#     (">:("  . "angry")
+#     (">>:(" . "rage")
+#     (":o"   . "wow")
+#     (":O"   . "astonished")
+#     (":/"   . "confused")
+#     (":-/"  . "thinking")
+#     (":|"   . "neutral")
+#     (":-|"  . "expressionless")))
+# #+end_src
 
-** Newsfeed
+# ** Newsfeed
 
-#+call: confpkg()
+# #+call: confpkg()
 
-RSS feeds are still a thing. Why not make use of them with =elfeed=.
-I really like what [[https://github.com/fuxialexander/doom-emacs-private-xfu/tree/master/modules/app/rss][fuxialexander]] has going on, but I don't think I need a custom
-module. Let's just try to patch on the main things I like the look of.
+# RSS feeds are still a thing. Why not make use of them with =elfeed=.
+# I really like what [[https://github.com/fuxialexander/doom-emacs-private-xfu/tree/master/modules/app/rss][fuxialexander]] has going on, but I don't think I need a custom
+# module. Let's just try to patch on the main things I like the look of.
 
-#+attr_html: :class invertible :alt Example elfeed entry
-[[https://tecosaur.com/lfs/emacs-config/screenshots/elfeed.png]]
+# #+attr_html: :class invertible :alt Example elfeed entry
+# [[https://tecosaur.com/lfs/emacs-config/screenshots/elfeed.png]]
 
-*** Keybindings
+# *** Keybindings
 
-#+begin_src emacs-lisp
-(map! :map elfeed-search-mode-map
-      :after elfeed-search
-      [remap kill-this-buffer] "q"
-      [remap kill-buffer] "q"
-      :n doom-leader-key nil
-      :n "q" #'+rss/quit
-      :n "e" #'elfeed-update
-      :n "r" #'elfeed-search-untag-all-unread
-      :n "u" #'elfeed-search-tag-all-unread
-      :n "s" #'elfeed-search-live-filter
-      :n "RET" #'elfeed-search-show-entry
-      :n "p" #'elfeed-show-pdf
-      :n "+" #'elfeed-search-tag-all
-      :n "-" #'elfeed-search-untag-all
-      :n "S" #'elfeed-search-set-filter
-      :n "b" #'elfeed-search-browse-url
-      :n "y" #'elfeed-search-yank)
-(map! :map elfeed-show-mode-map
-      :after elfeed-show
-      [remap kill-this-buffer] "q"
-      [remap kill-buffer] "q"
-      :n doom-leader-key nil
-      :nm "q" #'+rss/delete-pane
-      :nm "o" #'ace-link-elfeed
-      :nm "RET" #'org-ref-elfeed-add
-      :nm "n" #'elfeed-show-next
-      :nm "N" #'elfeed-show-prev
-      :nm "p" #'elfeed-show-pdf
-      :nm "+" #'elfeed-show-tag
-      :nm "-" #'elfeed-show-untag
-      :nm "s" #'elfeed-show-new-live-search
-      :nm "y" #'elfeed-show-yank)
-#+end_src
+# #+begin_src emacs-lisp
+# (map! :map elfeed-search-mode-map
+#       :after elfeed-search
+#       [remap kill-this-buffer] "q"
+#       [remap kill-buffer] "q"
+#       :n doom-leader-key nil
+#       :n "q" #'+rss/quit
+#       :n "e" #'elfeed-update
+#       :n "r" #'elfeed-search-untag-all-unread
+#       :n "u" #'elfeed-search-tag-all-unread
+#       :n "s" #'elfeed-search-live-filter
+#       :n "RET" #'elfeed-search-show-entry
+#       :n "p" #'elfeed-show-pdf
+#       :n "+" #'elfeed-search-tag-all
+#       :n "-" #'elfeed-search-untag-all
+#       :n "S" #'elfeed-search-set-filter
+#       :n "b" #'elfeed-search-browse-url
+#       :n "y" #'elfeed-search-yank)
+# (map! :map elfeed-show-mode-map
+#       :after elfeed-show
+#       [remap kill-this-buffer] "q"
+#       [remap kill-buffer] "q"
+#       :n doom-leader-key nil
+#       :nm "q" #'+rss/delete-pane
+#       :nm "o" #'ace-link-elfeed
+#       :nm "RET" #'org-ref-elfeed-add
+#       :nm "n" #'elfeed-show-next
+#       :nm "N" #'elfeed-show-prev
+#       :nm "p" #'elfeed-show-pdf
+#       :nm "+" #'elfeed-show-tag
+#       :nm "-" #'elfeed-show-untag
+#       :nm "s" #'elfeed-show-new-live-search
+#       :nm "y" #'elfeed-show-yank)
+# #+end_src
 
-*** Usability enhancements
+# *** Usability enhancements
 
-#+begin_src emacs-lisp
-(after! elfeed-search
-  (set-evil-initial-state! 'elfeed-search-mode 'normal))
-(after! elfeed-show-mode
-  (set-evil-initial-state! 'elfeed-show-mode   'normal))
+# #+begin_src emacs-lisp
+# (after! elfeed-search
+#   (set-evil-initial-state! 'elfeed-search-mode 'normal))
+# (after! elfeed-show-mode
+#   (set-evil-initial-state! 'elfeed-show-mode   'normal))
 
-(after! evil-snipe
-  (push 'elfeed-show-mode   evil-snipe-disabled-modes)
-  (push 'elfeed-search-mode evil-snipe-disabled-modes))
-#+end_src
+# (after! evil-snipe
+#   (push 'elfeed-show-mode   evil-snipe-disabled-modes)
+#   (push 'elfeed-search-mode evil-snipe-disabled-modes))
+# #+end_src
 
-*** Visual enhancements
+# *** Visual enhancements
 
-#+begin_src emacs-lisp
-(after! elfeed
+# #+begin_src emacs-lisp
+# (after! elfeed
 
-  (elfeed-org)
-  (use-package! elfeed-link)
+#   (elfeed-org)
+#   (use-package! elfeed-link)
 
-  (setq elfeed-search-filter "@1-week-ago +unread"
-        elfeed-search-print-entry-function '+rss/elfeed-search-print-entry
-        elfeed-search-title-min-width 80
-        elfeed-show-entry-switch #'pop-to-buffer
-        elfeed-show-entry-delete #'+rss/delete-pane
-        elfeed-show-refresh-function #'+rss/elfeed-show-refresh--better-style
-        shr-max-image-proportion 0.6)
+#   (setq elfeed-search-filter "@1-week-ago +unread"
+#         elfeed-search-print-entry-function '+rss/elfeed-search-print-entry
+#         elfeed-search-title-min-width 80
+#         elfeed-show-entry-switch #'pop-to-buffer
+#         elfeed-show-entry-delete #'+rss/delete-pane
+#         elfeed-show-refresh-function #'+rss/elfeed-show-refresh--better-style
+#         shr-max-image-proportion 0.6)
 
-  (add-hook! 'elfeed-show-mode-hook (hide-mode-line-mode 1))
-  (add-hook! 'elfeed-search-update-hook #'hide-mode-line-mode)
+#   (add-hook! 'elfeed-show-mode-hook (hide-mode-line-mode 1))
+#   (add-hook! 'elfeed-search-update-hook #'hide-mode-line-mode)
 
-  (defface elfeed-show-title-face '((t (:weight ultrabold :slant italic :height 1.5)))
-    "title face in elfeed show buffer"
-    :group 'elfeed)
-  (defface elfeed-show-author-face `((t (:weight light)))
-    "title face in elfeed show buffer"
-    :group 'elfeed)
-  (set-face-attribute 'elfeed-search-title-face nil
-                      :foreground 'unspecified
-                      :weight 'light)
+#   (defface elfeed-show-title-face '((t (:weight ultrabold :slant italic :height 1.5)))
+#     "title face in elfeed show buffer"
+#     :group 'elfeed)
+#   (defface elfeed-show-author-face `((t (:weight light)))
+#     "title face in elfeed show buffer"
+#     :group 'elfeed)
+#   (set-face-attribute 'elfeed-search-title-face nil
+#                       :foreground 'nil
+#                       :weight 'light)
 
-  (defadvice! +rss-elfeed-wrap-h-nicer ()
-    "Enhances an elfeed entry's readability by wrapping it to a width of
-`fill-column' and centering it with `visual-fill-column-mode'."
-    :override #'+rss-elfeed-wrap-h
-    (setq-local truncate-lines nil
-                shr-width 120
-                visual-fill-column-center-text t
-                default-text-properties '(line-height 1.1))
-    (let ((inhibit-read-only t)
-          (inhibit-modification-hooks t))
-      (visual-fill-column-mode)
-      ;; (setq-local shr-current-font '(:family "Merriweather" :height 1.2))
-      (set-buffer-modified-p nil)))
+#   (defadvice! +rss-elfeed-wrap-h-nicer ()
+#     "Enhances an elfeed entry's readability by wrapping it to a width of
+# `fill-column' and centering it with `visual-fill-column-mode'."
+#     :override #'+rss-elfeed-wrap-h
+#     (setq-local truncate-lines nil
+#                 shr-width 120
+#                 visual-fill-column-center-text t
+#                 default-text-properties '(line-height 1.1))
+#     (let ((inhibit-read-only t)
+#           (inhibit-modification-hooks t))
+#       (visual-fill-column-mode)
+#       ;; (setq-local shr-current-font '(:family "Merriweather" :height 1.2))
+#       (set-buffer-modified-p nil)))
 
-  (defun +rss/elfeed-search-print-entry (entry)
-    "Print ENTRY to the buffer."
-    (let* ((elfeed-goodies/tag-column-width 40)
-           (elfeed-goodies/feed-source-column-width 30)
-           (title (or (elfeed-meta entry :title) (elfeed-entry-title entry) ""))
-           (title-faces (elfeed-search--faces (elfeed-entry-tags entry)))
-           (feed (elfeed-entry-feed entry))
-           (feed-title
-            (when feed
-              (or (elfeed-meta feed :title) (elfeed-feed-title feed))))
-           (tags (mapcar #'symbol-name (elfeed-entry-tags entry)))
-           (tags-str (concat (mapconcat 'identity tags ",")))
-           (title-width (- (window-width) elfeed-goodies/feed-source-column-width
-                           elfeed-goodies/tag-column-width 4))
+#   (defun +rss/elfeed-search-print-entry (entry)
+#     "Print ENTRY to the buffer."
+#     (let* ((elfeed-goodies/tag-column-width 40)
+#            (elfeed-goodies/feed-source-column-width 30)
+#            (title (or (elfeed-meta entry :title) (elfeed-entry-title entry) ""))
+#            (title-faces (elfeed-search--faces (elfeed-entry-tags entry)))
+#            (feed (elfeed-entry-feed entry))
+#            (feed-title
+#             (when feed
+#               (or (elfeed-meta feed :title) (elfeed-feed-title feed))))
+#            (tags (mapcar #'symbol-name (elfeed-entry-tags entry)))
+#            (tags-str (concat (mapconcat 'identity tags ",")))
+#            (title-width (- (window-width) elfeed-goodies/feed-source-column-width
+#                            elfeed-goodies/tag-column-width 4))
 
-           (tag-column (elfeed-format-column
-                        tags-str (elfeed-clamp (length tags-str)
-                                               elfeed-goodies/tag-column-width
-                                               elfeed-goodies/tag-column-width)
-                        :left))
-           (feed-column (elfeed-format-column
-                         feed-title (elfeed-clamp elfeed-goodies/feed-source-column-width
-                                                  elfeed-goodies/feed-source-column-width
-                                                  elfeed-goodies/feed-source-column-width)
-                         :left)))
+#            (tag-column (elfeed-format-column
+#                         tags-str (elfeed-clamp (length tags-str)
+#                                                elfeed-goodies/tag-column-width
+#                                                elfeed-goodies/tag-column-width)
+#                         :left))
+#            (feed-column (elfeed-format-column
+#                          feed-title (elfeed-clamp elfeed-goodies/feed-source-column-width
+#                                                   elfeed-goodies/feed-source-column-width
+#                                                   elfeed-goodies/feed-source-column-width)
+#                          :left)))
 
-      (insert (propertize feed-column 'face 'elfeed-search-feed-face) " ")
-      (insert (propertize tag-column 'face 'elfeed-search-tag-face) " ")
-      (insert (propertize title 'face title-faces 'kbd-help title))
-      (setq-local line-spacing 0.2)))
+#       (insert (propertize feed-column 'face 'elfeed-search-feed-face) " ")
+#       (insert (propertize tag-column 'face 'elfeed-search-tag-face) " ")
+#       (insert (propertize title 'face title-faces 'kbd-help title))
+#       (setq-local line-spacing 0.2)))
 
-  (defun +rss/elfeed-show-refresh--better-style ()
-    "Update the buffer to match the selected entry, using a mail-style."
-    (interactive)
-    (let* ((inhibit-read-only t)
-           (title (elfeed-entry-title elfeed-show-entry))
-           (date (seconds-to-time (elfeed-entry-date elfeed-show-entry)))
-           (author (elfeed-meta elfeed-show-entry :author))
-           (link (elfeed-entry-link elfeed-show-entry))
-           (tags (elfeed-entry-tags elfeed-show-entry))
-           (tagsstr (mapconcat #'symbol-name tags ", "))
-           (nicedate (format-time-string "%a, %e %b %Y %T %Z" date))
-           (content (elfeed-deref (elfeed-entry-content elfeed-show-entry)))
-           (type (elfeed-entry-content-type elfeed-show-entry))
-           (feed (elfeed-entry-feed elfeed-show-entry))
-           (feed-title (elfeed-feed-title feed))
-           (base (and feed (elfeed-compute-base (elfeed-feed-url feed)))))
-      (erase-buffer)
-      (insert "\n")
-      (insert (format "%s\n\n" (propertize title 'face 'elfeed-show-title-face)))
-      (insert (format "%s\t" (propertize feed-title 'face 'elfeed-search-feed-face)))
-      (when (and author elfeed-show-entry-author)
-        (insert (format "%s\n" (propertize author 'face 'elfeed-show-author-face))))
-      (insert (format "%s\n\n" (propertize nicedate 'face 'elfeed-log-date-face)))
-      (when tags
-        (insert (format "%s\n"
-                        (propertize tagsstr 'face 'elfeed-search-tag-face))))
-      ;; (insert (propertize "Link: " 'face 'message-header-name))
-      ;; (elfeed-insert-link link link)
-      ;; (insert "\n")
-      (cl-loop for enclosure in (elfeed-entry-enclosures elfeed-show-entry)
-               do (insert (propertize "Enclosure: " 'face 'message-header-name))
-               do (elfeed-insert-link (car enclosure))
-               do (insert "\n"))
-      (insert "\n")
-      (if content
-          (if (eq type 'html)
-              (elfeed-insert-html content base)
-            (insert content))
-        (insert (propertize "(empty)\n" 'face 'italic)))
-      (goto-char (point-min))))
+#   (defun +rss/elfeed-show-refresh--better-style ()
+#     "Update the buffer to match the selected entry, using a mail-style."
+#     (interactive)
+#     (let* ((inhibit-read-only t)
+#            (title (elfeed-entry-title elfeed-show-entry))
+#            (date (seconds-to-time (elfeed-entry-date elfeed-show-entry)))
+#            (author (elfeed-meta elfeed-show-entry :author))
+#            (link (elfeed-entry-link elfeed-show-entry))
+#            (tags (elfeed-entry-tags elfeed-show-entry))
+#            (tagsstr (mapconcat #'symbol-name tags ", "))
+#            (nicedate (format-time-string "%a, %e %b %Y %T %Z" date))
+#            (content (elfeed-deref (elfeed-entry-content elfeed-show-entry)))
+#            (type (elfeed-entry-content-type elfeed-show-entry))
+#            (feed (elfeed-entry-feed elfeed-show-entry))
+#            (feed-title (elfeed-feed-title feed))
+#            (base (and feed (elfeed-compute-base (elfeed-feed-url feed)))))
+#       (erase-buffer)
+#       (insert "\n")
+#       (insert (format "%s\n\n" (propertize title 'face 'elfeed-show-title-face)))
+#       (insert (format "%s\t" (propertize feed-title 'face 'elfeed-search-feed-face)))
+#       (when (and author elfeed-show-entry-author)
+#         (insert (format "%s\n" (propertize author 'face 'elfeed-show-author-face))))
+#       (insert (format "%s\n\n" (propertize nicedate 'face 'elfeed-log-date-face)))
+#       (when tags
+#         (insert (format "%s\n"
+#                         (propertize tagsstr 'face 'elfeed-search-tag-face))))
+#       ;; (insert (propertize "Link: " 'face 'message-header-name))
+#       ;; (elfeed-insert-link link link)
+#       ;; (insert "\n")
+#       (cl-loop for enclosure in (elfeed-entry-enclosures elfeed-show-entry)
+#                do (insert (propertize "Enclosure: " 'face 'message-header-name))
+#                do (elfeed-insert-link (car enclosure))
+#                do (insert "\n"))
+#       (insert "\n")
+#       (if content
+#           (if (eq type 'html)
+#               (elfeed-insert-html content base)
+#             (insert content))
+#         (insert (propertize "(empty)\n" 'face 'italic)))
+#       (goto-char (point-min))))
 
-  )
-#+end_src
+#   )
+# #+end_src
 
-*** Functionality enhancements
+# *** Functionality enhancements
 
-#+begin_src emacs-lisp
-(after! elfeed-show
-  (require 'url)
+# #+begin_src emacs-lisp
+# (after! elfeed-show
+#   (require 'url)
 
-  (defvar elfeed-pdf-dir
-    (expand-file-name "pdfs/"
-                      (file-name-directory (directory-file-name elfeed-enclosure-default-dir))))
+#   (defvar elfeed-pdf-dir
+#     (expand-file-name "pdfs/"
+#                       (file-name-directory (directory-file-name elfeed-enclosure-default-dir))))
 
-  (defvar elfeed-link-pdfs
-    '(("https://www.jstatsoft.org/index.php/jss/article/view/v0\\([^/]+\\)" . "https://www.jstatsoft.org/index.php/jss/article/view/v0\\1/v\\1.pdf")
-      ("http://arxiv.org/abs/\\([^/]+\\)" . "https://arxiv.org/pdf/\\1.pdf"))
-    "List of alists of the form (REGEX-FOR-LINK . FORM-FOR-PDF)")
+#   (defvar elfeed-link-pdfs
+#     '(("https://www.jstatsoft.org/index.php/jss/article/view/v0\\([^/]+\\)" . "https://www.jstatsoft.org/index.php/jss/article/view/v0\\1/v\\1.pdf")
+#       ("http://arxiv.org/abs/\\([^/]+\\)" . "https://arxiv.org/pdf/\\1.pdf"))
+#     "List of alists of the form (REGEX-FOR-LINK . FORM-FOR-PDF)")
 
-  (defun elfeed-show-pdf (entry)
-    (interactive
-     (list (or elfeed-show-entry (elfeed-search-selected :ignore-region))))
-    (let ((link (elfeed-entry-link entry))
-          (feed-name (plist-get (elfeed-feed-meta (elfeed-entry-feed entry)) :title))
-          (title (elfeed-entry-title entry))
-          (file-view-function
-           (lambda (f)
-             (when elfeed-show-entry
-               (elfeed-kill-buffer))
-             (pop-to-buffer (find-file-noselect f))))
-          pdf)
+#   (defun elfeed-show-pdf (entry)
+#     (interactive
+#      (list (or elfeed-show-entry (elfeed-search-selected :ignore-region))))
+#     (let ((link (elfeed-entry-link entry))
+#           (feed-name (plist-get (elfeed-feed-meta (elfeed-entry-feed entry)) :title))
+#           (title (elfeed-entry-title entry))
+#           (file-view-function
+#            (lambda (f)
+#              (when elfeed-show-entry
+#                (elfeed-kill-buffer))
+#              (pop-to-buffer (find-file-noselect f))))
+#           pdf)
 
-      (let ((file (expand-file-name
-                   (concat (subst-char-in-string ?/ ?, title) ".pdf")
-                   (expand-file-name (subst-char-in-string ?/ ?, feed-name)
-                                     elfeed-pdf-dir))))
-        (if (file-exists-p file)
-            (funcall file-view-function file)
-          (dolist (link-pdf elfeed-link-pdfs)
-            (when (and (string-match-p (car link-pdf) link)
-                       (not pdf))
-              (setq pdf (replace-regexp-in-string (car link-pdf) (cdr link-pdf) link))))
-          (if (not pdf)
-              (message "No associated PDF for entry")
-            (message "Fetching %s" pdf)
-            (unless (file-exists-p (file-name-directory file))
-              (make-directory (file-name-directory file) t))
-            (url-copy-file pdf file)
-            (funcall file-view-function file))))))
+#       (let ((file (expand-file-name
+#                    (concat (subst-char-in-string ?/ ?, title) ".pdf")
+#                    (expand-file-name (subst-char-in-string ?/ ?, feed-name)
+#                                      elfeed-pdf-dir))))
+#         (if (file-exists-p file)
+#             (funcall file-view-function file)
+#           (dolist (link-pdf elfeed-link-pdfs)
+#             (when (and (string-match-p (car link-pdf) link)
+#                        (not pdf))
+#               (setq pdf (replace-regexp-in-string (car link-pdf) (cdr link-pdf) link))))
+#           (if (not pdf)
+#               (message "No associated PDF for entry")
+#             (message "Fetching %s" pdf)
+#             (unless (file-exists-p (file-name-directory file))
+#               (make-directory (file-name-directory file) t))
+#             (url-copy-file pdf file)
+#             (funcall file-view-function file))))))
 
-  )
-#+end_src
+#   )
+# #+end_src
 
 ** Dictionary
 
@@ -6452,6 +6491,19 @@ Prevents a series of redisplays from being called (when set to an appropriate va
       (when new-request
         (run-at-time (* 1.1 mu4e-reindex-request-min-seperation) nil
                      #'mu4e-reindex-maybe)))))
+
+(setq
+  mu4e-sent-folder   "/Sent"       ;; folder for sent messages
+  mu4e-drafts-folder "/Drafts"     ;; unfinished messages
+  mu4e-trash-folder  "/Trash"      ;; trashed messages
+  mu4e-refile-folder "/Archive")   ;; saved messages
+
+(setq mu4e-maildir-shortcuts
+  '( (:maildir "/INBOX"     :key  ?i)
+     (:maildir "/Sent"      :key  ?s)
+     (:maildir "/Drafts"     :key  ?d)
+     (:maildir "/Trash"      :key  ?t)
+     (:maildir "/Archive"   :key  ?a)))
 #+end_src
 
 **** Config transcoding & service management
@@ -7043,7 +7095,7 @@ There seem to be some advantages with using Gnus' article view (such as inline
 images), and judging from [[https://github.com/djcb/mu/pull/1442#issuecomment-591695814][djcb/mu!1442 (comment)]] this seems to be the 'way of
 the future' for mu4e.
 
-There are some all-the-icons font related issues, so we need to redefine the
+There are some nerd-icons font related issues, so we need to redefine the
 fancy chars, and make sure they get the correct width.
 
 To account for the increase width of each flag character, and make perform a
@@ -7167,7 +7219,7 @@ We also want to define ~mu4e-compose-from-mailto~.
 
 It would also be nice to change the name pre-filled in =From:= when drafting.
 #+begin_src emacs-lisp
-(defvar mu4e-from-name "Timothy"
+(defvar mu4e-from-name "Josua"
   "Name used in \"From:\" template.")
 (defadvice! mu4e~draft-from-construct-renamed (orig-fn)
   "Wrap `mu4e~draft-from-construct-renamed' to change the name."
@@ -7201,7 +7253,7 @@ I've got a few extra addresses I'd like ~+mu4e-set-from-address-h~ to be aware o
                         (lambda (alias)
                           (replace-regexp-in-string
                            "\\`\\(.*\\)@" alias primary-address t t 1))
-                        '("contact" "timothy")))))))
+                        '("contact" "josua")))))))
 
 (add-transient-hook! 'mu4e-compose-pre-hook
   (+mu4e-update-personal-addresses))
@@ -7217,9 +7269,9 @@ account-specific sent directory, not the catch-all.
                 (save-restriction
                   (mail-narrow-to-head)
                   (mail-fetch-field "from")))))
-    (if (and from (string-match-p "@tecosaur\\.net>?\\'" from))
-        "/tecosaur-net/Sent"
-      "/sent")))
+    (if (and from (string-match-p "@posteo\\.de>?\\'" from))
+        "/posteo-de/Sent"
+      "/Sent")))
 (setq mu4e-sent-folder #'+mu4e-account-sent-folder)
 #+end_src
 
@@ -7234,292 +7286,292 @@ mode than =normal= mode, which can be accomplished via a compose hook.
 (add-hook 'mu4e-compose-mode-hook #'+mu4e-evil-enter-insert-mode 90)
 #+end_src
 
-# **** Working with the Org mailing list
-# :PROPERTIES:
-# :header-args:emacs-lisp: :noweb-ref mu4e-conf
-# :END:
-# ***** Adding =X-Woof= headers
+**** Working with the Org mailing list
+:PROPERTIES:
+:header-args:emacs-lisp: :noweb-ref mu4e-conf
+:END:
+***** Adding =X-Woof= headers
 
-# I'm fairly active on the Org mailing list (ML). The Org ML has a linked
-# bug/patch tracker, https://updates.orgmode.org/ managed by [[https://github.com/bzg/woof][Woof]]. However, I feel
-# like I spend too much time looking up what the appropriate headers are for
-# updating the status of bugs and patches. What I need, is some sort of convenient
-# tool. Let's write one.
+I'm fairly active on the Org mailing list (ML). The Org ML has a linked
+bug/patch tracker, https://updates.orgmode.org/ managed by [[https://github.com/bzg/woof][Woof]]. However, I feel
+like I spend too much time looking up what the appropriate headers are for
+updating the status of bugs and patches. What I need, is some sort of convenient
+tool. Let's write one.
 
-# First, a function that asks what I want to do and returns the appropriate =X-Woof=
-# header.
-# #+begin_src emacs-lisp
-# (defun +mu4e-get-woof-header ()
-#   (pcase (read-char
-#           (format "\
-# %s
-#   %s Declare %s Applied %s Aborted
-# %s
-#   %s Confirm %s Fixed
-# %s
-#   %s Request %s Resolved
+First, a function that asks what I want to do and returns the appropriate =X-Woof=
+header.
+#+begin_src emacs-lisp
+(defun +mu4e-get-woof-header ()
+  (pcase (read-char
+          (format "\
+%s
+  %s Declare %s Applied %s Aborted
+%s
+  %s Confirm %s Fixed
+%s
+  %s Request %s Resolved
 
-# %s remove X-Woof header"
-#                   (propertize "Patch" 'face 'outline-3)
-#                   (propertize "p" 'face '(bold consult-key))
-#                   (propertize "a" 'face '(bold consult-key))
-#                   (propertize "c" 'face '(bold consult-key))
-#                   (propertize "Bug" 'face 'outline-3)
-#                   (propertize "b" 'face '(bold consult-key))
-#                   (propertize "f" 'face '(bold consult-key))
-#                   (propertize "Help" 'face 'outline-3)
-#                   (propertize "h" 'face '(bold consult-key))
-#                   (propertize "r" 'face '(bold consult-key))
-#                   (propertize "x" 'face '(bold error))))
-#     (?p "X-Woof-Patch: confirmed")
-#     (?a "X-Woof-Patch: applied")
-#     (?c "X-Woof-Patch: cancelled")
-#     (?b "X-Woof-Bug: confirmed")
-#     (?f "X-Woof-Bug: fixed")
-#     (?h "X-Woof-Help: confirmed")
-#     (?r "X-Woof-Help: cancelled")
-#     (?x 'delete)))
-# #+end_src
+%s remove X-Woof header"
+                  (propertize "Patch" 'face 'outline-3)
+                  (propertize "p" 'face '(bold consult-key))
+                  (propertize "a" 'face '(bold consult-key))
+                  (propertize "c" 'face '(bold consult-key))
+                  (propertize "Bug" 'face 'outline-3)
+                  (propertize "b" 'face '(bold consult-key))
+                  (propertize "f" 'face '(bold consult-key))
+                  (propertize "Help" 'face 'outline-3)
+                  (propertize "h" 'face '(bold consult-key))
+                  (propertize "r" 'face '(bold consult-key))
+                  (propertize "x" 'face '(bold error))))
+    (?p "X-Woof-Patch: confirmed")
+    (?a "X-Woof-Patch: applied")
+    (?c "X-Woof-Patch: cancelled")
+    (?b "X-Woof-Bug: confirmed")
+    (?f "X-Woof-Bug: fixed")
+    (?h "X-Woof-Help: confirmed")
+    (?r "X-Woof-Help: cancelled")
+    (?x 'delete)))
+#+end_src
 
-# Now we just need a function which will add such a header to a buffer
-# #+begin_src emacs-lisp
-# (defun +mu4e-insert-woof-header ()
-#   "Insert an X-Woof header into the current message."
-#   (interactive)
-#   (when-let ((header (+mu4e-get-woof-header)))
-#     (save-excursion
-#       (goto-char (point-min))
-#       (search-forward "--text follows this line--")
-#       (unless (eq header 'delete)
-#         (beginning-of-line)
-#         (insert header "\n")
-#         (forward-line -1))
-#       (when (re-search-backward "^X-Woof-" nil t)
-#         (kill-whole-line)))))
+Now we just need a function which will add such a header to a buffer
+#+begin_src emacs-lisp
+(defun +mu4e-insert-woof-header ()
+  "Insert an X-Woof header into the current message."
+  (interactive)
+  (when-let ((header (+mu4e-get-woof-header)))
+    (save-excursion
+      (goto-char (point-min))
+      (search-forward "--text follows this line--")
+      (unless (eq header 'delete)
+        (beginning-of-line)
+        (insert header "\n")
+        (forward-line -1))
+      (when (re-search-backward "^X-Woof-" nil t)
+        (kill-whole-line)))))
 
-# (map! :map mu4e-compose-mode-map
-#       :localleader
-#       :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
+(map! :map mu4e-compose-mode-map
+      :localleader
+      :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
 
-# (map! :map org-msg-edit-mode-map
-#       :after org-msg
-#       :localleader
-#       :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
-# #+end_src
+(map! :map org-msg-edit-mode-map
+      :after org-msg
+      :localleader
+      :desc "Insert X-Woof Header" "w" #'+mu4e-insert-woof-header)
+#+end_src
 
-# Lovely! That should make adding these headers a breeze.
+Lovely! That should make adding these headers a breeze.
 
-# # ***** Patch workflow
+***** Patch workflow
 
-# # Testing patches from the ML is currently more hassle than it needs to be. Let's
-# # change that.
+Testing patches from the ML is currently more hassle than it needs to be. Let's
+change that.
 
-# # #+begin_src emacs-lisp
-# # (after! mu4e
-# #   (defvar +org-ml-target-dir
-# #     (expand-file-name "lisp/org/" doom-user-dir))
-# #   (defvar +org-ml-max-age 600
-# #     "Maximum permissible age in seconds.")
-# #   (defvar +org-ml--cache-timestamp 0)
-# #   (defvar +org-ml--cache nil)
+#+begin_src emacs-lisp
+(after! mu4e
+  (defvar +org-ml-target-dir
+    (expand-file-name "lisp/org/" doom-user-dir))
+  (defvar +org-ml-max-age 600
+    "Maximum permissible age in seconds.")
+  (defvar +org-ml--cache-timestamp 0)
+  (defvar +org-ml--cache nil)
 
-# #   (define-minor-mode +org-ml-patchy-mood-mode
-# #     "Apply patches to Org in bulk."
-# #     :global t
-# #     (let ((action (cons "apply patch to org" #'+org-ml-apply-patch)))
-# #       (if +org-ml-patchy-mood-mode
-# #           (add-to-list 'mu4e-view-actions action)
-# #         (setq mu4e-view-actions (delete action mu4e-view-actions)))))
+  (define-minor-mode +org-ml-patchy-mood-mode
+    "Apply patches to Org in bulk."
+    :global t
+    (let ((action (cons "apply patch to org" #'+org-ml-apply-patch)))
+      (if +org-ml-patchy-mood-mode
+          (add-to-list 'mu4e-view-actions action)
+        (setq mu4e-view-actions (delete action mu4e-view-actions)))))
 
-# #   (defun +org-ml-apply-patch (msg)
-# #     "Apply the patch in the current message to Org."
-# #     (interactive)
-# #     (unless msg (setq msg (mu4e-message-at-point)))
-# #     (with-current-buffer (get-buffer-create "*Shell: Org apply patches*")
-# #       (erase-buffer)
-# #       (let* ((default-directory +org-ml-target-dir)
-# #              (exit-code (call-process "git" nil t nil "am" (mu4e-message-field msg :path))))
-# #         (magit-refresh)
-# #         (when (not (= 0 exit-code))
-# #           (+popup/buffer)))))
+  (defun +org-ml-apply-patch (msg)
+    "Apply the patch in the current message to Org."
+    (interactive)
+    (unless msg (setq msg (mu4e-message-at-point)))
+    (with-current-buffer (get-buffer-create "*Shell: Org apply patches*")
+      (erase-buffer)
+      (let* ((default-directory +org-ml-target-dir)
+             (exit-code (call-process "git" nil t nil "am" (mu4e-message-field msg :path))))
+        (magit-refresh)
+        (when (not (= 0 exit-code))
+          (+popup/buffer)))))
 
-# #   (defun +org-ml-current-patches ()
-# #     "Get the currently open patches, as a list of alists.
-# # Entries of the form (subject . id)."
-# #     (delq nil
-# #           (mapcar
-# #            (lambda (entry)
-# #              (unless (plist-get entry :fixed)
-# #                (cons
-# #                 (format "%-8s  %s"
-# #                         (propertize
-# #                          (replace-regexp-in-string "T.*" ""
-# #                                                    (plist-get entry :date))
-# #                          'face 'font-lock-doc-face)
-# #                         (propertize
-# #                          (replace-regexp-in-string "\\[PATCH\\] ?" ""
-# #                                                    (plist-get entry :summary))
-# #                          'face 'font-lock-keyword-face))
-# #                 (plist-get entry :id))))
-# #            (with-current-buffer (url-retrieve-synchronously "https://updates.orgmode.org/data/patches")
-# #              (goto-char url-http-end-of-headers)
-# #              (json-parse-buffer :object-type 'plist)))))
+  (defun +org-ml-current-patches ()
+    "Get the currently open patches, as a list of alists.
+Entries of the form (subject . id)."
+    (delq nil
+          (mapcar
+           (lambda (entry)
+             (unless (plist-get entry :fixed)
+               (cons
+                (format "%-8s  %s"
+                        (propertize
+                         (replace-regexp-in-string "T.*" ""
+                                                   (plist-get entry :date))
+                         'face 'font-lock-doc-face)
+                        (propertize
+                         (replace-regexp-in-string "\\[PATCH\\] ?" ""
+                                                   (plist-get entry :summary))
+                         'face 'font-lock-keyword-face))
+                (plist-get entry :id))))
+           (with-current-buffer (url-retrieve-synchronously "https://updates.orgmode.org/data/patches")
+             (goto-char url-http-end-of-headers)
+             (json-parse-buffer :object-type 'plist)))))
 
-# #   (defun +org-ml-select-patch-thread ()
-# #     "Find and apply a proposed Org patch."
-# #     (interactive)
-# #     (let* ((current-workspace (+workspace-current))
-# #            (patches (progn
-# #                       (when (or (not +org-ml--cache)
-# #                                 (> (- (float-time) +org-ml--cache-timestamp)
-# #                                    +org-ml-max-age))
-# #                         (setq +org-ml--cache (+org-ml-current-patches)
-# #                               +org-ml--cache-timestamp (float-time)))
-# #                       +org-ml--cache))
-# #            (msg-id (cdr (assoc (completing-read
-# #                                 "Thread: " (mapcar #'car patches))
-# #                                patches))))
-# #       (+workspace-switch +mu4e-workspace-name)
-# #       (mu4e-view-message-with-message-id msg-id)
-# #       (unless +org-ml-patchy-mood-mode
-# #         (add-to-list 'mu4e-view-actions
-# #                      (cons "apply patch to org" #'+org-ml-transient-mu4e-action)))))
+  (defun +org-ml-select-patch-thread ()
+    "Find and apply a proposed Org patch."
+    (interactive)
+    (let* ((current-workspace (+workspace-current))
+           (patches (progn
+                      (when (or (not +org-ml--cache)
+                                (> (- (float-time) +org-ml--cache-timestamp)
+                                   +org-ml-max-age))
+                        (setq +org-ml--cache (+org-ml-current-patches)
+                              +org-ml--cache-timestamp (float-time)))
+                      +org-ml--cache))
+           (msg-id (cdr (assoc (completing-read
+                                "Thread: " (mapcar #'car patches))
+                               patches))))
+      (+workspace-switch +mu4e-workspace-name)
+      (mu4e-view-message-with-message-id msg-id)
+      (unless +org-ml-patchy-mood-mode
+        (add-to-list 'mu4e-view-actions
+                     (cons "apply patch to org" #'+org-ml-transient-mu4e-action)))))
 
-# #   (defun +org-ml-transient-mu4e-action (msg)
-# #     (setq mu4e-view-actions
-# #           (delete (cons "apply patch to org" #'+org-ml-transient-mu4e-action)
-# #                   mu4e-view-actions))
-# #     (+workspace/other)
-# #     (magit-status +org-ml-target-dir)
-# #     (+org-ml-apply-patch msg)))
-# # #+end_src
+  (defun +org-ml-transient-mu4e-action (msg)
+    (setq mu4e-view-actions
+          (delete (cons "apply patch to org" #'+org-ml-transient-mu4e-action)
+                  mu4e-view-actions))
+    (+workspace/other)
+    (magit-status +org-ml-target-dir)
+    (+org-ml-apply-patch msg)))
+#+end_src
 
-# # ***** Mail list archive links
+***** Mail list archive links
 
-# # The other thing which it's good to be easily able to do is grab a link to the
-# # current message on https://list.orgmode.org.
+The other thing which it's good to be easily able to do is grab a link to the
+current message on https://list.orgmode.org.
 
-# # #+begin_src emacs-lisp
-# # (after! mu4e
-# #   (defun +mu4e-ml-message-link (msg)
-# #     "Copy the link to MSG on the mailing list archives."
-# #     (let* ((list-addr (or (mu4e-message-field msg :list)
-# #                           (thread-last (append (mu4e-message-field-raw msg :list-post)
-# #                                                (mu4e-message-field msg :to)
-# #                                                (mu4e-message-field msg :cc))
-# #                                        (mapcar (lambda (e) (plist-get e :email)))
-# #                                        (mapcar (lambda (addr)
-# #                                                  (when (string-match-p "emacs.*@gnu\\.org$" addr)
-# #                                                    (replace-regexp-in-string "@" "." addr))))
-# #                                        (delq nil)
-# #                                        (car))))
-# #            (msg-url
-# #             (pcase list-addr
-# #               ("emacs-orgmode.gnu.org"
-# #                (format "https://list.orgmode.org/%s" (mu4e-message-field msg :message-id)))
-# #               (_ (user-error "Mailing list %s not supported" list-addr)))))
-# #       (message "Link %s copied to clipboard"
-# #                (propertize (gui-select-text msg-url) 'face '((:weight normal :underline nil) link)))
-# #       msg-url))
+#+begin_src emacs-lisp
+(after! mu4e
+  (defun +mu4e-ml-message-link (msg)
+    "Copy the link to MSG on the mailing list archives."
+    (let* ((list-addr (or (mu4e-message-field msg :list)
+                          (thread-last (append (mu4e-message-field-raw msg :list-post)
+                                               (mu4e-message-field msg :to)
+                                               (mu4e-message-field msg :cc))
+                                       (mapcar (lambda (e) (plist-get e :email)))
+                                       (mapcar (lambda (addr)
+                                                 (when (string-match-p "emacs.*@gnu\\.org$" addr)
+                                                   (replace-regexp-in-string "@" "." addr))))
+                                       (delq nil)
+                                       (car))))
+           (msg-url
+            (pcase list-addr
+              ("emacs-orgmode.gnu.org"
+               (format "https://list.orgmode.org/%s" (mu4e-message-field msg :message-id)))
+              (_ (user-error "Mailing list %s not supported" list-addr)))))
+      (message "Link %s copied to clipboard"
+               (propertize (gui-select-text msg-url) 'face '((:weight normal :underline nil) link)))
+      msg-url))
 
-# #   (add-to-list 'mu4e-view-actions (cons "link to message ML" #'+mu4e-ml-message-link) t))
-# # #+end_src
+  (add-to-list 'mu4e-view-actions (cons "link to message ML" #'+mu4e-ml-message-link) t))
+#+end_src
 
-# # In a similar manner, when clicking on such a link (say when someone uses a link
-# # to the archive to refer to an earlier email) I'd much rather look at it in mu4e.
+In a similar manner, when clicking on such a link (say when someone uses a link
+to the archive to refer to an earlier email) I'd much rather look at it in mu4e.
 
-# # #+begin_src emacs-lisp
-# # (defun +browse-url-orgmode-ml (url &optional _)
-# #   "Open an orgmode list url using notmuch."
-# #   (let ((id (and (or (string-match "^https?://orgmode\\.org/list/\\([^/]+\\)" url)
-# #                      (string-match "^https?://list\\.orgmode\\.org/\\([^/]+\\)" url))
-# #                  (match-string 1 url))))
-# #     (mu4e-view-message-with-message-id id)))
+#+begin_src emacs-lisp
+(defun +browse-url-orgmode-ml (url &optional _)
+  "Open an orgmode list url using notmuch."
+  (let ((id (and (or (string-match "^https?://orgmode\\.org/list/\\([^/]+\\)" url)
+                     (string-match "^https?://list\\.orgmode\\.org/\\([^/]+\\)" url))
+                 (match-string 1 url))))
+    (mu4e-view-message-with-message-id id)))
 
-# # (add-to-list 'browse-url-handlers (cons "^https?://orgmode\\.org/list" #'+browse-url-orgmode-ml))
-# # (add-to-list 'browse-url-handlers (cons "^https?://list\\.orgmode\\.org/" #'+browse-url-orgmode-ml))
-# # #+end_src
+(add-to-list 'browse-url-handlers (cons "^https?://orgmode\\.org/list" #'+browse-url-orgmode-ml))
+(add-to-list 'browse-url-handlers (cons "^https?://list\\.orgmode\\.org/" #'+browse-url-orgmode-ml))
+#+end_src
 
-# ***** Setup when composing a new email
+***** Setup when composing a new email
 
-# Thanks to having a dedicated address for my interactions with the Org ML, and
-# Doom's ~+mu4e-set-from-address-h~, we can tell at the end of compose setup whether
-# I'm composing an email to the Org ML and then do a little setup for convenience,
-# namely:
-# + Pre-fill the =To= address
-# + Ensure that =org-msg= is set up to send plaintext only
-# + Set ~default-directory~ to my local Org repository (where patch files are
-#   generated)
-# + Move ~(point)~ to the =Subject:= line
-# + Use a special Org-ML-specific signature
+Thanks to having a dedicated address for my interactions with the Org ML, and
+Doom's ~+mu4e-set-from-address-h~, we can tell at the end of compose setup whether
+I'm composing an email to the Org ML and then do a little setup for convenience,
+namely:
++ Pre-fill the =To= address
++ Ensure that =org-msg= is set up to send plaintext only
++ Set ~default-directory~ to my local Org repository (where patch files are
+  generated)
++ Move ~(point)~ to the =Subject:= line
++ Use a special Org-ML-specific signature
 
-# #+begin_src emacs-lisp
-# (defun +mu4e-compose-org-ml-setup ()
-#   (when (string-match-p "\\`orgmode@" user-mail-address)
-#     (goto-char (point-min))
-#     (save-restriction
-#       (mail-narrow-to-head)
-#       (when (string-empty-p (mail-fetch-field "to"))
-#         (re-search-forward "^To: .*$")
-#         (replace-match "To: emacs-orgmode@gnu.org")
-#         (advice-add 'message-goto-to :after #'+mu4e-goto-subject-not-to-once)))
-#     (when (and org-msg-mode
-#                (re-search-forward "^:alternatives: (\\(utf-8 html\\))" nil t))
-#       (replace-match "utf-8" t t nil 1))
-#     (if org-msg-mode
-#         (let ((final-elem (org-element-at-point (point-max))))
-#           (when (equal (org-element-property :type final-elem) "signature")
-#             (goto-char (org-element-property :contents-begin final-elem))
-#             (delete-region (org-element-property :contents-begin final-elem)
-#                            (org-element-property :contents-end final-elem))
-#             (setq-local org-msg-signature
-#                         (format "\n\n#+begin_signature\n%s\n#+end_signature"
-#                                 (cdr +mu4e-org-ml-signature)))
-#             (insert (cdr +mu4e-org-ml-signature) "\n")))
-#       (goto-char (point-max))
-#       (insert (car +mu4e-org-ml-signature)))
-#     (setq default-directory
-#           (replace-regexp-in-string
-#            (regexp-quote straight-build-dir)
-#            "repos"
-#            (file-name-directory (locate-library "org"))))))
+#+begin_src emacs-lisp
+(defun +mu4e-compose-org-ml-setup ()
+  (when (string-match-p "\\`orgmode@" user-mail-address)
+    (goto-char (point-min))
+    (save-restriction
+      (mail-narrow-to-head)
+      (when (string-empty-p (mail-fetch-field "to"))
+        (re-search-forward "^To: .*$")
+        (replace-match "To: emacs-orgmode@gnu.org")
+        (advice-add 'message-goto-to :after #'+mu4e-goto-subject-not-to-once)))
+    (when (and org-msg-mode
+               (re-search-forward "^:alternatives: (\\(utf-8 html\\))" nil t))
+      (replace-match "utf-8" t t nil 1))
+    (if org-msg-mode
+        (let ((final-elem (org-element-at-point (point-max))))
+          (when (equal (org-element-property :type final-elem) "signature")
+            (goto-char (org-element-property :contents-begin final-elem))
+            (delete-region (org-element-property :contents-begin final-elem)
+                           (org-element-property :contents-end final-elem))
+            (setq-local org-msg-signature
+                        (format "\n\n#+begin_signature\n%s\n#+end_signature"
+                                (cdr +mu4e-org-ml-signature)))
+            (insert (cdr +mu4e-org-ml-signature) "\n")))
+      (goto-char (point-max))
+      (insert (car +mu4e-org-ml-signature)))
+    (setq default-directory
+          (replace-regexp-in-string
+           (regexp-quote straight-build-dir)
+           "repos"
+           (file-name-directory (locate-library "org"))))))
 
-# (defun +mu4e-goto-subject-not-to-once ()
-#   (message-goto-subject)
-#   (advice-remove 'message-goto-to #'+mu4e-goto-subject-not-to-once))
-# #+end_src
+(defun +mu4e-goto-subject-not-to-once ()
+  (message-goto-subject)
+  (advice-remove 'message-goto-to #'+mu4e-goto-subject-not-to-once))
+#+end_src
 
-# Now let's set up that signature.
+Now let's set up that signature.
 
-# #+begin_src emacs-lisp
-# (defvar +mu4e-org-ml-signature
-#   (cons
-#    "All the best,
-# Timothy
+#+begin_src emacs-lisp
+(defvar +mu4e-org-ml-signature
+  (cons
+   "Viele Grüße,
+Josua
 
-# -- \
-# Timothy (‘tecosaur’/‘TEC’), Org mode contributor.
-# Learn more about Org mode at <https://orgmode.org/>.
-# Support Org development at <https://liberapay.com/org-mode>,
-# or support my work at <https://liberapay.com/tec>.
-# "
-#    "All the best,\\\\
-# @@html:<b>@@Timothy@@html:</b>@@
+-- \
+Timothy (‘tecosaur’/‘TEC’), Org mode contributor.
+Learn more about Org mode at <https://orgmode.org/>.
+Support Org development at <https://liberapay.com/org-mode>,
+or support my work at <https://liberapay.com/tec>.
+"
+   "Viele Grüße,\\\\
+@@html:<b>@@Josua@@html:</b>@@
 
-# -\u200b- \\\\
-# Timothy (‘tecosaur’/‘TEC’), Org mode contributor.\\\\
-# Learn more about Org mode at https://orgmode.org/.\\\\
-# Support Org development at https://liberapay.com/org-mode,\\\\
-# or support my work at https://liberapay.com/tec.")
-#   "Plain and Org version of the org-ml specific signature.")
-# #+end_src
+-\u200b- \\\\
+Timothy (‘tecosaur’/‘TEC’), Org mode contributor.\\\\
+Learn more about Org mode at https://orgmode.org/.\\\\
+Support Org development at https://liberapay.com/org-mode,\\\\
+or support my work at https://liberapay.com/tec.")
+  "Plain and Org version of the org-ml specific signature.")
+#+end_src
 
-# Now to make this take effect, we can just add it a bit later on in
-# ~mu4e-compose-mode-hook~ (after ~org-msg-post-setup~) by setting a hook depth of 1.
+Now to make this take effect, we can just add it a bit later on in
+~mu4e-compose-mode-hook~ (after ~org-msg-post-setup~) by setting a hook depth of 1.
 
-# #+begin_src emacs-lisp
-# (add-hook 'mu4e-compose-mode-hook #'+mu4e-compose-org-ml-setup 1)
-# #+end_src
+#+begin_src emacs-lisp
+(add-hook 'mu4e-compose-mode-hook #'+mu4e-compose-org-ml-setup 1)
+#+end_src
 
 *** Org Msg
 
@@ -7527,8 +7579,8 @@ Doom does a fantastic stuff with the defaults with this, so we only make a few
 minor tweaks. First, some stylistic things:
 
 #+begin_src emacs-lisp
-(setq org-msg-greeting-fmt "\nHi%s,\n\n"
-      org-msg-signature "\n\n#+begin_signature\nAll the best,\\\\\n@@html:<b>@@Timothy@@html:</b>@@\n#+end_signature")
+(setq org-msg-greeting-fmt "\nHallo%s,\n\n"
+      org-msg-signature "\n\n#+begin_signature\nViele Grüße,\\\\\n@@html:<b>@@Josua@@html:</b>@@\n#+end_signature")
 #+end_src
 
 We also want to set the accent colour used in the Doom =mu4e= module's
@@ -7832,23 +7884,13 @@ correct package statement needed.
 #+end_src
 
 #+begin_src emacs-lisp :tangle packages.el :noweb no-export
-;;<<org-pkg-statement()>>
+<<org-pkg-statement()>>
 (unpin! org) ; there be bugs
-
-(package! org
-  :recipe (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror"
-           :fork (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")))
-
-
 (package! org-contrib
   :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
            :files ("lisp/*.el"))
   :pin "6422b265f1150204f024e33d54f2dcfd8323005c")
 #+end_src
-
-# ;; (package! org
-# ;;   :recipe (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror"
-# ;;            :fork (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")))
 
 **** Visuals
 ***** Org Modern
@@ -7859,31 +7901,23 @@ Fontifying =org-mode= buffers to be as pretty as possible is of paramount import
 and Minad's lovely =org-modern= goes a long way in this regard.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-modern)
+(package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
 #+end_src
-
-# This is the original version used by TEC.
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
-# #+end_src
 
 ...with a touch of configuration...
 
-
 #+begin_src emacs-lisp
 (use-package! org-modern
-  :hook (org-mode . global-org-modern-mode)
+  :hook (org-mode . org-modern-mode)
   :config
   (setq org-modern-star '("◉" "○" "✸" "✿" "✤" "✜" "◆" "▶")
         org-modern-table-vertical 1
         org-modern-table-horizontal 0.2
-        org-modern-label-border 0.3)
         org-modern-list '((43 . "➤")
                           (45 . "–")
-                          (42 . "•")
+                          (42 . "•"))
         org-modern-todo-faces
         '(("TODO" :inverse-video t :inherit org-todo)
-          ("NEXT" :inverse-video t :inherit +org-todo-active)
           ("PROJ" :inverse-video t :inherit +org-todo-project)
           ("STRT" :inverse-video t :inherit +org-todo-active)
           ("[-]"  :inverse-video t :inherit +org-todo-active)
@@ -8193,7 +8227,6 @@ It's nice to be able to link to music
         org-music-track-search-method 'beets
         org-music-beets-db "~/Music/library.db"))
 #+end_src
-
 *** Behaviour
 
 #+call: confpkg("Org Behaviour", after="org")
@@ -8315,7 +8348,6 @@ Now we'll just add that under the Org mode link localleader for convenience.
 Extending the =:tools biblio= module.
 #+end_quote
 
-
 References in Org are fairly easy now, thanks to =org-cite=. The =:tools biblio=
 module gives a fairly decent basic setup, but it would be nice to take it a bit
 further. This mostly consists of tweaking settings, but there is one extra
@@ -8373,10 +8405,9 @@ with =citar=, and make the symbols a bit prettier.
           paths)
         citar-bibliography org-cite-global-bibliography
         citar-symbols
-        `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-          (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " "))
-        citar-notes-paths '("~/org/notes")))
+        `((file ,(nerd-icons-faicon "nf-fa-file_o" :face 'nerd-icons-green :v-adjust -0.1) . " ")
+          (note ,(nerd-icons-octicon "nf-oct-note" :face 'nerd-icons-blue :v-adjust -0.3) . " ")
+          (link ,(nerd-icons-octicon "nf-oct-link" :face 'nerd-icons-orange :v-adjust 0.01) . " "))))
 #+end_src
 
 We can also make the Zotero CSL styles available to use.
@@ -8406,6 +8437,9 @@ Org's localleader.
       :localleader
       :desc "Insert citation" "@" #'org-cite-insert)
 #+end_src
+
+Lastly, just in case I come across any old citations of mine, I think it would
+be nice to have a function to convert =org-ref= citations to =org-cite= forms.
 
 #+begin_src emacs-lisp
 (use-package! citar-org-roam
@@ -8440,7 +8474,7 @@ Now, by default, LSPs don't really function at all in ~src~ blocks.
 (cl-defmacro lsp-org-babel-enable (lang)
   "Support LANG in org source code block."
   (setq centaur-lsp 'lsp-mode)
-  (cl-check-type lang stringp)
+  (cl-check-type lang string)
   (let* ((edit-pre (intern (format "org-babel-edit-prep:%s" lang)))
          (intern-pre (intern (format "lsp--%s" (symbol-name edit-pre)))))
     `(progn
@@ -8506,16 +8540,9 @@ functionality as in LaTeX. Let's try viewing possible output files with this.
 #+call: confpkg("!Pkg Org Super Agenda")
 
 The agenda is nice, but a souped up version is nicer.
-
-
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-super-agenda)
+(package! org-super-agenda :pin "f4f528985397c833c870967884b013cf91a1da4a")
 #+end_src
-
-
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! org-super-agenda :pin "f4f528985397c833c870967884b013cf91a1da4a")
-# #+end_src
 
 #+begin_src emacs-lisp
 (use-package! org-super-agenda
@@ -8775,343 +8802,288 @@ set up org-capture.
 (use-package! doct
   :commands doct)
 #+end_src
-# #+begin_src emacs-lisp
-# (setq org-capture-templates
-#           (doct `(("Personal todo" :keys "t"
-#                    :icon ("checklist" :set "octicon" :color "green")
-#                    :file +org-capture-todo-file
-#                    :prepend t
-#                    :headline "Inbox"
-#                    :type entry
-#                    :template ("* TODO %?"
-#                               "%i %a"))
-#                   ("Personal note" :keys "n"
-#                    :icon ("sticky-note-o" :set "faicon" :color "green")
-#                    :file +org-capture-todo-file
-#                    :prepend t
-#                    :headline "Inbox"
-#                    :type entry
-#                    :template ("* %?"
-#                               "%i %a"))
-#                  ("Project todo" :keys "p"
-#                    :icon ("repo" :set "octicon" :color "green")
-#                    :file +org-capture-central-project-todo-file
-#                    :prepend t
-#                    :headline "Inbox"
-#                    :type entry
-#                    :template ("* TODO %?"
-#                               "%i" "%a")))))
-# #+end_src
 
-# #+begin_src emacs-lisp :noweb no-export
-# (after! org-capture
+#+begin_src emacs-lisp :noweb no-export
+(after! org-capture
+  <<prettify-capture>>
 
-#  (setq org-capture-templates
-#           (doct `(("Personal todo" :keys "t"
-#                    :icon ("checklist" :set "octicon" :color "green")
-#                    :file +org-capture-todo-file
-#                    :prepend t
-#                    :headline "Inbox"
-#                    :type entry
-#                    :template ("* TODO %?"
-#                               "%i %a"))
-#                   ("Personal note" :keys "n"
-#                    :icon ("sticky-note-o" :set "faicon" :color "green")
-#                    :file +org-capture-todo-file
-#                    :prepend t
-#                    :headline "Inbox"
-#                    :type entry
-#                    :template ("* %?"
-#                               "%i %a"))
-#                  ("Project todo" :keys "p"
-#                    :icon ("repo" :set "octicon" :color "green")
-#                    :file +org-capture-central-project-todo-file
-#                    :prepend t
-#                    :headline "Inbox"
-#                    :type entry
-#                    :template ("* TODO %?"
-#                               "%i" "%a"))))))
+  (defun +doct-icon-declaration-to-icon (declaration)
+    "Convert :icon declaration to icon"
+    (let ((name (pop declaration))
+          (set  (intern (concat "nerd-icons-" (plist-get declaration :set))))
+          (face (intern (concat "nerd-icons-" (plist-get declaration :color))))
+          (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
+      (apply set `(,name :face ,face :v-adjust ,v-adjust))))
 
-#   ;; <<prettify-capture>>
+  (defun +doct-iconify-capture-templates (groups)
+    "Add declaration's :icon to each template group in GROUPS."
+    (let ((templates (doct-flatten-lists-in groups)))
+      (setq doct-templates (mapcar (lambda (template)
+                                     (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
+                                                 (spec (plist-get (plist-get props :doct) :icon)))
+                                       (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
+                                                                      "\t"
+                                                                      (nth 1 template))))
+                                     template)
+                                   templates))))
 
-# ;;   (defun +doct-icon-declaration-to-icon (declaration)
-# ;;     "Convert :icon declaration to icon"
-# ;;     (let ((name (pop declaration))
-# ;;           (set  (intern (concat "all-the-icons-" (plist-get declaration :set))))
-# ;;           (face (intern (concat "all-the-icons-" (plist-get declaration :color))))
-# ;;           (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
-# ;;       (apply set `(,name :face ,face :v-adjust ,v-adjust))))
+  (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
 
-# ;;   (defun +doct-iconify-capture-templates (groups)
-# ;;     "Add declaration's :icon to each template group in GROUPS."
-# ;;     (let ((templates (doct-flatten-lists-in groups)))
-# ;;       (setq doct-templates (mapcar (lambda (template)
-# ;;                                      (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
-# ;;                                                  (spec (plist-get (plist-get props :doct) :icon)))
-# ;;                                        (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
-# ;;                                                                       "\t"
-# ;;                                                                       (nth 1 template))))
-# ;;                                      template)
-# ;;                                    templates))))
+  (defvar +org-capture-recipies  "~/Desktop/TEC/Organisation/recipies.org")
 
-# ;;   (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
+  (defun set-org-capture-templates ()
+    (setq org-capture-templates
+          (doct `(("Personal todo" :keys "t"
+                   :icon ("nf-oct-checklist" :set "octicon" :color "green")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* TODO %?"
+                              "%i %a"))
+                  ("Personal note" :keys "n"
+                   :icon ("nf-fa-sticky_note_o" :set "faicon" :color "green")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* %?"
+                              "%i %a"))
+                  ("Email" :keys "e"
+                   :icon ("nf-fa-envelope" :set "faicon" :color "blue")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
+                              "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
+                              "about %^{topic}"
+                              "%U %i %a"))
+                  ("Interesting" :keys "i"
+                   :icon ("nf-fa-eye" :set "faicon" :color "lcyan")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Interesting"
+                   :type entry
+                   :template ("* [ ] %{desc}%? :%{i-type}:"
+                              "%i %a")
+                   :children (("Webpage" :keys "w"
+                               :icon ("nf-fa-globe" :set "faicon" :color "green")
+                               :desc "%(org-cliplink-capture) "
+                               :i-type "read:web")
+                              ("Article" :keys "a"
+                               :icon ("nf-fa-file_text_o" :set "faicon" :color "yellow")
+                               :desc ""
+                               :i-type "read:reaserch")
+                              ("\tRecipie" :keys "r"
+                               :icon ("nf-fa-spoon" :set "faicon" :color "dorange")
+                               :file +org-capture-recipies
+                               :headline "Unsorted"
+                               :template "%(org-chef-get-recipe-from-url)")
+                              ("Information" :keys "i"
+                               :icon ("nf-fa-info_circle" :set "faicon" :color "blue")
+                               :desc ""
+                               :i-type "read:info")
+                              ("Idea" :keys "I"
+                               :icon ("nf-md-chart_bubble" :set "mdicon" :color "silver")
+                               :desc ""
+                               :i-type "idea")))
+                  ("Tasks" :keys "k"
+                   :icon ("nf-oct-inbox" :set "octicon" :color "yellow")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Tasks"
+                   :type entry
+                   :template ("* TODO %? %^G%{extra}"
+                              "%i %a")
+                   :children (("General Task" :keys "k"
+                               :icon ("nf-oct-inbox" :set "octicon" :color "yellow")
+                               :extra "")
+                              ("Task with deadline" :keys "d"
+                               :icon ("nf-md-timer" :set "mdicon" :color "orange" :v-adjust -0.1)
+                               :extra "\nDEADLINE: %^{Deadline:}t")
+                              ("Scheduled Task" :keys "s"
+                               :icon ("nf-oct-calendar" :set "octicon" :color "orange")
+                               :extra "\nSCHEDULED: %^{Start time:}t")))
+                  ("Project" :keys "p"
+                   :icon ("nf-oct-repo" :set "octicon" :color "silver")
+                   :prepend t
+                   :type entry
+                   :headline "Inbox"
+                   :template ("* %{time-or-todo} %?"
+                              "%i"
+                              "%a")
+                   :file ""
+                   :custom (:time-or-todo "")
+                   :children (("Project-local todo" :keys "t"
+                               :icon ("nf-oct-checklist" :set "octicon" :color "green")
+                               :time-or-todo "TODO"
+                               :file +org-capture-project-todo-file)
+                              ("Project-local note" :keys "n"
+                               :icon ("nf-fa-sticky_note" :set "faicon" :color "yellow")
+                               :time-or-todo "%U"
+                               :file +org-capture-project-notes-file)
+                              ("Project-local changelog" :keys "c"
+                               :icon ("nf-fa-list" :set "faicon" :color "blue")
+                               :time-or-todo "%U"
+                               :heading "Unreleased"
+                               :file +org-capture-project-changelog-file)))
+                  ("\tCentralised project templates"
+                   :keys "o"
+                   :type entry
+                   :prepend t
+                   :template ("* %{time-or-todo} %?"
+                              "%i"
+                              "%a")
+                   :children (("Project todo"
+                               :keys "t"
+                               :prepend nil
+                               :time-or-todo "TODO"
+                               :heading "Tasks"
+                               :file +org-capture-central-project-todo-file)
+                              ("Project note"
+                               :keys "n"
+                               :time-or-todo "%U"
+                               :heading "Notes"
+                               :file +org-capture-central-project-notes-file)
+                              ("Project changelog"
+                               :keys "c"
+                               :time-or-todo "%U"
+                               :heading "Unreleased"
+                               :file +org-capture-central-project-changelog-file)))))))
 
-# ;;   (defvar +org-capture-recipies  "~/org/recipies.org")
-
-# ;;   (defun set-org-capture-templates ()
-# ;;     (setq org-capture-templates
-# ;;           (doct `(("Personal todo" :keys "t"
-# ;;                    :icon ("checklist" :set "octicon" :color "green")
-# ;;                    :file +org-capture-todo-file
-# ;;                    :prepend t
-# ;;                    :headline "Inbox"
-# ;;                    :type entry
-# ;;                    :template ("* TODO %?"
-# ;;                               "%i %a"))
-# ;;                   ("Personal note" :keys "n"
-# ;;                    :icon ("sticky-note-o" :set "faicon" :color "green")
-# ;;                    :file +org-capture-todo-file
-# ;;                    :prepend t
-# ;;                    :headline "Inbox"
-# ;;                    :type entry
-# ;;                    :template ("* %?"
-# ;;                               "%i %a"))
-# ;;                  ("Project todo" :keys "p"
-# ;;                    :icon ("repo" :set "octicon" :color "green")
-# ;;                    :file +org-capture-central-project-todo-file
-# ;;                    :prepend t
-# ;;                    ;;:headline "Inbox"
-# ;;                    :type entry
-# ;;                    :template ("* TODO %?"
-# ;;                               "%i" "%a"))))))
-# ;; ;                 ;; ("Email" :keys "e"
-# ;;                   ;;  :icon ("envelope" :set "faicon" :color "blue")
-# ;;                   ;;  :file +org-capture-todo-file
-# ;;                   ;;  :prepend t
-# ;;                   ;;  :headline "Inbox"
-# ;;                   ;;  :type entry
-# ;;                   ;;  :template ("* TODO %^{type|reply to|contact} %\\3 %? :email:"
-# ;;                   ;;             "Send an email %^{urgancy|soon|ASAP|anon|at some point|eventually} to %^{recipiant}"
-# ;;                   ;;             "about %^{topic}"
-# ;;                   ;;             "%U %i %a"))
-# ;;                   ;; ("Interesting" :keys "i"
-# ;;                   ;;  :icon ("eye" :set "faicon" :color "lcyan")
-# ;;                   ;;  :file +org-capture-todo-file
-# ;;                   ;;  :prepend t
-# ;;                   ;;  :headline "Interesting"
-# ;;                   ;;  :type entry
-# ;;                   ;;  :template ("* [ ] %{desc}%? :%{i-type}:"
-# ;;                   ;;             "%i %a")
-# ;;                   ;;  :children (("Webpage" :keys "w"
-# ;;                   ;;              :icon ("globe" :set "faicon" :color "green")
-# ;;                   ;;              :desc "%(org-cliplink-capture) "
-# ;;                   ;;              :i-type "read:web")
-# ;;                   ;;             ("Article" :keys "a"
-# ;;                   ;;              :icon ("file-text" :set "octicon" :color "yellow")
-# ;;                   ;;              :desc ""
-# ;;                   ;;              :i-type "read:reaserch")
-# ;;                   ;;             ("\tRecipie" :keys "r"
-# ;;                   ;;              :icon ("spoon" :set "faicon" :color "dorange")
-# ;;                   ;;              :file +org-capture-recipies
-# ;;                   ;;              :headline "Unsorted"
-# ;;                   ;;              :template "%(org-chef-get-recipe-from-url)")
-# ;;                   ;;             ("Information" :keys "i"
-# ;;                   ;;              :icon ("info-circle" :set "faicon" :color "blue")
-# ;;                   ;;              :desc ""
-# ;;                   ;;              :i-type "read:info")
-# ;;                   ;;             ("Idea" :keys "I"
-# ;;                   ;;              :icon ("bubble_chart" :set "material" :color "silver")
-# ;;                   ;;              :desc ""
-# ;;                   ;;              :i-type "idea")))
-# ;;                   ;; ("Tasks" :keys "k"
-# ;;                   ;;  :icon ("inbox" :set "octicon" :color "yellow")
-# ;;                   ;;  :file +org-capture-todo-file
-# ;;                   ;;  :prepend t
-# ;;                   ;;  :headline "Tasks"
-# ;;                   ;;  :type entry
-# ;;                   ;;  :template ("* TODO %? %^G%{extra}"
-# ;;                   ;;             "%i %a")
-# ;;                   ;;  :children (("General Task" :keys "k"
-# ;;                   ;;              :icon ("inbox" :set "octicon" :color "yellow")
-# ;;                   ;;              :extra "")
-# ;;                   ;;             ("Task with deadline" :keys "d"
-# ;;                   ;;              :icon ("timer" :set "material" :color "orange" :v-adjust -0.1)
-# ;;                   ;;              :extra "\nDEADLINE: %^{Deadline:}t")
-# ;;                   ;;             ("Scheduled Task" :keys "s"
-# ;;                   ;;              :icon ("calendar" :set "octicon" :color "orange")
-# ;;                   ;;              :extra "\nSCHEDULED: %^{Start time:}t")))
-
-# ;; ;                :custom (:time-or-todo "")
-# ;;                    ;; :children (("Project-local todo" :keys "t"
-# ;;                    ;;             :icon ("checklist" :set "octicon" :color "green")
-# ;;                    ;;             :time-or-todo "TODO"
-# ;;                    ;;             :file +org-capture-project-todo-file)
-# ;;                    ;;            ("Project-local note" :keys "n"
-# ;;                    ;;             :icon ("sticky-note" :set "faicon" :color "yellow")
-# ;;                    ;;             :time-or-todo "%U"
-# ;;                    ;;             :file +org-capture-project-notes-file)
-# ;;                    ;;            ("Project-local changelog" :keys "c"
-# ;;                    ;;             :icon ("list" :set "faicon" :color "blue")
-# ;;                    ;;             :time-or-todo "%U"
-# ;;                    ;;             :heading "Unreleased"
-# ;;                    ;;             :file +org-capture-project-changelog-file)))
-# ;;                   ;; ("\tCentralised project templates"
-# ;;                   ;;  :keys "o"
-# ;;                   ;;  :type entry
-# ;;                   ;;  :prepend t
-# ;;                   ;;  :template ("* %{time-or-todo} %?"
-# ;;                   ;;             "%i"
-# ;;                   ;;             "%a")
-# ;;                   ;;  :children (("Project todo"
-# ;;                   ;;              :keys "t"
-# ;;                   ;;              :prepend nil
-# ;;                   ;;              :time-or-todo "TODO"
-# ;;                   ;;              ;;:heading "Tasks"
-# ;;                   ;;              :file +org-capture-central-project-todo-file)
-# ;;                   ;;             ("Project note"
-# ;;                   ;;              :keys "n"
-# ;;                   ;;              :time-or-todo "%U"
-# ;;                   ;;              :heading "Notes"
-# ;;                   ;;              :file +org-capture-central-project-notes-file)
-# ;;                   ;;             ("Project changelog"
-# ;;                   ;;              :keys "c"
-# ;;                   ;;              :time-or-todo "%U"
-# ;;                   ;;              :heading "Unreleased"
-# ;;                   ;;              :file +org-capture-central-project-changelog-file)))
-
-# ;;   (set-org-capture-templates)
-# ;;   (unless (display-graphic-p)
-# ;;     (add-hook 'server-after-make-frame-hook
-# ;;               (defun org-capture-reinitialise-hook ()
-# ;;                 (when (display-graphic-p)
-# ;;                   (set-org-capture-templates)
-# ;;                   (remove-hook 'server-after-make-frame-hook
-# ;;                                #'org-capture-reinitialise-hook))))))
-# #+end_src
+  (set-org-capture-templates)
+  (unless (display-graphic-p)
+    (add-hook 'server-after-make-frame-hook
+              (defun org-capture-reinitialise-hook ()
+                (when (display-graphic-p)
+                  (set-org-capture-templates)
+                  (remove-hook 'server-after-make-frame-hook
+                               #'org-capture-reinitialise-hook))))))
+#+end_src
 It would also be nice to improve how the capture dialogue looks
-# #+name: prettify-capture
-# #+begin_src emacs-lisp :noweb-ref none
-# (defun org-capture-select-template-prettier (&optional keys)
-#   "Select a capture template, in a prettier way than default
-# Lisp programs can force the template by setting KEYS to a string."
-#   (let ((org-capture-templates
-#          (or (org-contextualize-keys
-#               (org-capture-upgrade-templates org-capture-templates)
-#               org-capture-templates-contexts)
-#              '(("t" "Task" entry (file+headline "" "Tasks")
-#                 "* TODO %?\n  %u\n  %a")))))
-#     (if keys
-#         (or (assoc keys org-capture-templates)
-#             (error "No capture template referred to by \"%s\" keys" keys))
-#       (org-mks org-capture-templates
-#                "Select a capture template\n━━━━━━━━━━━━━━━━━━━━━━━━━"
-#                "Template key: "
-#                `(("q" ,(concat (all-the-icons-octicon "stop" :face 'all-the-icons-red :v-adjust 0.01) "\tAbort")))))))
-# (advice-add 'org-capture-select-template :override #'org-capture-select-template-prettier)
+#+name: prettify-capture
+#+begin_src emacs-lisp :noweb-ref none
+(defun org-capture-select-template-prettier (&optional keys)
+  "Select a capture template, in a prettier way than default
+Lisp programs can force the template by setting KEYS to a string."
+  (let ((org-capture-templates
+         (or (org-contextualize-keys
+              (org-capture-upgrade-templates org-capture-templates)
+              org-capture-templates-contexts)
+             '(("t" "Task" entry (file+headline "" "Tasks")
+                "* TODO %?\n  %u\n  %a")))))
+    (if keys
+        (or (assoc keys org-capture-templates)
+            (error "No capture template referred to by \"%s\" keys" keys))
+      (org-mks org-capture-templates
+               "Select a capture template\n━━━━━━━━━━━━━━━━━━━━━━━━━"
+               "Template key: "
+               `(("q" ,(concat (nerd-icons-octicon "nf-oct-stop" :face 'nerd-icons-red :v-adjust 0.01) "\tAbort")))))))
+(advice-add 'org-capture-select-template :override #'org-capture-select-template-prettier)
 
-# (defun org-mks-pretty (table title &optional prompt specials)
-#   "Select a member of an alist with multiple keys. Prettified.
+(defun org-mks-pretty (table title &optional prompt specials)
+  "Select a member of an alist with multiple keys. Prettified.
 
-# TABLE is the alist which should contain entries where the car is a string.
-# There should be two types of entries.
+TABLE is the alist which should contain entries where the car is a string.
+There should be two types of entries.
 
-# 1. prefix descriptions like (\"a\" \"Description\")
-#    This indicates that `a' is a prefix key for multi-letter selection, and
-#    that there are entries following with keys like \"ab\", \"ax\"…
+1. prefix descriptions like (\"a\" \"Description\")
+   This indicates that `a' is a prefix key for multi-letter selection, and
+   that there are entries following with keys like \"ab\", \"ax\"…
 
-# 2. Select-able members must have more than two elements, with the first
-#    being the string of keys that lead to selecting it, and the second a
-#    short description string of the item.
+2. Select-able members must have more than two elements, with the first
+   being the string of keys that lead to selecting it, and the second a
+   short description string of the item.
 
-# The command will then make a temporary buffer listing all entries
-# that can be selected with a single key, and all the single key
-# prefixes.  When you press the key for a single-letter entry, it is selected.
-# When you press a prefix key, the commands (and maybe further prefixes)
-# under this key will be shown and offered for selection.
+The command will then make a temporary buffer listing all entries
+that can be selected with a single key, and all the single key
+prefixes.  When you press the key for a single-letter entry, it is selected.
+When you press a prefix key, the commands (and maybe further prefixes)
+under this key will be shown and offered for selection.
 
-# TITLE will be placed over the selection in the temporary buffer,
-# PROMPT will be used when prompting for a key.  SPECIALS is an
-# alist with (\"key\" \"description\") entries.  When one of these
-# is selected, only the bare key is returned."
-#   (save-window-excursion
-#     (let ((inhibit-quit t)
-#           (buffer (org-switch-to-buffer-other-window "*Org Select*"))
-#           (prompt (or prompt "Select: "))
-#           case-fold-search
-#           current)
-#       (unwind-protect
-#           (catch 'exit
-#             (while t
-#               (setq-local evil-normal-state-cursor (list nil))
-#               (erase-buffer)
-#               (insert title "\n\n")
-#               (let ((des-keys nil)
-#                     (allowed-keys '("\C-g"))
-#                     (tab-alternatives '("\s" "\t" "\r"))
-#                     (cursor-type nil))
-#                 ;; Populate allowed keys and descriptions keys
-#                 ;; available with CURRENT selector.
-#                 (let ((re (format "\\`%s\\(.\\)\\'"
-#                                   (if current (regexp-quote current) "")))
-#                       (prefix (if current (concat current " ") "")))
-#                   (dolist (entry table)
-#                     (pcase entry
-#                       ;; Description.
-#                       (`(,(and key (pred (string-match re))) ,desc)
-#                        (let ((k (match-string 1 key)))
-#                          (push k des-keys)
-#                          ;; Keys ending in tab, space or RET are equivalent.
-#                          (if (member k tab-alternatives)
-#                              (push "\t" allowed-keys)
-#                            (push k allowed-keys))
-#                          (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) (propertize "›" 'face 'font-lock-comment-face) "  " desc "…" "\n")))
-#                       ;; Usable entry.
-#                       (`(,(and key (pred (string-match re))) ,desc . ,_)
-#                        (let ((k (match-string 1 key)))
-#                          (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) "   " desc "\n")
-#                          (push k allowed-keys)))
-#                       (_ nil))))
-#                 ;; Insert special entries, if any.
-#                 (when specials
-#                   (insert "─────────────────────────\n")
-#                   (pcase-dolist (`(,key ,description) specials)
-#                     (insert (format "%s   %s\n" (propertize key 'face '(bold all-the-icons-red)) description))
-#                     (push key allowed-keys)))
-#                 ;; Display UI and let user select an entry or
-#                 ;; a sub-level prefix.
-#                 (goto-char (point-min))
-#                 (unless (pos-visible-in-window-p (point-max))
-#                   (org-fit-window-to-buffer))
-#                 (let ((pressed (org--mks-read-key allowed-keys
-#                                                   prompt
-#                                                   (not (pos-visible-in-window-p (1- (point-max)))))))
-#                   (setq current (concat current pressed))
-#                   (cond
-#                    ((equal pressed "\C-g") (user-error "Abort"))
-#                    ;; Selection is a prefix: open a new menu.
-#                    ((member pressed des-keys))
-#                    ;; Selection matches an association: return it.
-#                    ((let ((entry (assoc current table)))
-#                       (and entry (throw 'exit entry))))
-#                    ;; Selection matches a special entry: return the
-#                    ;; selection prefix.
-#                    ((assoc current specials) (throw 'exit current))
-#                    (t (error "No entry available")))))))
-#         (when buffer (kill-buffer buffer))))))
-# (advice-add 'org-mks :override #'org-mks-pretty)
-# #+end_src
-# The [[file:~/.config/emacs/bin/org-capture][org-capture bin]] is rather nice, but I'd be nicer with a smaller frame, and
-# no modeline.
-# #+begin_src emacs-lisp
-# (setf (alist-get 'height +org-capture-frame-parameters) 15)
-# ;; (alist-get 'name +org-capture-frame-parameters) "❖ Capture") ;; ATM hardcoded in other places, so changing breaks stuff
-# (setq +org-capture-fn
-#       (lambda ()
-#         (interactive)
-#         (set-window-parameter nil 'mode-line-format 'none)
-#         (org-capture)))
-# #+end_src
-
+TITLE will be placed over the selection in the temporary buffer,
+PROMPT will be used when prompting for a key.  SPECIALS is an
+alist with (\"key\" \"description\") entries.  When one of these
+is selected, only the bare key is returned."
+  (save-window-excursion
+    (let ((inhibit-quit t)
+          (buffer (org-switch-to-buffer-other-window "*Org Select*"))
+          (prompt (or prompt "Select: "))
+          case-fold-search
+          current)
+      (unwind-protect
+          (catch 'exit
+            (while t
+              (setq-local evil-normal-state-cursor (list nil))
+              (erase-buffer)
+              (insert title "\n\n")
+              (let ((des-keys nil)
+                    (allowed-keys '("\C-g"))
+                    (tab-alternatives '("\s" "\t" "\r"))
+                    (cursor-type nil))
+                ;; Populate allowed keys and descriptions keys
+                ;; available with CURRENT selector.
+                (let ((re (format "\\`%s\\(.\\)\\'"
+                                  (if current (regexp-quote current) "")))
+                      (prefix (if current (concat current " ") "")))
+                  (dolist (entry table)
+                    (pcase entry
+                      ;; Description.
+                      (`(,(and key (pred (string-match re))) ,desc)
+                       (let ((k (match-string 1 key)))
+                         (push k des-keys)
+                         ;; Keys ending in tab, space or RET are equivalent.
+                         (if (member k tab-alternatives)
+                             (push "\t" allowed-keys)
+                           (push k allowed-keys))
+                         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) (propertize "›" 'face 'font-lock-comment-face) "  " desc "…" "\n")))
+                      ;; Usable entry.
+                      (`(,(and key (pred (string-match re))) ,desc . ,_)
+                       (let ((k (match-string 1 key)))
+                         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) "   " desc "\n")
+                         (push k allowed-keys)))
+                      (_ nil))))
+                ;; Insert special entries, if any.
+                (when specials
+                  (insert "─────────────────────────\n")
+                  (pcase-dolist (`(,key ,description) specials)
+                    (insert (format "%s   %s\n" (propertize key 'face '(bold nerd-icons-red)) description))
+                    (push key allowed-keys)))
+                ;; Display UI and let user select an entry or
+                ;; a sub-level prefix.
+                (goto-char (point-min))
+                (unless (pos-visible-in-window-p (point-max))
+                  (org-fit-window-to-buffer))
+                (let ((pressed (org--mks-read-key allowed-keys
+                                                  prompt
+                                                  (not (pos-visible-in-window-p (1- (point-max)))))))
+                  (setq current (concat current pressed))
+                  (cond
+                   ((equal pressed "\C-g") (user-error "Abort"))
+                   ;; Selection is a prefix: open a new menu.
+                   ((member pressed des-keys))
+                   ;; Selection matches an association: return it.
+                   ((let ((entry (assoc current table)))
+                      (and entry (throw 'exit entry))))
+                   ;; Selection matches a special entry: return the
+                   ;; selection prefix.
+                   ((assoc current specials) (throw 'exit current))
+                   (t (error "No entry available")))))))
+        (when buffer (kill-buffer buffer))))))
+(advice-add 'org-mks :override #'org-mks-pretty)
+#+end_src
+The [[file:~/.config/emacs/bin/org-capture][org-capture bin]] is rather nice, but I'd be nicer with a smaller frame, and
+no modeline.
+#+begin_src emacs-lisp
+(setf (alist-get 'height +org-capture-frame-parameters) 15)
+;; (alist-get 'name +org-capture-frame-parameters) "❖ Capture") ;; ATM hardcoded in other places, so changing breaks stuff
+(setq +org-capture-fn
+      (lambda ()
+        (interactive)
+        (set-window-parameter nil 'mode-line-format 'none)
+        (org-capture)))
+#+end_src
 
 # **** GTD-jethro
 
@@ -9325,7 +9297,6 @@ It would also be nice to improve how the capture dialogue looks
 #+end_src
 
 #+begin_src emacs-lisp
-
 ;; (setq org-capture-templates
 ;;       `(("s" "Slipbox" entry  (file "notes/inbox.org")
 ;;          "* %?\n")))
@@ -9376,8 +9347,11 @@ It would also be nice to improve how the capture dialogue looks
         :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
         :desc "org-roam-capture" "c" #'org-roam-capture)
   (setq org-roam-directory (file-truename "~/org/notes")
-        org-roam-dailies-directory "journals/"
-        org-roam-database-connector 'sqlite-builtin)
+        org-roam-dailies-directory "journals/")
+        org-roam-database-connector 'sqlite-builtin
+        ;; org-roam-db-gc-threshold most-positive-fixnum
+        ;; org-id-link-to-org-use-id t)
+
   :config
   (org-roam-db-autosync-mode)
   (setq org-roam-capture-templates
@@ -9390,6 +9364,11 @@ It would also be nice to improve how the capture dialogue looks
           ;; ("b" "bibliographic note" plain "\n%?"
           ;;  :if-new
           ;;  (file+head "reference/${slug}.org" "#+title: ${title}\n")
+          ;;  :immediate-finish t
+          ;;  :unnarrowed t)
+          ;; ("a" "article" plain "\n%?"
+          ;;  :if-new
+          ;;  (file+head "articles/${slug}.org" "#+title: ${title}\n#+filetags: :article:\n")
           ;;  :immediate-finish t
           ;;  :unnarrowed t)))
         ("b" "literature note" plain "\n%?"
@@ -9416,6 +9395,25 @@ It would also be nice to improve how the capture dialogue looks
 
   (setq org-roam-node-display-template
         (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag))))
+
+  ;; (require 'citar)
+
+  ;; (defun jethro/org-roam-node-from-cite (keys-entries)
+  ;;   (interactive (list (citar-select-ref)))
+  ;;   (let ((title (citar-format--entry(cdr keys-entries) "${author editor} :: ${title}")))
+  ;;     (org-roam-capture-
+  ;;      :templates
+  ;;      '(("r" "reference" plain "%?" :if-new
+  ;;         (file+head "reference/${citekey}.org"
+  ;;                    ":PROPERTIES:
+  ;;                    :ROAM_REFS: [cite:@${citekey}]
+  ;;                    :END:
+  ;;                    #+title: ${title}\n")
+  ;;      :immediate-finish t
+  ;;      :unnarrowed t))
+  ;;      :info (list :citekey (car keys-entries))
+  ;;      :node (org-roam-node-create :title title)
+  ;;      :props '(:finalize find-file)))))
 #+end_src
 
 
@@ -10014,7 +10012,7 @@ cause issues. Let's make their failure less eventful.
   (ignore-errors (apply orig-fn args)))
 #+end_src
 
-# **** Flycheck with org-lint
+# **** Flycheck  with org-lint
 
 # #+call: confpkg("Flycheck org-lint", after="org")
 
@@ -10258,11 +10256,11 @@ and add an extra ~org-bullet~ to the default list of four.
       org-priority-highest ?A
       org-priority-lowest ?E
       org-priority-faces
-      '((?A . 'all-the-icons-red)
-        (?B . 'all-the-icons-orange)
-        (?C . 'all-the-icons-yellow)
-        (?D . 'all-the-icons-green)
-        (?E . 'all-the-icons-blue)))
+      '((?A . 'nerd-icons-red)
+        (?B . 'nerd-icons-orange)
+        (?C . 'nerd-icons-yellow)
+        (?D . 'nerd-icons-green)
+        (?E . 'nerd-icons-blue)))
 #+end_src
 
 It's also nice to make use of the =prettify-symbols-mode= for a few Org syntactic
@@ -10279,11 +10277,11 @@ other settings.
                 :arrow_lr      "↔"
                 :properties    "⚙"
                 :end           "∎"
-                :priority_a    #("⚑" 0 1 (face all-the-icons-red))
-                :priority_b    #("⬆" 0 1 (face all-the-icons-orange))
-                :priority_c    #("■" 0 1 (face all-the-icons-yellow))
-                :priority_d    #("⬇" 0 1 (face all-the-icons-green))
-                :priority_e    #("❓" 0 1 (face all-the-icons-blue))))
+                :priority_a    #("⚑" 0 1 (face nerd-icons-red))
+                :priority_b    #("⬆" 0 1 (face nerd-icons-orange))
+                :priority_c    #("■" 0 1 (face nerd-icons-yellow))
+                :priority_d    #("⬇" 0 1 (face nerd-icons-green))
+                :priority_e    #("❓" 0 1 (face nerd-icons-blue))))
 
 (defadvice! +org-init-appearance-h--no-ligatures-a ()
   :after #'+org-init-appearance-h
@@ -10360,12 +10358,8 @@ and out of the LaTeX fragments.
 
 Thankfully, all we need to do to make this happen is use ~org-latex-preview-auto-mode~.
 
-# #+begin_src emacs-lisp
-# (add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
-# #+end_src
-
 #+begin_src emacs-lisp
-(setq org-startup-with-latex-preview t)
+(add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
 #+end_src
 
 ***** Prettier rendering
@@ -10402,7 +10396,7 @@ let's make it transparent.
 
 #+begin_src emacs-lisp
 (plist-put org-format-latex-options :background "Transparent")
-(plist-put org-format-latex-options :zoom 1) ; Calibrated based on the TeX font and org-buffer font.
+(plist-put org-format-latex-options :zoom 0.93) ; Calibrated based on the TeX font and org-buffer font.
 #+end_src
 
 With the background taken care of, we just need to make sure we're using the
@@ -10573,65 +10567,65 @@ the creator string.
       (format "Emacs %s (Org mode %s–%s)" emacs-version (org-release) (org-git-version)))
 #+end_src
 
-# **** Acronym formatting
+**** Acronym formatting
 
-# I like automatically using spaced small caps for acronyms. For strings I want to
-# be unaffected let's use ~;~ as a prefix to prevent the transformation --- i.e.
-# ~;JFK~ (as one would want for two-letter geographic locations and names).
+I like automatically using spaced small caps for acronyms. For strings I want to
+be unaffected let's use ~;~ as a prefix to prevent the transformation --- i.e.
+~;JFK~ (as one would want for two-letter geographic locations and names).
 
-# This has to be implemented on a per-format basis, currently HTML and LaTeX
-# exports are supported.
+This has to be implemented on a per-format basis, currently HTML and LaTeX
+exports are supported.
 
-# #+begin_src emacs-lisp
-# (defun org-export-filter-text-acronym (text backend _info)
-#   "Wrap suspected acronyms in acronyms-specific formatting.
-# Treat sequences of 2+ capital letters (optionally succeeded by \"s\") as an acronym.
-# Ignore if preceeded by \";\" (for manual prevention) or \"\\\" (for LaTeX commands).
+#+begin_src emacs-lisp
+(defun org-export-filter-text-acronym (text backend _info)
+  "Wrap suspected acronyms in acronyms-specific formatting.
+Treat sequences of 2+ capital letters (optionally succeeded by \"s\") as an acronym.
+Ignore if preceeded by \";\" (for manual prevention) or \"\\\" (for LaTeX commands).
 
-# TODO abstract backend implementations."
-#   (let ((base-backend
-#          (cond
-#           ((org-export-derived-backend-p backend 'latex) 'latex)
-#           ;; Markdown is derived from HTML, but we don't want to format it
-#           ((org-export-derived-backend-p backend 'md) nil)
-#           ((org-export-derived-backend-p backend 'html) 'html)))
-#         (case-fold-search nil))
-#     (when base-backend
-#       (replace-regexp-in-string
-#        "[;\\\\]?\\b[A-Z][A-Z]+s?\\(?:[^A-Za-z]\\|\\b\\)"
-#        (lambda (all-caps-str)
-#          (cond ((equal (aref all-caps-str 0) ?\\) all-caps-str)                ; don't format LaTeX commands
-#                ((equal (aref all-caps-str 0) ?\;) (substring all-caps-str 1))  ; just remove not-acronym indicator char ";"
-#                (t (let* ((final-char (if (string-match-p "[^A-Za-z]" (substring all-caps-str -1 (length all-caps-str)))
-#                                          (substring all-caps-str -1 (length all-caps-str))
-#                                        nil)) ; needed to re-insert the [^A-Za-z] at the end
-#                          (trailing-s (equal (aref all-caps-str (- (length all-caps-str) (if final-char 2 1))) ?s))
-#                          (acr (if final-char
-#                                   (substring all-caps-str 0 (if trailing-s -2 -1))
-#                                 (substring all-caps-str 0 (+ (if trailing-s -1 (length all-caps-str)))))))
-#                     (pcase base-backend
-#                       ('latex (concat "\\acr{" (s-downcase acr) "}" (when trailing-s "\\acrs{}") final-char))
-#                       ('html (concat "<span class='acr'>" acr "</span>" (when trailing-s "<small>s</small>") final-char)))))))
-#        text t t))))
+TODO abstract backend implementations."
+  (let ((base-backend
+         (cond
+          ((org-export-derived-backend-p backend 'latex) 'latex)
+          ;; Markdown is derived from HTML, but we don't want to format it
+          ((org-export-derived-backend-p backend 'md) nil)
+          ((org-export-derived-backend-p backend 'html) 'html)))
+        (case-fold-search nil))
+    (when base-backend
+      (replace-regexp-in-string
+       "[;\\\\]?\\b[A-Z][A-Z]+s?\\(?:[^A-Za-z]\\|\\b\\)"
+       (lambda (all-caps-str)
+         (cond ((equal (aref all-caps-str 0) ?\\) all-caps-str)                ; don't format LaTeX commands
+               ((equal (aref all-caps-str 0) ?\;) (substring all-caps-str 1))  ; just remove not-acronym indicator char ";"
+               (t (let* ((final-char (if (string-match-p "[^A-Za-z]" (substring all-caps-str -1 (length all-caps-str)))
+                                         (substring all-caps-str -1 (length all-caps-str))
+                                       nil)) ; needed to re-insert the [^A-Za-z] at the end
+                         (trailing-s (equal (aref all-caps-str (- (length all-caps-str) (if final-char 2 1))) ?s))
+                         (acr (if final-char
+                                  (substring all-caps-str 0 (if trailing-s -2 -1))
+                                (substring all-caps-str 0 (+ (if trailing-s -1 (length all-caps-str)))))))
+                    (pcase base-backend
+                      ('latex (concat "\\acr{" (s-downcase acr) "}" (when trailing-s "\\acrs{}") final-char))
+                      ('html (concat "<span class='acr'>" acr "</span>" (when trailing-s "<small>s</small>") final-char)))))))
+       text t t))))
 
-# (add-to-list 'org-export-filter-plain-text-functions
-#              #'org-export-filter-text-acronym)
+(add-to-list 'org-export-filter-plain-text-functions
+             #'org-export-filter-text-acronym)
 
-# ;; We won't use `org-export-filter-headline-functions' because it
-# ;; passes (and formats) the entire section contents. That's no good.
+;; We won't use `org-export-filter-headline-functions' because it
+;; passes (and formats) the entire section contents. That's no good.
 
-# (defun org-html-format-headline-acronymised (todo todo-type priority text tags info)
-#   "Like `org-html-format-headline-default-function', but with acronym formatting."
-#   (org-html-format-headline-default-function
-#    todo todo-type priority (org-export-filter-text-acronym text 'html info) tags info))
-# (setq org-html-format-headline-function #'org-html-format-headline-acronymised)
+(defun org-html-format-headline-acronymised (todo todo-type priority text tags info)
+  "Like `org-html-format-headline-default-function', but with acronym formatting."
+  (org-html-format-headline-default-function
+   todo todo-type priority (org-export-filter-text-acronym text 'html info) tags info))
+(setq org-html-format-headline-function #'org-html-format-headline-acronymised)
 
-# (defun org-latex-format-headline-acronymised (todo todo-type priority text tags info)
-#   "Like `org-latex-format-headline-default-function', but with acronym formatting."
-#   (org-latex-format-headline-default-function
-#    todo todo-type priority (org-export-filter-text-acronym text 'latex info) tags info))
-# (setq org-latex-format-headline-function #'org-latex-format-headline-acronymised)
-# #+end_src
+(defun org-latex-format-headline-acronymised (todo todo-type priority text tags info)
+  "Like `org-latex-format-headline-default-function', but with acronym formatting."
+  (org-latex-format-headline-default-function
+   todo todo-type priority (org-export-filter-text-acronym text 'latex info) tags info))
+(setq org-latex-format-headline-function #'org-latex-format-headline-acronymised)
+#+end_src
 
 **** Exporting Org code
 
@@ -12461,79 +12455,79 @@ Then we can just hook this in with our clever preamble.
    :order 0.7))
 #+end_src
 
-# **** Pretty code blocks
+**** Pretty code blocks
 
-# We could just use minted for syntax highlighting --- however, we can do better!
-# The =engrave-faces= package lets us use Emacs' font-lock for syntax highlighting,
-# exporting that as LaTeX commands.
+We could just use minted for syntax highlighting --- however, we can do better!
+The =engrave-faces= package lets us use Emacs' font-lock for syntax highlighting,
+exporting that as LaTeX commands.
 
-# #+begin_src emacs-lisp :noweb-ref none :tangle packages.el
-# (package! engrave-faces :recipe (:local-repo "lisp/engrave-faces"))
-# #+end_src
+#+begin_src emacs-lisp :noweb-ref none :tangle packages.el
+(package! engrave-faces :recipe (:local-repo "lisp/engrave-faces"))
+#+end_src
 
-# #+begin_src emacs-lisp
-# (use-package! engrave-faces-latex
-#   :after ox-latex)
-# #+end_src
+#+begin_src emacs-lisp
+(use-package! engrave-faces-latex
+  :after ox-latex)
+#+end_src
 
-# Using this as in LaTeX exports is now as easy as
+Using this as in LaTeX exports is now as easy as
 
-# #+begin_src emacs-lisp
-# (setq org-latex-listings 'engraved)
-# #+end_src
+#+begin_src emacs-lisp
+(setq org-latex-listings 'engraved)
+#+end_src
 
-# One little annoyance with this is the interaction between microtype and =Verbatim=
-# environments. Protrusion is not desirable here. Thankfully, we can patch the
-# =Verbatim= environment to turn off protrusion locally.
+One little annoyance with this is the interaction between microtype and =Verbatim=
+environments. Protrusion is not desirable here. Thankfully, we can patch the
+=Verbatim= environment to turn off protrusion locally.
 
-# #+begin_src emacs-lisp
-# (org-export-update-features 'latex
-#   (no-protrusion-in-code
-#    :condition t
-#    :when microtype
-#    :snippet "\\ifcsname Code\\endcsname\n  \\let\\oldcode\\Code\\renewcommand{\\Code}{\\microtypesetup{protrusion=false}\\oldcode}\n\\fi"
-#    :order 98.5))
-# #+end_src
+#+begin_src emacs-lisp
+(org-export-update-features 'latex
+  (no-protrusion-in-code
+   :condition t
+   :when microtype
+   :snippet "\\ifcsname Code\\endcsname\n  \\let\\oldcode\\Code\\renewcommand{\\Code}{\\microtypesetup{protrusion=false}\\oldcode}\n\\fi"
+   :order 98.5))
+#+end_src
 
-# At some point it would be nice to make the box colours easily customisable. At
-# the moment it's fairly easy to change the syntax highlighting colours with
-# src_elisp{(setq engrave-faces-preset-styles (engrave-faces-generate-preset))},
-# but perhaps a toggle which specifies whether to use the default values, the
-# current theme, or any named theme could be a good idea. It should also possible
-# to set the box background dynamically to match. The named theme could work by
-# looking for a style definition with a certain name in a cache dir, and then
-# switching to that theme and producing (and saving) the style definition if it
-# doesn't exist.
+At some point it would be nice to make the box colours easily customisable. At
+the moment it's fairly easy to change the syntax highlighting colours with
+src_elisp{(setq engrave-faces-preset-styles (engrave-faces-generate-preset))},
+but perhaps a toggle which specifies whether to use the default values, the
+current theme, or any named theme could be a good idea. It should also possible
+to set the box background dynamically to match. The named theme could work by
+looking for a style definition with a certain name in a cache dir, and then
+switching to that theme and producing (and saving) the style definition if it
+doesn't exist.
 
-# Now let's have the example block be styled similarly.
+Now let's have the example block be styled similarly.
 
-# #+begin_src emacs-lisp
-# (defadvice! org-latex-example-block-engraved (orig-fn example-block contents info)
-#   "Like `org-latex-example-block', but supporting an engraved backend"
-#   :around #'org-latex-example-block
-#   (let ((output-block (funcall orig-fn example-block contents info)))
-#     (if (eq 'engraved (plist-get info :latex-listings))
-#         (format "\\begin{Code}[alt]\n%s\n\\end{Code}" output-block)
-#       output-block)))
-# #+end_src
+#+begin_src emacs-lisp
+(defadvice! org-latex-example-block-engraved (orig-fn example-block contents info)
+  "Like `org-latex-example-block', but supporting an engraved backend"
+  :around #'org-latex-example-block
+  (let ((output-block (funcall orig-fn example-block contents info)))
+    (if (eq 'engraved (plist-get info :latex-listings))
+        (format "\\begin{Code}[alt]\n%s\n\\end{Code}" output-block)
+      output-block)))
+#+end_src
 
-# In addition to the vastly superior visual output, this should also be much
-# faster to compile for code-heavy documents (like this config).
+In addition to the vastly superior visual output, this should also be much
+faster to compile for code-heavy documents (like this config).
 
-# Performing a little benchmark with this document, I find that this is indeed the
-# case.
+Performing a little benchmark with this document, I find that this is indeed the
+case.
 
-# | LaTeX syntax highlighting backend | Compile time | Overhead | Overhead ratio |
-# |-----------------------------------+--------------+----------+----------------|
-# | verbatim                          | 12 s         | 0        |            0.0 |
-# | lstlistings                       | 15 s         | 3 s      |            0.2 |
-# | Engrave                           | 34 s         | 22 s     |            1.8 |
-# | Pygments (Minted)                 | 184 s        | 172 s    |           14.3 |
-# #+TBLFM: $3=$2-@2$2::$4=$3 / @2$2;%.1f
+| LaTeX syntax highlighting backend | Compile time | Overhead | Overhead ratio |
+|-----------------------------------+--------------+----------+----------------|
+| verbatim                          | 12 s         | 0        |            0.0 |
+| lstlistings                       | 15 s         | 3 s      |            0.2 |
+| Engrave                           | 34 s         | 22 s     |            1.8 |
+| Pygments (Minted)                 | 184 s        | 172 s    |           14.3 |
+#+TBLFM: $3=$2-@2$2::$4=$3 / @2$2;%.1f
 
-# Treating the verbatim (no syntax highlighting) result as a baseline; this
-# rudimentary test suggest that =engrave-faces= is around eight times faster than
-# =pygments=, and takes three times as long as no syntax highlighting (verbatim).
+Treating the verbatim (no syntax highlighting) result as a baseline; this
+rudimentary test suggest that =engrave-faces= is around eight times faster than
+=pygments=, and takes three times as long as no syntax highlighting (verbatim).
 
 **** Julia code blocks
 
@@ -12989,7 +12983,7 @@ able to handle anyway. For them we define a table of LaTeX translations
 | γ         | \(\gamma\) |
 | δ         | \(\delta\) |
 | ε         | \(\epsilon\) |
-| ϵ         | \(\varepsilon\) |
+| ϵ          | \(\varepsilon\) |
 | ζ         | \(\zeta\) |
 | η         | \(\eta\) |
 | θ         | \(\theta\) |
@@ -13024,8 +13018,8 @@ able to handle anyway. For them we define a table of LaTeX translations
 | Ψ         | \(\Psi\) |
 | Ω         | \(\Omega\) |
 | א         | \(\aleph\) |
-| ב          | \(\beth\)  |
-| ד          | \(\daleth\) |
+| ב         | \(\beth\) |
+| ד         | \(\daleth\) |
 | ג          | \(\gimel\) |
 
 #+name: gen-latex-non-ascii-char-substitutions
@@ -13977,6 +13971,13 @@ In case of Emacs28,
 
 ** Python
 
+Since I'm using =mypyls=, as suggested in [[file:~/.config/emacs/modules/lang/python/README.org::*Language Server Protocol Support][:lang python LSP support]] I'll tweak the
+priority of =mypyls=
+
+# #+begin_src emacs-lisp
+# (after! lsp-python-ms
+#   (set-lsp-priority! 'mspyls 1))
+# #+end_src
 
 ** PDF
 *** MuPDF
@@ -14185,11 +14186,11 @@ Of course, there's an Emacs mode for this.
 (use-package! beancount
   :mode ("\\.beancount\\'" . beancount-mode)
   :init
-  (after! all-the-icons
-    (add-to-list 'all-the-icons-icon-alist
-                 '("\\.beancount\\'" all-the-icons-material "attach_money" :face all-the-icons-lblue))
-    (add-to-list 'all-the-icons-mode-icon-alist
-                 '(beancount-mode all-the-icons-material "attach_money" :face all-the-icons-lblue)))
+  (after! nerd-icons
+    (add-to-list 'nerd-icons-extension-icon-alist
+                 '("beancount" nerd-icons-faicon "nf-fa-dollar" :face nerd-icons-lblue))
+    (add-to-list 'nerd-icons-mode-icon-alist
+                 '(beancount-mode nerd-icons-faicon "nf-fa-dollar" :face nerd-icons-lblue)))
   :config
   (setq beancount-electric-currency t)
   (defun beancount-bal ()
@@ -14306,4 +14307,93 @@ which is perfect for our needs.
 
 #+begin_src emacs-lisp
 (add-to-list 'magic-mode-alist (cons "\\`GIMP Palette\n" #'gimp-palette-mode))
+#+end_src
+
+
+* Custom Workflow
+** Type Break
+
+#+call: confpkg("!Pkg type-break")
+
+#+begin_src emacs-lisp
+(use-package! type-break
+  :hook ((org-pomodoro-killed . type-break-mode)
+         (org-pomodoro-break-finished . type-break-mode)
+         (org-pomodoro-started . (lambda () (type-break-mode -1)))
+         (after-init . type-break-mode))
+  :init
+  (defun type-break-demo-agenda ()
+    "Display the Org Agenda in read-only mode. Cease the demo as soon as a key is pressed."
+    (let ((buffer-name "*Typing Break Org Agenda*")
+          lines)
+      (condition-case ()
+          (progn
+            (org-agenda-list)
+            (setq buffer-name (buffer-name))
+            ;; Set the buffer to read-only
+            (with-current-buffer buffer-name
+              (read-only-mode 1))
+            ;; Message to be displayed at the bottom
+            (let ((msg (if type-break-terse-messages
+                           ""
+                         "Press any key to resume from typing break")))
+              ;; Loop until key is pressed
+              (while (not (input-pending-p))
+                (sit-for 60))
+              ;; Clean up after key is pressed
+              (read-event)
+              (type-break-catch-up-event)
+              (kill-buffer buffer-name)))
+        (quit
+         (and (get-buffer buffer-name)
+              (kill-buffer buffer-name))))))
+
+  :config
+  ;; Setting interval of that of a pomodoro session
+  (setq type-break-interval (* 25 60) ;; 25 mins
+        type-break-good-rest-interval (* 9 60) ;; 9 mins
+        type-break-good-break-interval (* 5 60) ;; 5 mins
+        type-break-query-mode t
+        type-break-keystroke-threshold '(nil . 2625)
+        type-break-demo-boring-stats t
+        type-break-demo-functions '(type-break-demo-agenda)))
+#+end_src
+
+** Org pomodoro
+
+#+call: confpkg("!Pkg org-pomodoro", after="org")
+
+#+begin_src emacs-lisp
+(use-package! org-pomodoro
+  :after org
+  :bind (("<f12>" . org-pomodoro))
+  :hook ((org-pomodoro-started . gopar/load-window-config-and-close-work-agenda)
+         (org-pomodoro-finished . gopar/save-window-config-and-show-work-agenda))
+  :config
+  (setq org-pomodoro-manual-break t
+        org-pomodoro-short-break-length 20
+        org-pomodoro-long-break-length 30
+        org-pomodoro-length 60)
+  :init
+  (defun gopar/home-pomodoro ()
+    (interactive)
+    (setq org-pomodoro-length 25
+          org-pomodoro-short-break-length 5))
+
+  (defun gopar/work-pomodoro ()
+    (interactive)
+    (setq org-pomodoro-length 60
+          org-pomodoro-short-break-length 20))
+
+  (defun gopar/save-window-config-and-show-work-agenda ()
+    (interactive)
+    (window-configuration-to-register ?`)
+    (delete-other-windows)
+    (org-save-all-org-buffers)
+    (org-agenda "a"))
+
+  (defun gopar/load-window-config-and-close-work-agenda ()
+    (interactive)
+    (org-save-all-org-buffers)
+    (jump-to-register ?`)))
 #+end_src
