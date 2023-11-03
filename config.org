@@ -8383,6 +8383,20 @@ be nice to have a function to convert =org-ref= citations to =org-cite= forms.
                                  (match-string 2))))))))
 #+end_src
 
+*****  citar-org-roam
+
+#+call: confpkg("!Pkg citar-org-roam", after="citar, org-roam")
+
+#+begin_src emacs-lisp :tangle package.el
+(package! citar-org-roam)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! citar-org-roam
+  :after (citar org-roam)
+  :config (citar-org-roam-mode))
+#+end_src
+
 ***** cdlatex
 
 It's also nice to be able to use ~cdlatex~.
@@ -14292,4 +14306,23 @@ which is perfect for our needs.
     (interactive)
     (org-save-all-org-buffers)
     (jump-to-register ?`)))
+#+end_src
+
+** org-noter
+
+#+call: confpkg("!Pkg org-noter", after="org")
+
+Here I'm using my forked version of the package. There I merged the
+org-roam-integration branch.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-noter :recipe (:host github :repo "org-noter/org-noter"
+                             :branch "feature/org-roam-integration"))
+(unpin! org-noter)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! org-noter
+  :config
+  (org-noter-enable-org-roam-integration))
 #+end_src
