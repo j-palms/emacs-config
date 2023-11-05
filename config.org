@@ -14266,7 +14266,8 @@ which is perfect for our needs.
       (condition-case ()
           (progn
             ;; (org-agenda-list)
-            (org-agenda nil "n")
+            ;; (org-agenda nil "n")
+            (org-gtd-engage)
             (setq buffer-name (buffer-name))
             ;; Set the buffer to read-only
             (with-current-buffer buffer-name
@@ -14328,7 +14329,8 @@ which is perfect for our needs.
     (window-configuration-to-register ?`)
     (delete-other-windows)
     (org-save-all-org-buffers)
-    (org-agenda nil "n"))
+    ;; (org-agenda nil "n"))
+    (org-gtd-engage))
 
   (defun gopar/load-window-config-and-close-work-agenda ()
     (interactive)
