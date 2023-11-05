@@ -7818,10 +7818,16 @@ Fontifying =org-mode= buffers to be as pretty as possible is of paramount import
 and Minad's lovely =org-modern= goes a long way in this regard.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
+(package! org-modern)
 #+end_src
 
+This is the commit TEC uses:
+(package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
+
+
 ...with a touch of configuration...
+
+
 
 #+begin_src emacs-lisp
 (use-package! org-modern
@@ -7834,15 +7840,17 @@ and Minad's lovely =org-modern= goes a long way in this regard.
                           (45 . "–")
                           (42 . "•"))
         org-modern-todo-faces
-        '(("TODO" :inverse-video t :inherit org-todo)
-          ("PROJ" :inverse-video t :inherit +org-todo-project)
-          ("STRT" :inverse-video t :inherit +org-todo-active)
-          ("[-]"  :inverse-video t :inherit +org-todo-active)
-          ("HOLD" :inverse-video t :inherit +org-todo-onhold)
-          ("WAIT" :inverse-video t :inherit +org-todo-onhold)
-          ("[?]"  :inverse-video t :inherit +org-todo-onhold)
-          ("KILL" :inverse-video t :inherit +org-todo-cancel)
-          ("NO"   :inverse-video t :inherit +org-todo-cancel))
+        '(("TODO" :inherit org-todo)
+          ("NEXT" :inherit +org-todo-active)
+          ("WAIT" :inherit +org-todo-onhold)
+          ("CNCL" :inherit +org-todo-cancel)
+          ("PROJ" :inherit +org-todo-project)
+          ;; ("STRT" :inherit +org-todo-active)
+          ("LOOP" :inherit +org-todo-active)
+          ("[-]"  :inherit +org-todo-active)
+          ("HOLD" :inherit +org-todo-onhold)
+          ("[?]"  :inherit +org-todo-onhold)
+          ("NO"   :inherit +org-todo-cancel))
         org-modern-footnote
         (cons nil (cadr org-script-display))
         org-modern-block-fringe nil
@@ -7854,6 +7862,10 @@ and Minad's lovely =org-modern= goes a long way in this regard.
           ("export" "⏩" "⏪"))
         org-modern-progress nil
         org-modern-priority nil
+        ;; org-modern-priority
+        ;; '((?A . "❗")
+        ;;   (?B . "⬆")
+        ;;   (?C . "⬇"))
         org-modern-horizontal-rule (make-string 36 ?─)
         org-modern-keyword
         '((t . t)
@@ -8195,6 +8207,17 @@ There also seem to be a few keybindings which use =hjkl=, but miss arrow key equ
       :n "g <down>" #'org-forward-heading-same-level
       :n "g <left>" #'org-up-element
       :n "g <right>" #'org-down-element)
+#+end_src
+
+
+#+begin_src emacs-lisp
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "NEXT(n)" "WAIT(w)" "HOLD(h)" "|" "DONE(d)" "CNCL(c)")
+        (sequence "PROJ(p)" "LOOP(l)" "IDEA(i)" "|" "DONE(d)" "CNCL(c)")
+        (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")
+        (sequence "|" "OKAY(o)" "YES(y)" "NO(n)")))
+
+      ;; '((sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "LOOP(l)" "PROJ(p)" "|" "DONE(d)" "|" "CANCEL(c)")))
 #+end_src
 
 **** Extra functionality
@@ -10171,6 +10194,9 @@ and add an extra ~org-bullet~ to the default list of four.
         (?C . 'nerd-icons-yellow)
         (?D . 'nerd-icons-green)
         (?E . 'nerd-icons-blue)))
+;;(custom-set-faces!
+;;  '(+org-todo-active :inherit (bold org-todo) :foreground "#7bc275"))
+;;
 #+end_src
 
 It's also nice to make use of the =prettify-symbols-mode= for a few Org syntactic
@@ -10193,23 +10219,24 @@ other settings.
                 :priority_d    #("⬇" 0 1 (face nerd-icons-green))
                 :priority_e    #("❓" 0 1 (face nerd-icons-blue))))
 
+(set-ligatures! 'org-mode
+  :list_property "::"
+  :em_dash       "---"
+  :ellipsis      "..."
+  :arrow_right   "->"
+  :arrow_left    "<-"
+  :arrow_lr      "<->"
+  :properties    ":PROPERTIES:"
+  :end           ":END:"
+  :priority_a    "[#A]"
+  :priority_b    "[#B]"
+  :priority_c    "[#C]"
+  :priority_d    "[#D]"
+  :priority_e    "[#E]")
+
 (defadvice! +org-init-appearance-h--no-ligatures-a ()
   :after #'+org-init-appearance-h
-  (set-ligatures! 'org-mode nil)
-  (set-ligatures! 'org-mode
-    :list_property "::"
-    :em_dash       "---"
-    :ellipsis      "..."
-    :arrow_right   "->"
-    :arrow_left    "<-"
-    :arrow_lr      "<->"
-    :properties    ":PROPERTIES:"
-    :end           ":END:"
-    :priority_a    "[#A]"
-    :priority_b    "[#B]"
-    :priority_c    "[#C]"
-    :priority_d    "[#D]"
-    :priority_e    "[#E]"))
+  (set-ligatures! 'org-mode nil))
 #+end_src
 
 While we're at it we may as well make tags prettier as well 🙂
