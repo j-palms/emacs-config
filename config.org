@@ -1784,7 +1784,7 @@ ess                          ; emacs speaks statistics
 json                         ; At least it ain't XML
 ;;(java +lsp)                ; the poster child for carpal tunnel syndrome
 (javascript +lsp)            ; all(hope(abandon(ye(who(enter(here))))))
-(julia +lsp)                 ; Python, R, and MATLAB in a blender
+;; (julia +lsp)                 ; Python, R, and MATLAB in a blender
 ;;kotlin                     ; a better, slicker Java(Script)
 (latex                       ; writing papers in Emacs has never been so fun
  +latexmk                    ; what else would you use?
@@ -8010,28 +8010,28 @@ recognising the pgtk window system]].
 #+end_src
 
 **** Extra functionality
-***** Julia support
+# ***** Julia support
 
-#+call: confpkg("!Pkg ob-julia")
+# #+call: confpkg("!Pkg ob-julia")
 
-=ob-julia= is currently a bit borked, but there's an effort to improve this.
-#+begin_src emacs-lisp :tangle packages.el
-(package! ob-julia :recipe (:local-repo "lisp/ob-julia" :files ("*.el" "julia")))
-#+end_src
+# =ob-julia= is currently a bit borked, but there's an effort to improve this.
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! ob-julia :recipe (:local-repo "lisp/ob-julia" :files ("*.el" "julia")))
+# #+end_src
 
-#+begin_src emacs-lisp
-(use-package! ob-julia
-  :commands org-babel-execute:julia
-  :config
-  (setq org-babel-julia-command-arguments
-        `("--sysimage"
-          ,(when-let ((img "~/.local/lib/julia.so")
-                      (exists? (file-exists-p img)))
-             (expand-file-name img))
-          "--threads"
-          ,(number-to-string (- (doom-system-cpus) 2))
-          "--banner=no")))
-#+end_src
+# #+begin_src emacs-lisp
+# (use-package! ob-julia
+#   :commands org-babel-execute:julia
+#   :config
+#   (setq org-babel-julia-command-arguments
+#         `("--sysimage"
+#           ,(when-let ((img "~/.local/lib/julia.so")
+#                       (exists? (file-exists-p img)))
+#              (expand-file-name img))
+#           "--threads"
+#           ,(number-to-string (- (doom-system-cpus) 2))
+#           "--banner=no")))
+# #+end_src
 
 ***** HTTP requests
 
@@ -12535,68 +12535,68 @@ Then we can just hook this in with our clever preamble.
 # rudimentary test suggest that =engrave-faces= is around eight times faster than
 # =pygments=, and takes three times as long as no syntax highlighting (verbatim).
 
-**** Julia code blocks
+# **** Julia code blocks
 
-Julia code has fantastic support for unicode! The downside is that =pdflatex= is
-/still/ a pain to use with unicode symbols. The solution --- =lualatex=. Now we just
-need to make it automatic
+# Julia code has fantastic support for unicode! The downside is that =pdflatex= is
+# /still/ a pain to use with unicode symbols. The solution --- =lualatex=. Now we just
+# need to make it automatic
 
-#+begin_src emacs-lisp
-(defadvice! org-latex-pick-compiler (_contents info)
-  :before #'org-latex-template
-  :before #'org-beamer-template
-  (when (and (memq 'code (plist-get info :features))
-             (memq 'julia-code (plist-get info :features))
-             (save-excursion
-               (goto-char (point-min))
-               (re-search-forward "[^\x00-\x7F\u200b]" nil t)))
-    (setf info (plist-put
-                (if (member #'+org-latex-replace-non-ascii-chars (plist-get info :filter-final-output))
-                    (plist-put info :filter-final-output
-                               (delq #'+org-latex-replace-non-ascii-chars (plist-get info :filter-final-output)))
-                  info)
-                :latex-compiler "lualatex"))))
-#+end_src
+# #+begin_src emacs-lisp
+# (defadvice! org-latex-pick-compiler (_contents info)
+#   :before #'org-latex-template
+#   :before #'org-beamer-template
+#   (when (and (memq 'code (plist-get info :features))
+#              (memq 'julia-code (plist-get info :features))
+#              (save-excursion
+#                (goto-char (point-min))
+#                (re-search-forward "[^\x00-\x7F\u200b]" nil t)))
+#     (setf info (plist-put
+#                 (if (member #'+org-latex-replace-non-ascii-chars (plist-get info :filter-final-output))
+#                     (plist-put info :filter-final-output
+#                                (delq #'+org-latex-replace-non-ascii-chars (plist-get info :filter-final-output)))
+#                   info)
+#                 :latex-compiler "lualatex"))))
+# #+end_src
 
-Then a font with unicode support must be used. JuliaMono is the obvious choice,
-and we can use it with the =fontspec= package. In future it may be nice to set
-this just as a fallback font (when it isn't a pain to do so).
+# Then a font with unicode support must be used. JuliaMono is the obvious choice,
+# and we can use it with the =fontspec= package. In future it may be nice to set
+# this just as a fallback font (when it isn't a pain to do so).
 
-#+name: julia-mono-fontspec
-#+begin_src LaTeX
-\ifcsname directlua\endcsname
-  \usepackage{fontspec}
-  \newfontfamily\JuliaMono{JuliaMono-Regular.ttf}[Path=/usr/share/fonts/truetype/, Extension=.ttf]
-  \newfontface\JuliaMonoRegular{JuliaMono-Regular}
-  \setmonofont{JuliaMonoRegular}[Contextuals=Alternate, Scale=MatchLowercase]
-\fi
-#+end_src
+# #+name: julia-mono-fontspec
+# #+begin_src LaTeX
+# \ifcsname directlua\endcsname
+#   \usepackage{fontspec}
+#   \newfontfamily\JuliaMono{JuliaMono-Regular.ttf}[Path=/usr/share/fonts/truetype/, Extension=.ttf]
+#   \newfontface\JuliaMonoRegular{JuliaMono-Regular}
+#   \setmonofont{JuliaMonoRegular}[Contextuals=Alternate, Scale=MatchLowercase]
+# \fi
+# #+end_src
 
-Now all that remains is to hook this into the preamble generation.
+# Now all that remains is to hook this into the preamble generation.
 
-#+begin_src emacs-lisp :noweb no-export :noweb-prefix no
-(defvar org-latex-julia-mono-fontspec
-  <<grab("julia-mono-fontspec")>>
-  "LaTeX preamble snippet that sets LuaLaTeX's fontspec to use Julia Mono.")
+# #+begin_src emacs-lisp :noweb no-export :noweb-prefix no
+# (defvar org-latex-julia-mono-fontspec
+#   <<grab("julia-mono-fontspec")>>
+#   "LaTeX preamble snippet that sets LuaLaTeX's fontspec to use Julia Mono.")
 
-(org-export-update-features 'latex
-  (julia-code
-   :condition "^[ \t]*#\\+begin_src julia\\|^[ \t]*#\\+BEGIN_SRC julia\\|src_julia"
-   :when code
-   :snippet org-latex-julia-mono-fontspec
-   :order 0)
-  (microtype-lualatex
-   :condition t
-   :when (microtype julia-code)
-   :prevents microtype
-   :snippet "\\usepackage[activate={true,nocompatibility},final,tracking=true,factor=2000]{microtype}\n"
-   :order 0.1)
-  (custom-font-no-mono
-   :condition t
-   :prevents custom-font
-   :snippet (org-latex-fontset :serif :sans)
-   :order 0))
-#+end_src
+# (org-export-update-features 'latex
+#   (julia-code
+#    :condition "^[ \t]*#\\+begin_src julia\\|^[ \t]*#\\+BEGIN_SRC julia\\|src_julia"
+#    :when code
+#    :snippet org-latex-julia-mono-fontspec
+#    :order 0)
+#   (microtype-lualatex
+#    :condition t
+#    :when (microtype julia-code)
+#    :prevents microtype
+#    :snippet "\\usepackage[activate={true,nocompatibility},final,tracking=true,factor=2000]{microtype}\n"
+#    :order 0.1)
+#   (custom-font-no-mono
+#    :condition t
+#    :prevents custom-font
+#    :snippet (org-latex-fontset :serif :sans)
+#    :order 0))
+# #+end_src
 
 **** Emojis
 
@@ -12804,18 +12804,18 @@ Unfortunately this isn't a global solution, as LuaLaTeX doesn't have
 =\DeclareUnicodeCharacter=. However, we can fix this with a hack for the one case
 when we know it will be used.
 
-#+begin_src emacs-lisp
-(org-export-update-features 'latex
-  (emoji-lualatex-hack
-   :condition t
-   :when (emoji julia-code) ; LuaLaTeX is used with julia-code.
-   :snippet
-   "\\usepackage{newunicodechar}
-\\newcommand{\\DeclareUnicodeCharacter}[2]{%
-    \\begingroup\\lccode`|=\\string\"#1\\relax
-    \\lowercase{\\endgroup\\newunicodechar{|}}{#2}}"
-   :order 2.9))
-#+end_src
+# #+begin_src emacs-lisp
+# (org-export-update-features 'latex
+#   (emoji-lualatex-hack
+#    :condition t
+#    :when (emoji julia-code) ; LuaLaTeX is used with julia-code.
+#    :snippet
+#    "\\usepackage{newunicodechar}
+# \\newcommand{\\DeclareUnicodeCharacter}[2]{%
+#     \\begingroup\\lccode`|=\\string\"#1\\relax
+#     \\lowercase{\\endgroup\\newunicodechar{|}}{#2}}"
+#    :order 2.9))
+# #+end_src
 
 This works fairly nicely, there's just one little QOL upgrade that we can
 perform. =emojify= downloads the ~72x72~ versions of Twemoji, however SVG versions
@@ -14068,34 +14068,34 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
     :multiply "%*%"))
 #+end_src
 
-** Julia
+# ** Julia
 
-#+call: confpkg(after="julia-mode")
+# #+call: confpkg(after="julia-mode")
 
-As mentioned in [[https://github.com/non-Jedi/lsp-julia/issues/35][lsp-julia#35]], =lsp-mode= seems to serve an invalid response to the
-Julia server. The pseudo-fix is rather simple at least
-#+begin_src emacs-lisp
-(add-hook 'julia-mode-hook #'rainbow-delimiters-mode-enable)
-(add-hook! 'julia-mode-hook
-  (setq-local lsp-enable-folding t
-              lsp-folding-range-limit 100))
-#+end_src
+# As mentioned in [[https://github.com/non-Jedi/lsp-julia/issues/35][lsp-julia#35]], =lsp-mode= seems to serve an invalid response to the
+# Julia server. The pseudo-fix is rather simple at least
+# #+begin_src emacs-lisp
+# (add-hook 'julia-mode-hook #'rainbow-delimiters-mode-enable)
+# (add-hook! 'julia-mode-hook
+#   (setq-local lsp-enable-folding t
+#               lsp-folding-range-limit 100))
+# #+end_src
 
-Julia is also missing a mime type, but that's not too hard to fix.
+# Julia is also missing a mime type, but that's not too hard to fix.
 
-#+begin_src xml :tangle ~/.local/share/mime/packages/julia.xml :mkdirp yes :comments no
-<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
-  <mime-type type="text/julia">
-    <comment>Julia source sode</comment>
-    <glob pattern="*.jl"/>
-    <alias type="text/julia"/>
-  </mime-type>
-</mime-info>
-#+end_src
+# #+begin_src xml :tangle ~/.local/share/mime/packages/julia.xml :mkdirp yes :comments no
+# <mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+#   <mime-type type="text/julia">
+#     <comment>Julia source sode</comment>
+#     <glob pattern="*.jl"/>
+#     <alias type="text/julia"/>
+#   </mime-type>
+# </mime-info>
+# #+end_src
 
-#+begin_src shell :tangle (if (string= (shell-command-to-string "xdg-mime query default text/julia") "") "setup.sh" "no")
-update-mime-database ~/.local/share/mime
-#+end_src
+# #+begin_src shell :tangle (if (string= (shell-command-to-string "xdg-mime query default text/julia") "") "setup.sh" "no")
+# update-mime-database ~/.local/share/mime
+# #+end_src
 
 ** Data.toml files
 
