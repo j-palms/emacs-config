@@ -1371,24 +1371,27 @@ changes Doom makes:
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 (global-activity-watch-mode)
 
-(setq lsp-headerline-breadcrumb-enable t
-      lsp-headerline-breadcrumb-segments '(project file symbols)
-      lsp-headerline-breadcrumb-icons-enable t
-      ;; lsp-ui-doc-delay 5
-      ;; lsp-ui-doc-use-childframe nil
-      company-box-doc-enable nil)
+;; (setq lsp-headerline-breadcrumb-enable t
+;;       lsp-headerline-breadcrumb-segments '(project file symbols)
+;;       lsp-headerline-breadcrumb-icons-enable t
+;;       ;; lsp-ui-doc-delay 5
+;;       ;; lsp-ui-doc-use-childframe nil
+;;       company-box-doc-enable nil)
+(setq company-box-doc-enable nil)
 
-;; (setq doom-modeline-persp-name t)
+(setq doom-modeline-persp-name t)
 
 (map! ("C-c C-SPC"
        :desc "Switch perspective" #'+workspace/cycle))
 
-;; use flymake
-(after! lsp-mode
-  (setq lsp-diagnostics-provider :flymake))
-(add-hook! prog-mode #'flymake-mode)
+;; (add-hook! prog-mode #'flymake-mode)
 
-;; ;; Debugging with python
+;; ;; use flymake
+;; (after! lsp-mode
+;;   (setq lsp-diagnostics-provider :flymake))
+;; (add-hook! prog-mode #'flymake-mode)
+
+;; ;; ;; Debugging with python
 ;; (map! :leader
 ;;       (:prefix "m"
 ;;        :desc "Debug with dap-mode hydra" "d" #'dap-hydra))
@@ -1616,7 +1619,7 @@ I reckon enabling half the modules Doom provides should do it.
 doom                         ; what makes DOOM look the way it does
 doom-dashboard               ; a nifty splash screen for Emacs
 doom-quit                    ; DOOM quit-message prompts when you quit Emacs
-;; (emoji +unicode)          ; 🙂
+(emoji +unicode)          ; 🙂
 ;;fill-column                ; a `fill-column' indicator
 hl-todo                      ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
 hydra                      ; quick documentation for related commands
@@ -1696,11 +1699,13 @@ docker                       ; port everything to containers
 ;;editorconfig               ; let someone else argue about tabs vs spaces
 ;;ein                        ; tame Jupyter notebooks with emacs
 (eval +overlay)              ; run code, run (also, repls)
-;;gist                       ; interacting with github gists
+gist                       ; interacting with github gists
 (lookup                      ; helps you navigate your code and documentation
  +dictionary                 ; dictionary/thesaurus is nice
  +docsets)                   ; ...or in Dash docsets locally
-lsp                          ; Language Server Protocol
+(lsp
+ +peek)
+ ;; +eglot)                     ; Language Server Protocol
 ;;macos                      ; MacOS-specific commands
 (magit                       ; a git porcelain for Emacs
  +forge)                     ; interface with git forges
@@ -1712,7 +1717,7 @@ rgb                          ; creating color strings
 ;;taskrunner                 ; taskrunner for all your projects
 ;;terraform                  ; infrastructure as code
 ;;tmux                       ; an API for interacting with tmux
-;;tree-sitter                ; syntax and parsing, sitting in a tree...
+tree-sitter                ; syntax and parsing, sitting in a tree...
 upload                       ; map local to remote projects via ssh/ftp
 #+end_src
 
@@ -1750,7 +1755,9 @@ ess                          ; emacs speaks statistics
 ;;fstar                      ; (dependent) types and (monadic) effects and Z3
 ;;gdscript                   ; the language you waited for
 ;;(graphql +lsp)             ; Give queries a REST
-(go +lsp)                    ; the hipster dialect
+(go
+ +lsp
+ +tree-sitter)                    ; the hipster dialect
 ;;(haskell +lsp)             ; a language that's lazier than I am
 ;;hy                         ; readability of scheme w/ speed of python
 ;;idris                      ;
@@ -1784,8 +1791,11 @@ nix                          ; I hereby declare "nix geht mehr!"
 ;;php                        ; perl's insecure younger brother
 ;;plantuml                   ; diagrams for confusing people more
 ;;purescript                 ; javascript, but functional
-;; (python +lsp +pyright)       ; beautiful is better than ugly
-;;qt                         ; the 'cutest' gui framework ever
+(python
+ +lsp
+ +tree-sitter
+ +pyright)       ; beautiful is better than ugly
+qt                         ; the 'cutest' gui framework ever
 ;;racket                     ; a DSL for DSLs
 ;;raku                       ; the artist formerly known as perl6
 ;;rest                       ; Emacs as a REST client
@@ -1828,7 +1838,7 @@ I couldn't resist the Email and Feed modules.
 
 #+name: doom-app
 #+begin_src emacs-lisp
-;;calendar                   ; A dated approach to timetabling
+calendar                   ; A dated approach to timetabling
 ;;emms                       ; Multimedia in Emacs is music to my ears
 everywhere                   ; *leave* Emacs!? You must be joking.
 ;; irc                          ; how neckbeards socialize
