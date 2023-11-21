@@ -9211,7 +9211,7 @@ no modeline.
   :custom
   (org-gtd-directory "~/org/gtd")
   (org-edna-use-inheritance t)
-  ;; (org-gtd-organize-hooks '(org-gtd-set-area-of-focus org-set-tags-command))
+  (org-gtd-organize-hooks '(org-gtd-set-area-of-focus org-set-tags-command))
   :config
   (org-edna-mode)
   (map! :prefix "C-c"
