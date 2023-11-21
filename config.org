@@ -14383,6 +14383,16 @@ org-roam-integration branch.
   (citar-org-roam-mode)
   (setq citar-org-roam-capture-template-key "l"))
 #+end_src
+
+** lsp-mode
+
+#+call: confpkg("!Pkg lsp-mode")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! lsp-mode :recipe (:host github :repo "emacs-lsp/lsp-mode"))
+(unpin! lsp-mode)
+#+end_src
+
 ** org-caldav
 
 #+call: confpkg("!Pkg org-caldav")
