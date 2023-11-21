@@ -1369,6 +1369,7 @@ changes Doom makes:
 
 (display-time-mode 1)                             ; Enable time in the mode-line
 (global-subword-mode 1)                           ; Iterate through CamelCase words
+(global-activity-watch-mode)
 
 (setq lsp-headerline-breadcrumb-enable t
       lsp-headerline-breadcrumb-segments '(project file symbols)
@@ -14371,4 +14372,11 @@ org-roam-integration branch.
   :config
   (citar-org-roam-mode)
   (setq citar-org-roam-capture-template-key "l"))
+#+end_src
+** Activity watch mode
+
+#+call: confpkg("!Pkg activity-watch-mode")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! activity-watch-mode)
 #+end_src
