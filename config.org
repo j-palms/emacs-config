@@ -14373,6 +14373,74 @@ org-roam-integration branch.
   (citar-org-roam-mode)
   (setq citar-org-roam-capture-template-key "l"))
 #+end_src
+** org-caldav
+
+#+call: confpkg("!Pkg org-caldav")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-caldav)
+#+end_src
+
+
+#+begin_src emacs-lisp
+(use-package! org-caldav
+  :config
+  (setq org-caldav-url "https://posteo.de:8443/calendars/zeo")
+  ;;       org-caldav-calendar-id "default"
+  ;;       org-caldav-inbox "~/org/gtd/calendar.org"))
+
+ (setq org-caldav-calendars
+  '((:calendar-id "default"
+     ;; :files ("~/org/work.org")
+     :inbox "~/org/gtd/cal-work.org")
+    (:calendar-id "pjygij"
+     :files ("~/org/gtd/org-gtd-tasks.org")
+     :inbox "~/org/gtd/cal-pers.org"))))
+     ;; :skip-conditions (regexp "soccer")
+#+end_src
+** calfw
+
+#+call: confpkg("!Pkg calfw")
+
+# #+begin_src emacs-lisp
+# (use-package! calfw
+#   :config
+#   ;; (require 'calfw-ical)
+#   (setq cfw:open-ical-calendar "https://posteo.de/calendars/ics/uom0kta3bomsfffh0hhxs7jmrkqz9mbm")
+#   )
+# #+end_src
+
+
+#+begin_src emacs-lisp
+(defun calendar-helper () ;; doesn't have to be interactive
+  (cfw:open-calendar-buffer
+   :contents-sources
+   (list
+    (cfw:org-create-source)
+    (cfw:ical-create-source "Posteo-Work" "https://posteo.de/calendars/ics/uom0kta3bomsfffh0hhxs7jmrkqz9mbm" "Green")
+    (cfw:ical-create-source "Posteo-Personal" "https://posteo.de/calendars/ics/n2onw8jtaxxomy9x2p9p9thox7eitp7w" "Red"))))
+(defun calendar-init ()
+  ;; switch to existing calendar buffer if applicable
+  (if-let (win (cl-find-if (lambda (b) (string-match-p "^\\*cfw:" (buffer-name b)))
+                           (doom-visible-windows)
+                           :key #'window-buffer))
+      (select-window win)
+    (calendar-helper)))
+(defun =my-calendar ()
+  "Activate (or switch to) *my* `calendar' in its workspace."
+  (interactive)
+  (if (featurep! :ui workspaces) ;; create workspace (if enabled)
+      (progn
+        (+workspace-switch "Calendar" t)
+        (doom/switch-to-scratch-buffer)
+        (calendar-init)
+        (+workspace/display))
+    (setq +calendar--wconf (current-window-configuration))
+    (delete-other-windows)
+    (switch-to-buffer (doom-fallback-buffer))
+    (calendar-init)))
+#+end_src
+
 ** Activity watch mode
 
 #+call: confpkg("!Pkg activity-watch-mode")
