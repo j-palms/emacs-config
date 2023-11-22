@@ -3346,26 +3346,6 @@ sounds nice to me.
 (package! rotate :pin "4e9ac3ff800880bd9b705794ef0f7c99d72900a6")
 #+end_src
 
-*** Org noter
-
-#+call: confpkg("!Pkg org-noter")
-
-#+begin_src emacs-lisp :tangle packages.el
-(package! org-noter :recipe (:host github :repo "org-noter/org-noter"
-                             :branch "feature/org-roam-integration"))
-(unpin! org-noter)
-#+end_src
-
-#+begin_src emacs-lisp
-(use-package! org-noter
-  :init
-  (map! :map org-noter-doc-mode-map
-        "C-i" #'org-noter-insert-note
-        "C-I" #'org-noter-insert-note-toggle-no-questions
-        "M-i" #'org-noter-insert-precise-note
-        "C-M-i" #'org-noter-insert-precise-note-toggle-no-questions))
-#+end_src
-
 
 *** Djvu (for org-noter)
 
