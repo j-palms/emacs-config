@@ -1795,7 +1795,7 @@ nix                          ; I hereby declare "nix geht mehr!"
  +lsp
  +tree-sitter
  +pyright)       ; beautiful is better than ugly
-qt                         ; the 'cutest' gui framework ever
+;;qt                         ; the 'cutest' gui framework ever
 ;;racket                     ; a DSL for DSLs
 ;;raku                       ; the artist formerly known as perl6
 ;;rest                       ; Emacs as a REST client
