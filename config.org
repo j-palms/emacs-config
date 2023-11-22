@@ -1383,6 +1383,7 @@ changes Doom makes:
 
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 (global-emojify-mode-line-mode 1)
+(global-activity-watch-mode 1)
 
 (org-clock-today-mode 1)
 
@@ -10365,13 +10366,15 @@ and out of the LaTeX fragments.
 
 Thankfully, all we need to do to make this happen is use ~org-latex-preview-auto-mode~.
 
-# #+begin_src emacs-lisp
-# (add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
-# #+end_src
-
 #+begin_src emacs-lisp
-(setq org-startup-with-latex-preview t)
+(add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
 #+end_src
+
+This is not needed with auto preview:
+
+##+begin_src emacs-lisp
+#(setq org-startup-with-latex-preview t)
+##+end_src
 
 ***** Prettier rendering
 
