@@ -7863,20 +7863,20 @@ and Minad's lovely =org-modern= goes a long way in this regard.
   (setq org-modern-star '("◉" "○" "✸" "✿" "✤" "✜" "◆" "▶")
         org-modern-table-vertical 1
         org-modern-table-horizontal 0.2
-        org-modern-label-border 0.3)
         org-modern-list '((43 . "➤")
                           (45 . "–")
-                          (42 . "•")
+                          (42 . "•"))
         org-modern-todo-faces
         '(("TODO" :inverse-video t :inherit org-todo)
           ("NEXT" :inverse-video t :inherit +org-todo-active)
+          ("WAIT" :inverse-video t :inherit +org-todo-onhold)
+          ("CNCL" :inverse-video t :inherit +org-todo-cancel)
           ("PROJ" :inverse-video t :inherit +org-todo-project)
-          ("STRT" :inverse-video t :inherit +org-todo-active)
+          ;; ("STRT" :inverse-video t :inherit +org-todo-active)
+          ("LOOP" :inverse-video t :inherit +org-todo-active)
           ("[-]"  :inverse-video t :inherit +org-todo-active)
           ("HOLD" :inverse-video t :inherit +org-todo-onhold)
-          ("WAIT" :inverse-video t :inherit +org-todo-onhold)
           ("[?]"  :inverse-video t :inherit +org-todo-onhold)
-          ("KILL" :inverse-video t :inherit +org-todo-cancel)
           ("NO"   :inverse-video t :inherit +org-todo-cancel))
         org-modern-footnote
         (cons nil (cadr org-script-display))
@@ -8426,7 +8426,7 @@ Now, by default, LSPs don't really function at all in ~src~ blocks.
 (cl-defmacro lsp-org-babel-enable (lang)
   "Support LANG in org source code block."
   (setq centaur-lsp 'lsp-mode)
-  (cl-check-type lang stringp)
+  (cl-check-type lang string)
   (let* ((edit-pre (intern (format "org-babel-edit-prep:%s" lang)))
          (intern-pre (intern (format "lsp--%s" (symbol-name edit-pre)))))
     `(progn
@@ -9297,8 +9297,9 @@ It would also be nice to improve how the capture dialogue looks
   :config
   (org-edna-mode)
   (setq org-edna-use-inheritance t
+        org-gtd-engage-prefix-width 16
         org-gtd-directory "~/org/gtd"
-        org-gtd-organize-hooks '(org-gtd-set-area-of-focus org-set-tags-command))
+        org-gtd-organize-hooks '(org-set-tags-command))
 
   (map! :prefix ("C-c d" . "org-gtd")
         :desc "Capture"        "c"  #'org-gtd-capture
@@ -10265,29 +10266,30 @@ other settings.
                 :arrow_lr      "↔"
                 :properties    "⚙"
                 :end           "∎"
-                :priority_a    #("⚑" 0 1 (face all-the-icons-red))
-                :priority_b    #("⬆" 0 1 (face all-the-icons-orange))
-                :priority_c    #("■" 0 1 (face all-the-icons-yellow))
-                :priority_d    #("⬇" 0 1 (face all-the-icons-green))
-                :priority_e    #("❓" 0 1 (face all-the-icons-blue))))
+                :priority_a    #("⚑" 0 1 (face nerd-icons-red))
+                :priority_b    #("⬆" 0 1 (face nerd-icons-orange))
+                :priority_c    #("■" 0 1 (face nerd-icons-yellow))
+                :priority_d    #("⬇" 0 1 (face nerd-icons-green))
+                :priority_e    #("❓" 0 1 (face nerd-icons-blue))))
+
+(set-ligatures! 'org-mode
+  :list_property "::"
+  :em_dash       "---"
+  :ellipsis      "..."
+  :arrow_right   "->"
+  :arrow_left    "<-"
+  :arrow_lr      "<->"
+  :properties    ":PROPERTIES:"
+  :end           ":END:"
+  :priority_a    "[#A]"
+  :priority_b    "[#B]"
+  :priority_c    "[#C]"
+  :priority_d    "[#D]"
+  :priority_e    "[#E]")
 
 (defadvice! +org-init-appearance-h--no-ligatures-a ()
   :after #'+org-init-appearance-h
-  (set-ligatures! 'org-mode nil)
-  (set-ligatures! 'org-mode
-    :list_property "::"
-    :em_dash       "---"
-    :ellipsis      "..."
-    :arrow_right   "->"
-    :arrow_left    "<-"
-    :arrow_lr      "<->"
-    :properties    ":PROPERTIES:"
-    :end           ":END:"
-    :priority_a    "[#A]"
-    :priority_b    "[#B]"
-    :priority_c    "[#C]"
-    :priority_d    "[#D]"
-    :priority_e    "[#E]"))
+  (set-ligatures! 'org-mode nil))
 #+end_src
 
 While we're at it we may as well make tags prettier as well 🙂
