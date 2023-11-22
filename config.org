@@ -1890,8 +1890,8 @@ trying out JetBrains Mono though. So far I have mixed feelings on it, some
 aspects are nice, but on others I prefer Fira.
 
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 20)
-      doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 36)
+(setq doom-font (font-spec :family "JetBrainsMono NF" :size 20)
+      doom-big-font (font-spec :family "JetBrainsMono NF" :size 36)
       ;;doom-variable-pitch-font (font-spec :family "Avenir Next LT Pro" :size 28)
       ;;doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 28 :weight 'light)
       doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 24)
@@ -1995,7 +1995,7 @@ if the system doesn't have any of those fonts.
 
 #+name: detect-missing-fonts
 #+begin_src emacs-lisp :tangle no :noweb-ref none
-(defvar required-fonts '("JetBrainsMono.*" "Overpass" "JuliaMono" "IBM Plex Mono"
+(defvar required-fonts '("JetBrainsMono NF*" "Overpass" "JuliaMono" "IBM Plex Mono"
                          "Merriweather" "Alegreya" "Twitter Color Emoji"))
 
 (defvar available-fonts
