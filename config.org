@@ -1377,10 +1377,6 @@ changes Doom makes:
       display-time-format "%H:%M")
 
 (display-time-mode 1)                             ; Enable time in the mode-line
-
-;;(unless (string-match-p "^Power N/A" (battery))   ; On laptops...
-;;(display-battery-mode 1)                       ; it's nice to know how much power you have
-
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 (global-emojify-mode-line-mode 1)
 ;; (global-activity-watch-mode 1)
@@ -1444,6 +1440,28 @@ changes Doom makes:
          (org-mode . (lambda () (push '(?M . ("\\[" . "\\]")) evil-surround-pairs-alist))))
   :config
   (global-evil-surround-mode 1)) ;; globally enable evil-surround
+#+end_src
+
+When using a device with a battery, it would be nice to display battery
+ information. We can check for a battery during tangle via noweb, and only call
+ ~display-battery-mode~ when relevant. From a look at the various status functions
+ in =battery.el=, it seems like the ~?L~ key is consistently =N/A= when there is no
+ battery, so we'll test on that.
+
+#+name: battery-status-setup
+#+begin_src emacs-lisp :noweb-ref none
+(require 'battery)
+(if (and battery-status-function
+         (not (equal (alist-get ?L (funcall battery-status-function))
+                     "N/A")))
+    (prin1-to-string `(display-battery-mode 1))
+  "")
+#+end_src
+
+Now with noweb we' use the result.
+
+#+begin_src emacs-lisp :noweb no-export 
+<<battery-status-setup()>>
 #+end_src
 
 *** Frame sizing
@@ -1644,7 +1662,7 @@ I reckon enabling half the modules Doom provides should do it.
 doom                         ; what makes DOOM look the way it does
 doom-dashboard               ; a nifty splash screen for Emacs
 doom-quit                    ; DOOM quit-message prompts when you quit Emacs
-(emoji +unicode)             ; 🙂
+;; (emoji +unicode)          ; 🙂
 ;;fill-column                ; a `fill-column' indicator
 hl-todo                      ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
 hydra                      ; quick documentation for related commands
@@ -1905,6 +1923,7 @@ near-minimal new config:
 
 *** Visual Settings
 **** Font Face
+***** Setting fonts
 
 'Fira Code' is nice, and 'Overpass' makes for a nice sans companion. We just need to
 fiddle with the font sizes a tad so that they visually match. Just for fun I'm
@@ -1920,6 +1939,7 @@ aspects are nice, but on others I prefer Fira.
       ;;doom-variable-pitch-font (font-spec :family "Metropolis" :size 28 :weight 'light)
       ;;doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 28 :weight 'light)
       doom-unicode-font (font-spec :family "JuliaMono")
+      doom-emoji-font (font-spec :family "Twitter Color Emoji") ; Just used by me
       doom-serif-font (font-spec :family "IBM Plex Mono" :size 22 :weight 'light))
 #+end_src
 
@@ -1930,26 +1950,140 @@ In addition to these fonts, Merriweather is used with =nov.el=, and Alegreya as 
 serifed proportional font used by =mixed-pitch-mode= for =writeroom-mode= with Org
 files.
 
+***** Emojis
+
+Emacs (28+) has an ~emoji~ script table. We're about to use it, but before doing
+so we're going to excise a few characteris that I actually want rendered as
+using the symbol font (not as emojis).
+
+#+begin_src emacs-lisp
+(dolist (char '(?⏩ ?⏪ ?❓))
+  (set-char-table-range char-script-table char 'symbol))
+#+end_src
+
+To actually sort out emojis, all that's really needed here is to apply
+=doom-emoji-font=, which needs to be done /here/ because it's not /actually/ a Doom
+font variable, but rather my own addition.
+
+#+begin_src emacs-lisp
+(add-hook! 'after-setting-font-hook
+  (defun +emoji-set-font ()
+    (set-fontset-font t 'emoji doom-emoji-font nil 'prepend)))
+#+end_src
+
+We might as well also construct a regexp to make identifying emojis if buffers
+more convenient.
+
+#+begin_src emacs-lisp
+(defvar +emoji-rx
+  (let (emojis)
+    (map-char-table
+     (lambda (char set)
+       (when (eq set 'emoji)
+         (push (copy-tree char) emojis)))
+     char-script-table)
+    (rx-to-string `(any ,@emojis)))
+  "A regexp to find all emoji-script characters.")
+#+end_src
+
+For the sake of convenient insertion, we'll also register some emoji aliases
+based on common usage.
+
+#+begin_src emacs-lisp
+(setq emoji-alternate-names
+      '(("🙂" ":)")
+        ("😄" ":D")
+        ("😉" ";)")
+        ("🙁" ":(")
+        ("😆" "laughing face" "xD")
+        ("🤣" "ROFL face")
+        ("😢" ":'(")
+        ("🥲" ":')")
+        ("😮" ":o")
+        ("😑" ":|")
+        ("😎" "cool face")
+        ("🤪" "goofy face")
+        ("🤥" "pinnochio face" "liar face")
+        ("😠" ">:(")
+        ("😡" "angry+ face")
+        ("🤬" "swearing face")
+        ("🤢" "sick face")
+        ("😈" "smiling imp")
+        ("👿" "frowning imp")
+        ("❤️" "<3")
+        ("🫡" "o7")
+        ("👍" "+1")
+        ("👎" "-1")
+        ("👈" "left")
+        ("👉" "right")
+        ("👆" "up")
+        ("💯" "100")
+        ("💸" "flying money")))
+#+end_src
+
+Lastly, when using Emacs 28+ it would be nice to open the nice emoji dispatch
+with the leader key as well as =C-x 8 e=. Since =SPC e= is unclaimed, let's just use
+that until we have a better use for it (we could also split up the insertion and
+querying commands in other parts of the map).
+
+#+begin_src emacs-lisp
+(when (>= emacs-major-version 29)
+  (map! :leader
+        (:prefix ("e" . "Emoji")
+         :desc "Search" "s" #'emoji-search
+         :desc "Recent" "r" #'emoji-recent
+         :desc "List" "l" #'emoji-list
+         :desc "Describe" "d" #'emoji-describe
+         :desc "Insert" "i" #'emoji-insert
+         :desc "Insert" "e" #'emoji-insert)))
+#+end_src
+
+***** Checking the system
+
 Because we care about how things look let's add a check to make sure we're told
-if the system doesn't have any of those fonts.
+if the system doesn't have any of those fonts. We can obtain a list of installed
+fonts with either ~(font-family-list)~ or with the ~fc-list~ command.
 
 #+name: detect-missing-fonts
-#+begin_src emacs-lisp :tangle no
-(defvar required-fonts '("JetBrainsMono NF.*" "Overpass" "JuliaMono" "IBM Plex Mono" "Merriweather" "Alegreya"))
+#+begin_src emacs-lisp :noweb-ref none
+(setq required-fonts '("JetBrains ?Mono.*" "Overpass" "JuliaMono" "IBM Plex Mono"
+                       "Merriweather" "Alegreya" "Twitter Color Emoji"))
 
-(defvar available-fonts
-  (delete-dups (or (font-family-list)
-                   (split-string (shell-command-to-string "fc-list : family")
-                                 "[,\n]"))))
+(setq available-fonts
+      (delete-dups
+       (or (font-family-list)
+           (and (executable-find "fc-list")
+                (with-temp-buffer
+                  (call-process "fc-list" nil t nil ":" "family")
+                  (split-string (buffer-string) "[,\n]"))))))
 
-(defvar missing-fonts
-  (delq nil (mapcar
-             (lambda (font)
-               (unless (delq nil (mapcar (lambda (f)
-                                           (string-match-p (format "^%s$" font) f))
-                                         available-fonts))
-                 font))
-             required-fonts)))
+(setq missing-fonts
+      (delq nil (mapcar
+                 (lambda (font)
+                   (unless (delq nil (mapcar (lambda (f)
+                                               (string-match-p (format "^%s$" font) f))
+                                             available-fonts))
+                     font))
+                 required-fonts)))
+#+end_src
+
+We can then use this to create a =doctor= check.
+
+#+begin_src emacs-lisp :noweb yes :noweb-ref doctor
+(let (required-fonts available-fonts missing-fonts)
+  <<detect-missing-fonts>>
+  (if available-fonts
+      (dolist (font missing-fonts)
+        (warn! (format "Missing font: %s." font)))
+    (warn! "Unable to check for missing fonts, is fc-list installed?")))
+#+end_src
+
+Furthermore, when fonts /are/ missing, it could be good to check the state of
+affairs on statup.
+
+#+name: warn-missing-fonts
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref none
+<<detect-missing-fonts>>
 
 (if missing-fonts
     (pp-to-string
@@ -1957,18 +2091,20 @@ if the system doesn't have any of those fonts.
         (add-hook! 'doom-init-ui-hook
           (run-at-time nil nil
                        (lambda ()
-                         (message "%s missing the following fonts: %s"
-                                  (propertize "Warning!" 'face '(bold warning))
-                                  (mapconcat (lambda (font)
-                                               (propertize font 'face 'font-lock-variable-name-face))
-                                             ',missing-fonts
-                                             ", "))
+                         (let (required-fonts available-fonts missing-fonts)
+                           <<detect-missing-fonts>>
+                           (message "%s missing the following fonts: %s"
+                                    (propertize "Warning!" 'face '(bold warning))
+                                    (mapconcat (lambda (font)
+                                                 (propertize font 'face 'font-lock-variable-name-face))
+                                               ',missing-fonts
+                                               ", ")))
                          (sleep-for 0.5))))))
   ";; No missing fonts detected")
 #+end_src
 
 #+begin_src emacs-lisp :noweb no-export
-<<detect-missing-fonts()>>
+<<warn-missing-fonts()>>
 #+end_src
 
 This way whenever fonts are missing, after Doom's UI has initialised, a warning
@@ -1976,10 +2112,39 @@ listing the missing fonts should appear for at least half a second.
 
 **** Theme
 
-~doom-one~ is nice and all, but I find the ~vibrant~ variant nicer.
+The ~doom-one~ theme is nice and all, but I find the ~vibrant~ variant nicer. With
+the light themes, I rather like ~doom-tomorrow-day~. I'd like to pick the default
+from them based on the system theme. We can detect this with a ~gdbus~ call, which
+is a Gnome CLI tool but often present on KDE systems for GTK support.
 
-#+begin_src emacs-lisp
-(setq doom-theme 'doom-vibrant)
+#+name: default-theme
+#+begin_src emacs-lisp :noweb-ref none
+(let ((light-theme 'doom-tomorrow-day)
+      (dark-theme 'doom-vibrant)
+      (system-light-p
+       (and
+        (executable-find "gdbus")
+        (string= "<<uint32 2>>"
+                 (with-temp-buffer
+                   (call-process "gdbus" nil t nil
+                                 "call" "--session"
+                                 "--timeout=1000"
+                                 "--dest=org.freedesktop.portal.Desktop"
+                                 "--object-path" "/org/freedesktop/portal/desktop"
+                                 "--method" "org.freedesktop.portal.Settings.Read"
+                                 "org.freedesktop.appearance" "color-scheme")
+                   (string-trim (buffer-string) "(" ",)\n"))))))
+  (if system-light-p light-theme dark-theme))
+#+end_src
+
+We'll use the appropriate theme as the default, but let's also accept the theme
+as an envvar for fun.
+
+#+begin_src emacs-lisp :noweb yes
+(setq doom-theme
+      (if (getenv "DOOM_THEME")
+          (intern (getenv "DOOM_THEME"))
+        '<<default-theme()>>))
 #+end_src
 
 Oh, and with the nice selection doom provides there's no reason for me to want
@@ -2919,6 +3084,18 @@ frame size or theme is changed.
 (add-hook 'doom-load-theme-hook #'fancy-splash-apply-appropriate-image)
 #+end_src
 
+*** Config doctor
+
+We can collect checks throughout this config and put them in a =doctor.el= file
+that will be run as part of =doom doctor=. This will complement the =setup.sh=
+approach.
+
+#+begin_src emacs-lisp :tangle doctor.el :noweb yes :noweb-ref none
+;;; doctor.el -*- lexical-binding: t; no-byte-compile: t; -*-
+
+<<doctor>>
+#+end_src
+
 ** Other things
 
 # This stub for the shell setup scrip needs to appear before any
@@ -2971,6 +3148,7 @@ used to ensure that =.zshenv= is loaded.
 [Unit]
 Description=Emacs server daemon
 Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
+Wants=gpg-agent.service
 
 [Service]
 Type=forking
@@ -2986,6 +3164,13 @@ WantedBy=default.target
 which is then enabled by
 #+begin_src shell :tangle (if (string= "enabled\n" (shell-command-to-string "systemctl --user is-enabled emacs.service")) "no" "setup.sh")
 systemctl --user enable emacs.service
+#+end_src
+
+We can also add a =doctor= warning should this not be enabled.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(unless (string= "enabled\n" (shell-command-to-string "systemctl --user is-enabled emacs.service"))
+  (warn! "Emacsclient service is not enabled."))
 #+end_src
 
 For some reason if a frame isn't opened early in the initialisation process, the
@@ -3968,7 +4153,16 @@ add package src directories to projectile. This isn't desirable in my opinion.
 # sudo mv en-custom.{aff,dic} /usr/share/myspell/
 # #+end_src
 
-# ***** Aspell
+We will also add an acompanying =doctor= warning.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(unless (executable-find "hunspell")
+  (warn! "Couldn't find hunspell executable."))
+(unless (file-exists-p "/usr/share/myspell/en-custom.dic")
+  (warn! "Custom hunspell dictionary is not present."))
+#+end_src
+
+***** Aspell
 
 # #+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
 # cd /tmp
@@ -3980,6 +4174,15 @@ add package src directories to projectile. This isn't desirable in my opinion.
 # #+end_src
 
 For now arch packages of hunspell (de, en_us) are required.
+
+We will also add an acompanying =doctor= warning.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(unless (executable-find "ispell")
+  (warn! "Couldn't find ispell executable."))
+(unless (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi")
+  (warn! "Custom aspell dictionary is not present."))
+#+end_src
 
 **** Configuration
 
@@ -4184,7 +4387,7 @@ For when you want to change the case pattern for a symbol.
         :desc "Upper_Score" "u" #'string-inflection-capital-underscore
         :desc "UP_CASE" "U" #'string-inflection-upcase)
   (after! evil
-    (evil-define-operator evil-operator-string-inflection (beg end _type)
+    (evil-define-operator evil-operator-string-inflection (beg end type)
       "Define a new evil operator that cycles symbol casing."
       :move-point nil
       (interactive "<R>")
@@ -4262,8 +4465,16 @@ With all our fancy Emacs themes, my terminal is missing out!
 
 This operates using =pywal=, which is present in some repositories, but most
 reliably installed with =pip=.
+
 #+begin_src shell :eval no :tangle (if (executable-find "wal") "no" "setup.sh")
 sudo python3 -m pip install pywal
+#+end_src
+
+We can also add a =doctor= check.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(unless (executable-find "wal")
+  (warn! "Couldn't find the pywal executable (wal), theme-magic will not function."))
 #+end_src
 
 Theme magic takes a look at a number of faces, the saturation levels, and colour
@@ -4321,79 +4532,7 @@ situations decently.
   (setq simple-comment-markup-set '(org markdown-code)))
 #+end_src
 
-*** Emojify
-
-#+call: confpkg("!Pkg emojify")
-
-#+begin_quote
-From the =:ui emoji= module.
-#+end_quote
-
-
-For starters, twitter's emojis look nicer than emoji-one.
-Other than that, this is pretty great OOTB 😀.
-
-#+begin_src emacs-lisp
-(setq emojify-emoji-set "twemoji-v2")
-#+end_src
-
-One minor annoyance is the use of emojis over the default character
-when the default is actually preferred. This occurs with overlay symbols I use
-in Org mode, such as checkbox state, and a few other miscellaneous cases.
-
-We can accommodate our preferences by deleting those entries from the emoji hash
-table
-
-#+begin_src emacs-lisp
-(defvar emojify-disabled-emojis
-  '(;; Org
-    "◼" "☑" "☸" "⚙" "⏩" "⏪" "⬆" "⬇" "❓" "↔"
-    ;; Terminal powerline
-    "✔"
-    ;; Box drawing
-    "▶" "◀"
-    ;; I just want to see this as text
-    "©" "™")
-  "Characters that should never be affected by `emojify-mode'.")
-
-(defadvice! emojify-delete-from-data ()
-  "Ensure `emojify-disabled-emojis' don't appear in `emojify-emojis'."
-  :after #'emojify-set-emoji-data
-  (dolist (emoji emojify-disabled-emojis)
-    (remhash emoji emojify-emojis)))
-#+end_src
-
-Now, it would be good to have a minor mode which allowed you to type ascii/gh
-emojis and get them converted to unicode. Let's make one.
-#+begin_src emacs-lisp
-(defun emojify--replace-text-with-emoji (orig-fn emoji text buffer start end &optional target)
-  "Modify `emojify--propertize-text-for-emoji' to replace ascii/github emoticons with unicode emojis, on the fly."
-  (if (or (not emoticon-to-emoji) (= 1 (length text)))
-      (funcall orig-fn emoji text buffer start end target)
-    (delete-region start end)
-    (insert (ht-get emoji "unicode"))))
-
-(define-minor-mode emoticon-to-emoji
-  "Write ascii/gh emojis, and have them converted to unicode live."
-  :global nil
-  :init-value nil
-  (if emoticon-to-emoji
-      (progn
-        (setq-local emojify-emoji-styles '(ascii github unicode))
-        (advice-add 'emojify--propertize-text-for-emoji :around #'emojify--replace-text-with-emoji)
-        (unless emojify-mode
-          (emojify-turn-on-emojify-mode)))
-    (setq-local emojify-emoji-styles (default-value 'emojify-emoji-styles))
-    (advice-remove 'emojify--propertize-text-for-emoji #'emojify--replace-text-with-emoji)))
-#+end_src
-
-This new minor mode of ours will be nice for messages, so let's hook it in for
-Email and IRC.
-#+begin_src emacs-lisp
-(add-hook! '(mu4e-compose-mode org-msg-edit-mode circe-channel-mode) (emoticon-to-emoji 1))
-#+end_src
-
-# *** Doom modeline
+*** Doom modeline
 
 # #+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
 
@@ -4565,12 +4704,12 @@ Email and IRC.
 # #    (doom-modeline--buffer-name)))
 
 # # (doom-modeline-def-segment pdf-icon
-# #   "PDF icon from all-the-icons."
+# #   "PDF icon from nerd-icons."
 # #   (concat
 # #    doom-modeline-spc
-# #    (doom-modeline-icon 'octicon "file-pdf" nil nil
+# #    (doom-modeline-icon sucicon "nf-seti-pdf" nil nil
 # #                        :face (if (doom-modeline--active)
-# #                                  'all-the-icons-red
+# #                                  'nerd-icons-red
 # #                                'mode-line-inactive)
 # #                        :v-adjust 0.02)))
 
@@ -4854,21 +4993,22 @@ well somehow, so let's switch to 'P22 Underground Book'; it looks much nicer.
 ;; (setq x-underline-at-descent-line t)
 #+end_src
 
-*** All the icons
+*** Nerd Icons
 
-#+call: confpkg("!Pkg All the Icons")
+#+call: confpkg("!Pkg Nerd Icons")
 
 #+begin_quote
 From the =:core packages= module.
 #+end_quote
 
-=all-the-icons= does a generally great job giving file names icons. One minor
+=nerd-icons= does a generally great job giving file names icons. One minor
 niggle I have is that when /I/ open a =.m= file, it's much more likely to be Matlab
 than Objective-C. As such, it'll be switching the icon associated with =.m=.
+
 #+begin_src emacs-lisp
-(after! all-the-icons
-  (setcdr (assoc "m" all-the-icons-extension-icon-alist)
-          (cdr (assoc "matlab" all-the-icons-extension-icon-alist))))
+(after! nerd-icons
+  (setcdr (assoc "m" nerd-icons-extension-icon-alist)
+          (cdr (assoc "matlab" nerd-icons-extension-icon-alist))))
 #+end_src
 
 *** Prettier page breaks
@@ -5779,9 +5919,9 @@ omitting the =#= in channel names we can have a list of channels comma-separated
               (mapcar (lambda (entry)
                         (let* ((host (plist-get entry :host))
                                (label (or (plist-get entry :label) host))
-                               (_ports (mapcar #'string-to-number
+                               (ports (mapcar #'string-to-number
                                                (s-split "," (plist-get entry :port))))
-                               (port (if (= 1 (length _ports)) (car _ports) _ports))
+                               (port (if (= 1 (length ports)) (car ports) ports))
                                (user (plist-get entry :user))
                                (nick (or (plist-get entry :nick) user))
                                (channels (mapcar (lambda (c) (concat "#" c))
@@ -5824,9 +5964,9 @@ configuration tweaks.
              "")))
   (add-hook 'circe-chat-mode-hook #'named-circe-prompt)
 
-  (appendq! all-the-icons-mode-icon-alist
-            '((circe-channel-mode all-the-icons-material "message" :face all-the-icons-lblue)
-              (circe-server-mode all-the-icons-material "chat_bubble_outline" :face all-the-icons-purple))))
+  (appendq! nerd-icons-mode-icon-alist
+            '((circe-channel-mode nerd-icons-mdicon "nf-md-message" :face nerd-icons-lblue)
+              (circe-server-mode nerd-icons-mdicon "nf-md-chat_outline" :face nerd-icons-purple))))
 
 <<irc-authinfo-reader>>
 
@@ -6332,6 +6472,24 @@ if [ ! -d "$DIC_FOLDER" ]; then
 fi
 #+end_src
 
+We can also add a =doctor= dictionary check.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(if (executable-find "sdcv")
+    (let ((dict-root (concat (or (getenv "STARDICT_DATA_DIR")
+                                 (concat (or "~/.local/share"
+                                             (getenv "XDG_DATA_HOME"))
+                                         "/stardict"))
+                             "/dic"))
+          (dicts '("webster" "synonyms" "etymology" "en-to-latin" "hitchcock" "elements")))
+      (if (file-exists-p dict-root)
+          (dolist (dict dicts)
+            (unless (file-exists-p (file-name-concat dict-root dict))
+              (warn! (format "Absent sdcv dictionary: %s." dict))))
+        (warn! "Couldn't find any stcv dictionaries, lexic will not function")))
+  (warn! "Couldn't find sdcv executable, lexic will be disabled"))
+#+end_src
+
 ** Mail
 
 #+call: confpkg(after="mu4e", via="require", pre="org-msg-accent")
@@ -6382,6 +6540,20 @@ Here's the general plan:
 4. Separately, we set up Emacs to check for the existance of
    =/tmp/mu_reindex_now= once a second while mu4e is
    running, and (after deleting the file) call ~mu4e-update-index~.
+
+We can add a =doctor= check for these external dependencies.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(when (file-exists-p "~/.mail") ; We care about mail when the mail folder exists
+  (unless (executable-find "mu")
+    (error! "Couldn't find mail dependency mu."))
+  (unless (executable-find "mbsync")
+    (error! "Couldn't find mail dependency mbsync."))
+  (unless (executable-find "msmtp")
+    (error! "Couldn't find mail dependency msmtp."))
+  (unless (executable-find "goimapnotify")
+    (warn! "Couldn't find mail helper goimapnotify, mail syncs will be slower.")))
+#+end_src
 
 Let's start off by handling the elisp side of things
 
@@ -6443,8 +6615,17 @@ Prevents a series of redisplays from being called (when set to an appropriate va
 **** Config transcoding & service management
 
 As long as the =mbsyncrc= file exists, this is as easy as running
-#+begin_src shell :tangle (if (and (executable-find "mu") (not (file-exists-p "~/.config/imapnotify"))) "setup.sh" "no")
+
+#+begin_src shell :tangle (if (and (executable-find "goimapnotify") (not (file-exists-p "~/.config/imapnotify"))) "setup.sh" "no")
 ~/.config/doom/misc/mbsync-imapnotify.py
+#+end_src
+
+Let's also add a =doctor= check for this.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(when (and (executable-find "goimapnotify")
+           (not (file-exists-p "~/.config/imapnotify")))
+  (warn! "goimapnotify is installed but not configured."))
 #+end_src
 
 When run without flags this will perform the following actions
@@ -6827,6 +7008,7 @@ We'll use a template service file so we can enable a unit per-account.
 Description=IMAP notifier using IDLE, golang version.
 ConditionPathExists=%h/.config/imapnotify/%I/notify.conf
 After=network.target
+Wants=gpg-agent.service
 
 [Service]
 ExecStart=%h/.local/bin/goimapnotify -conf %h/.config/imapnotify/%I/notify.conf
@@ -6848,7 +7030,7 @@ start, so for that I'll do the 'normal' thing and run ~mbsync -all~ every so oft
 --- let's say five minutes.
 
 We can accomplish this via a systemd timer, and service file.
-#+begin_src systemd :tangle (if (executable-find "mu") "~/.config/systemd/user/mbsync.timer" "no")
+#+begin_src systemd :tangle (if (executable-find "mbsync") "~/.config/systemd/user/mbsync.timer" "no")
 [Unit]
 Description=call mbsync on all accounts every 5 minutes
 ConditionPathExists=%h/.mbsyncrc
@@ -6861,11 +7043,12 @@ OnUnitInactiveSec=5m
 WantedBy=default.target
 #+end_src
 
-#+begin_src systemd :tangle (if (executable-find "mu") "~/.config/systemd/user/mbsync.service" "no")
+#+begin_src systemd :tangle (if (executable-find "mbsync") "~/.config/systemd/user/mbsync.service" "no")
 [Unit]
 Description=mbsync service, sync all mail
 Documentation=man:mbsync(1)
 ConditionPathExists=%h/.mbsyncrc
+Wants=gpg-agent.service
 
 [Service]
 Type=oneshot
@@ -6876,8 +7059,17 @@ WantedBy=mail.target
 #+end_src
 
 Enabling (and starting) this is as simple as
-#+begin_src shell :tangle (if (or (not (executable-find "mu")) (string= "enabled\n" (shell-command-to-string "systemctl --user is-enabled mbsync.timer"))) "no" "setup.sh")
+
+#+begin_src shell :tangle (if (or (not (executable-find "mbsync")) (string= "enabled\n" (shell-command-to-string "systemctl --user is-enabled mbsync.timer"))) "no" "setup.sh")
 systemctl --user enable mbsync.timer --now
+#+end_src
+
+We can also add a =doctor= check for the timer state.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(when (executable-find "mbsync")
+  (unless (string= "enabled\n" (shell-command-to-string "systemctl --user is-enabled mbsync.timer"))
+    (warn! "The mbsync timer is not enabled.")))
 #+end_src
 
 *** Indexing/Searching
@@ -7029,7 +7221,7 @@ There seem to be some advantages with using Gnus' article view (such as inline
 images), and judging from [[https://github.com/djcb/mu/pull/1442#issuecomment-591695814][djcb/mu!1442 (comment)]] this seems to be the 'way of
 the future' for mu4e.
 
-There are some all-the-icons font related issues, so we need to redefine the
+There are some nerd-icons font related issues, so we need to redefine the
 fancy chars, and make sure they get the correct width.
 
 To account for the increase width of each flag character, and make perform a
@@ -7112,11 +7304,22 @@ StartupWMClass=Emacs
 #+end_src
 
 To register this, just call
+
 #+begin_src shell :tangle (if (or (not (executable-find "mu")) (string= (shell-command-to-string "xdg-mime query default x-scheme-handler/mailto") "emacsmail.desktop\n")) "no" "setup.sh")
 update-desktop-database ~/.local/share/applications
 #+end_src
 
+We can see if this is necessary with a =doctor= check.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(when (and (executable-find "mu")
+           (not (string= (shell-command-to-string "xdg-mime query default x-scheme-handler/mailto")
+                         "emacsmail.desktop\n")))
+  (warn! "Emacs is not registered as a mailto handler."))
+#+end_src
+
 We also want to define ~mu4e-compose-from-mailto~.
+
 #+begin_src emacs-lisp
 (defun mu4e-compose-from-mailto (mailto-string &optional quit-frame-after)
   (require 'mu4e)
@@ -7741,6 +7944,15 @@ Then set Emacs as the default editor
 xdg-mime default emacs.desktop text/org
 #+end_src
 
+Once again, we will add =doctor= checks around this.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(if (string= (shell-command-to-string "xdg-mime query default text/org") "")
+  (warn! "text/org is not a registered mime type.")
+  (unless (string= (shell-command-to-string "xdg-mime query default text/org") "emacs-client.desktop\n")
+    (warn! "Emacs(client) is not set up as the text/org handler.")))
+#+end_src
+
 **** Git diffs
 
 Protesilaos wrote a [[https://protesilaos.com/codelog/2021-01-26-git-diff-hunk-elisp-org/][very helpful article]] in which he explains how to change the
@@ -8238,7 +8450,7 @@ function.
 (defun +org-insert-file-link ()
   "Insert a file link.  At the prompt, enter the filename."
   (interactive)
-  (insert (format "[[%s]]" (org-link-complete-file))))
+  (org-insert-link nil (org-link-complete-file)))
 #+end_src
 
 Now we'll just add that under the Org mode link localleader for convenience.
@@ -8316,10 +8528,9 @@ with =citar=, and make the symbols a bit prettier.
           paths)
         citar-bibliography org-cite-global-bibliography
         citar-symbols
-        `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-          (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " "))
-        citar-notes-paths '("~/org/notes")))
+        `((file ,(nerd-icons-faicon "nf-fa-file_o" :face 'nerd-icons-green :v-adjust -0.1) . " ")
+          (note ,(nerd-icons-octicon "nf-oct-note" :face 'nerd-icons-blue :v-adjust -0.3) . " ")
+          (link ,(nerd-icons-octicon "nf-oct-link" :face 'nerd-icons-orange :v-adjust 0.01) . " "))))
 #+end_src
 
 We can also make the Zotero CSL styles available to use.
@@ -8774,6 +8985,13 @@ set up org-capture.
 #                    :type entry
 #                    :template ("* TODO %?"
 #                               "%i" "%a"))))))
+# # (defun +doct-icon-declaration-to-icon (declaration)
+# #   "Convert :icon declaration to icon"
+# #   (let ((name (pop declaration))
+# #         (set  (intern (concat "nerd-icons-" (plist-get declaration :set))))
+# #         (face (intern (concat "nerd-icons-" (plist-get declaration :color))))
+# #         (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
+# #     (apply set `(,name :face ,face :v-adjust ,v-adjust))))
 
 #   ;; <<prettify-capture>>
 
@@ -10202,11 +10420,11 @@ and add an extra ~org-bullet~ to the default list of four.
       org-priority-highest ?A
       org-priority-lowest ?E
       org-priority-faces
-      '((?A . 'all-the-icons-red)
-        (?B . 'all-the-icons-orange)
-        (?C . 'all-the-icons-yellow)
-        (?D . 'all-the-icons-green)
-        (?E . 'all-the-icons-blue)))
+      '((?A . 'nerd-icons-red)
+        (?B . 'nerd-icons-orange)
+        (?C . 'nerd-icons-yellow)
+        (?D . 'nerd-icons-green)
+        (?E . 'nerd-icons-blue)))
 #+end_src
 
 It's also nice to make use of the =prettify-symbols-mode= for a few Org syntactic
@@ -13175,7 +13393,8 @@ export to a PDF.
                         package))
                     packages)))
 
-(if-let ((missing-pkgs (check-for-latex-packages org-required-latex-packages)))
+(if-let (((executable-find "kpsewhich"))
+         (missing-pkgs (check-for-latex-packages org-required-latex-packages)))
     (concat
      (pp-to-string `(setq org-required-latex-packages ',org-required-latex-packages))
      (message ";; Detected missing LaTeX packages: %s\n" (mapconcat #'identity missing-pkgs ", "))
@@ -13302,6 +13521,13 @@ really packaged]]. So, we'll resort to installing it with =pip=.
 
 #+begin_src shell :tangle (if (executable-find "latex2text") "no" "setup.sh")
 sudo python3 -m pip install pylatexenc
+#+end_src
+
+With an accompanying =doctor= check.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(unless (executable-find "latex2text")
+  (warn! "Couldn't find latex2text executable (from pylatexenc), will be unable to render LaTeX fragments in org→text exports."))
 #+end_src
 
 With that installed, we can override the src_elisp{(org-ascii-latex-fragment)} and
@@ -14044,6 +14270,13 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
 # update-mime-database ~/.local/share/mime
 # #+end_src
 
+We'll also add a =doctor= check for this.
+
+#+begin_src emacs-lisp :noweb-ref doctor
+(when (string= (shell-command-to-string "xdg-mime query default text/julia") "")
+  (warn! "text/julia is not a registered mime type."))
+#+end_src
+
 ** Data.toml files
 
 #+call: confpkg("conf-data-toml")
@@ -14132,11 +14365,11 @@ Of course, there's an Emacs mode for this.
 (use-package! beancount
   :mode ("\\.beancount\\'" . beancount-mode)
   :init
-  (after! all-the-icons
-    (add-to-list 'all-the-icons-icon-alist
-                 '("\\.beancount\\'" all-the-icons-material "attach_money" :face all-the-icons-lblue))
-    (add-to-list 'all-the-icons-mode-icon-alist
-                 '(beancount-mode all-the-icons-material "attach_money" :face all-the-icons-lblue)))
+  (after! nerd-icons
+    (add-to-list 'nerd-icons-extension-icon-alist
+                 '("beancount" nerd-icons-faicon "nf-fa-dollar" :face nerd-icons-lblue))
+    (add-to-list 'nerd-icons-mode-icon-alist
+                 '(beancount-mode nerd-icons-faicon "nf-fa-dollar" :face nerd-icons-lblue)))
   :config
   (setq beancount-electric-currency t)
   (defun beancount-bal ()
