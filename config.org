@@ -10507,3 +10507,187 @@ sixth greyed out. Since the sixth level is so small, I'll turn up the boldness a
   '(markdown-header-face-6 :height 0.75 :weight extra-bold :inherit markdown-header-face))
 #+end_src
 
+* Custom Workflow
+** Type Break
+
+# #+call: confpkg("!Pkg type-break")
+# #+begin_src emacs-lisp
+# (use-package! type-break
+#   ;; :hook ((org-pomodoro-killed . type-break-mode)
+#   ;;        (org-pomodoro-break-finished . type-break-mode)
+#   ;;        (org-pomodoro-started . (lambda () (type-break-mode -1)))
+#   ;;        (after-init . type-break-mode))
+#   :init
+#   (defun type-break-demo-agenda ()
+#     "Display the Org Agenda in read-only mode. Cease the demo as soon as a key is pressed."
+#     (let ((buffer-name "*Typing Break Org Agenda*")
+#           lines)
+#       (condition-case ()
+#           (progn
+#             ;; (org-agenda-list)
+#             ;; (org-agenda nil "n")
+#             (org-gtd-engage)
+#             (setq buffer-name (buffer-name))
+#             ;; Set the buffer to read-only
+#             (with-current-buffer buffer-name
+#               (read-only-mode 1))
+#             ;; Message to be displayed at the bottom
+#             (let ((msg (if type-break-terse-messages
+#                            ""
+#                          "Press any key to resume from typing break")))
+#               ;; Loop until key is pressed
+#               (while (not (input-pending-p))
+#                 (sit-for 60))
+#               ;; Clean up after key is pressed
+#               (read-event)
+#               (type-break-catch-up-event)
+#               (kill-buffer buffer-name)))
+#         (quit
+#          (and (get-buffer buffer-name)
+#               (kill-buffer buffer-name))))))
+
+#   :config
+#   ;; Setting interval of that of a pomodoro session
+#   (setq type-break-interval (* 25 60) ;; 25 mins
+#         type-break-good-rest-interval (* 9 60) ;; 9 mins
+#         type-break-good-break-interval (* 5 60) ;; 5 mins
+#         type-break-query-mode t
+#         type-break-keystroke-threshold '(nil . 2625)
+#         type-break-demo-boring-stats t
+#         type-break-demo-functions '(type-break-demo-agenda)))
+# #+end_src
+
+** Org pomodoro
+
+#+call: confpkg("!Pkg org-pomodoro", after="org")
+
+#+begin_src emacs-lisp
+(use-package! org-pomodoro
+  :after org
+  :bind (("<f12>" . org-pomodoro))
+  ;; :hook ((org-pomodoro-started . gopar/load-window-config-and-close-work-agenda)
+  ;;        (org-pomodoro-finished . gopar/save-window-config-and-show-work-agenda))
+  :config
+  (setq org-pomodoro-manual-break t
+        org-pomodoro-short-break-length 20
+        org-pomodoro-long-break-length 30
+        org-pomodoro-length 60)
+  :init
+  (defun gopar/home-pomodoro ()
+    (interactive)
+    (setq org-pomodoro-length 25
+          org-pomodoro-short-break-length 5))
+
+  (defun gopar/work-pomodoro ()
+    (interactive)
+    (setq org-pomodoro-length 60
+          org-pomodoro-short-break-length 20))
+
+  (defun gopar/save-window-config-and-show-work-agenda ()
+    (interactive)
+    (window-configuration-to-register ?`)
+    (delete-other-windows)
+    (org-save-all-org-buffers)
+    ;; (org-agenda nil "n"))
+    (org-gtd-engage))
+
+  (defun gopar/load-window-config-and-close-work-agenda ()
+    (interactive)
+    (org-save-all-org-buffers)
+    (jump-to-register ?`)))
+#+end_src
+
+** org-noter
+
+#+call: confpkg("!Pkg org-noter", after="org")
+
+# Here I'm using my forked version of the package. There I merged the
+# org-roam-integration branch.
+
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! org-noter :recipe (:host github :repo "org-noter/org-noter"))
+# (unpin! org-noter)
+# #+end_src
+
+#+begin_src emacs-lisp
+(use-package! org-noter
+  :config
+  (org-noter-enable-org-roam-integration))
+#+end_src
+
+**  citar-org-roam
+
+#+call: confpkg("!Pkg citar-org-roam")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! citar-org-roam :recipe (:host github :repo "emacs-citar/citar-org-roam" :files ("*.el")))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! citar-org-roam
+  :after (citar org-roam)
+  :config
+  (citar-org-roam-mode)
+  (setq citar-org-roam-capture-template-key "l"))
+#+end_src
+
+**  activity watch mode
+
+#+call: confpkg("!Pkg activity-watch-mode")
+#+begin_src emacs-lisp :tangle packages.el
+(package! activity-watch-mode)
+#+end_src
+
+** org-clock-convenience
+#+call: confpkg("!Pkg org-clock-convenience", after="org")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-clock-convenience)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! org-clock-convenience
+   :after org
+   :config
+   (map! :map org-agenda-mode-map
+         "<S-up>" #'org-clock-convenience-timestamp-up
+         "<S-down>" #'org-clock-convenience-timestamp-down
+         "o" #'org-clock-convenience-fill-gap
+         "e" #'org-clock-convenience-fill-gap-both))
+#+end_src
+
+** org-clock-today
+#+call: confpkg("!Pkg org-clock-today", after="org")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-clock-today)
+#+end_src
+
+** GTD
+#+call: confpkg("!Pkg org-gtd", after="org")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-gtd)
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! org-gtd
+  :after org
+  :init
+  (setq org-gtd-update-ack "3.0.0")
+  :config
+  (org-edna-mode)
+  (setq org-edna-use-inheritance t
+        org-gtd-engage-prefix-width 16
+        org-gtd-directory "~/org/gtd"
+        org-gtd-organize-hooks '(org-set-tags-command))
+
+  (map! :prefix ("C-c d" . "org-gtd")
+        :desc "Capture"        "c"  #'org-gtd-capture
+        :desc "Engage"         "e"  #'org-gtd-engage
+        :desc "Process inbox"  "p"  #'org-gtd-process-inbox
+        :desc "Show all next"  "n"  #'org-gtd-show-all-next
+        :desc "Stuck projects" "s"  #'org-gtd-review-stuck-projects)
+  (map! :map org-gtd-clarify-map
+        :desc "Organize this item" "C-c c" #'org-gtd-organize))
+#+end_src
