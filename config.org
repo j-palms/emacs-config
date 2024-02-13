@@ -10569,9 +10569,9 @@ sixth greyed out. Since the sixth level is so small, I'll turn up the boldness a
   ;;        (org-pomodoro-finished . gopar/save-window-config-and-show-work-agenda))
   :config
   (setq org-pomodoro-manual-break t
-        org-pomodoro-short-break-length 20
+        org-pomodoro-short-break-length 30
         org-pomodoro-long-break-length 30
-        org-pomodoro-length 60)
+        org-pomodoro-length 90)
   :init
   (defun gopar/home-pomodoro ()
     (interactive)
@@ -10580,8 +10580,8 @@ sixth greyed out. Since the sixth level is so small, I'll turn up the boldness a
 
   (defun gopar/work-pomodoro ()
     (interactive)
-    (setq org-pomodoro-length 60
-          org-pomodoro-short-break-length 20))
+    (setq org-pomodoro-length 90
+          org-pomodoro-short-break-length 30))
 
   (defun gopar/save-window-config-and-show-work-agenda ()
     (interactive)
