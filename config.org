@@ -6471,7 +6471,10 @@ The agenda is nice, but a souped up version is nicer.
       org-agenda-include-deadlines t
       org-agenda-block-separator nil
       org-agenda-tags-column 100 ;; from testing this seems to be a good value
-      org-agenda-compact-blocks t)
+      org-agenda-compact-blocks t
+      org-todo-keywords '((sequence "NEXT(n)" "TODO(t)" "PROJ(p)" "LOOP(r)" "STRT(s)" "WAIT(w)" "HOLD(h)" "IDEA(i)" "|" "DONE(d)" "KILL(k)")
+                          (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")
+                          (sequence "|" "OKAY(o)" "YES(y)" "NO(n)")))
 
 (setq org-agenda-custom-commands
       '(("o" "Overview"
