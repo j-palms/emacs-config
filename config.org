@@ -3406,7 +3406,10 @@ Now let's just have this included when an ErgoDox is found via =dmesg=.
 #+end_src
 
 #+begin_src emacs-lisp :noweb no-export
-<<avy-detect-colemak()>>
+(after! avy
+  ;; home row priorities: 8 6 4 5 - - 1 2 3 7
+  (setq avy-keys '(?n ?e ?i ?s ?t ?r ?i ?a)))
+;;<<avy-detect-colemak()>>
 #+end_src
 
 *** Rotate (window management)
