@@ -2511,25 +2511,24 @@ From the =:config default= module.
 What a wonderful way to jump to buffer positions, and it uses the QWERTY
 home-row for jumping. Very convenient ... except I'm using Colemak.
 
-#+name: avy-colemak-setup
-#+begin_src emacs-lisp :noweb-ref none
+#+begin_src emacs-lisp
 (after! avy
   ;; home row priorities: 8 6 4 5 - - 1 2 3 7
   (setq avy-keys '(?n ?e ?i ?s ?t ?r ?i ?a)))
 #+end_src
 
-Now let's just have this included when an ErgoDox is found via =dmesg=.
+# Now let's just have this included when an ErgoDox is found via =dmesg=.
 
-#+name: avy-detect-colemak
-#+begin_src emacs-lisp :noweb no-export :noweb-ref none :noweb-prefix no
-(if (= 0 (call-process "sh" nil nil nil "-c" "dmesg | grep -q 'ErgoDox'"))
-    (pp '<<avy-colemak-setup>>)
-  ";; Avy: Colemak layout not detected (ErgoDox not mentioned in dmesg).")
-#+end_src
+# #+name: avy-detect-colemak
+# #+begin_src emacs-lisp :noweb no-export :noweb-ref none :noweb-prefix no
+# (if (= 0 (call-process "sh" nil nil nil "-c" "dmesg | grep -q 'ErgoDox'"))
+#     (pp '<<avy-colemak-setup>>)
+#   ";; Avy: Colemak layout not detected (ErgoDox not mentioned in dmesg).")
+# #+end_src
 
-#+begin_src emacs-lisp :noweb no-export
-<<avy-detect-colemak()>>
-#+end_src
+# #+begin_src emacs-lisp :noweb no-export
+# <<avy-detect-colemak()>>
+# #+end_src
 
 *** Rotate (window management)
 
@@ -4605,8 +4604,8 @@ It's nice to be able to link to music
 **** Tweaking defaults
 
 #+begin_src emacs-lisp
-(setq org-directory (expand-file-name "org" (xdg-data-home)) ; Let's put files here.
-      org-agenda-files (list org-directory)                  ; Seems like the obvious place.
+(setq org-directory "~/org"                                  ; Let's put files here.
+      org-agenda-files '("~/org/gtd")                        ; Seems like the obvious place.
       org-use-property-inheritance t                         ; It's convenient to have properties inherited.
       org-log-done 'time                                     ; Having the time a item is done sounds convenient.
       org-list-allow-alphabetical t                          ; Have a. A. a) A) list bullets.
@@ -4757,6 +4756,10 @@ packages already loaded. For starters, we can make use of the my Zotero files
 with =citar=, and make the symbols a bit prettier.
 
 #+begin_src emacs-lisp
+(map! :leader
+      (:prefix "n"
+       :desc "File from bibliographic note" "B" #'citar-open-files))
+
 (after! citar
   (setq org-cite-global-bibliography
         (let ((libfile-search-names '("library.json" "Library.json" "library.bib" "Library.bib"))
@@ -4786,7 +4789,10 @@ citation export processor for everything.
 
 #+begin_src emacs-lisp
 (after! oc
-  (setq org-cite-export-processors '((t csl))))
+  (setq org-cite-export-processors
+   '((latex biblatex)
+     (t . (csl "iso690-author-date-de.csl"))
+     )))
 #+end_src
 
 Then, for convenience we'll cap things off by putting the citation command under
@@ -5722,10 +5728,6 @@ other settings.
                 :priority_c    #("■" 0 1 (face nerd-icons-yellow))
                 :priority_d    #("⬇" 0 1 (face nerd-icons-green))
                 :priority_e    #("❓" 0 1 (face nerd-icons-blue))))
-
-(defadvice! +org-init-appearance-h--no-ligatures-a ()
-  :after #'+org-init-appearance-h
-  (set-ligatures! 'org-mode nil)
   (set-ligatures! 'org-mode
     :list_property "::"
     :em_dash       "---"
@@ -5739,7 +5741,11 @@ other settings.
     :priority_b    "[#B]"
     :priority_c    "[#C]"
     :priority_d    "[#D]"
-    :priority_e    "[#E]"))
+    :priority_e    "[#E]")
+
+(defadvice! +org-init-appearance-h--no-ligatures-a ()
+  :after #'+org-init-appearance-h
+  (set-ligatures! 'org-mode nil))
 #+end_src
 
 While we're at it we may as well make tags prettier as well 🙂
@@ -9749,6 +9755,197 @@ which is perfect for our needs.
 (add-to-list 'magic-mode-alist (cons "\\`GIMP Palette\n" #'gimp-palette-mode))
 #+end_src
 * Custom Workflow
+** General
+*** Dump
+
+#+begin_src emacs-lisp
+(setq display-time-format "%H:%M")
+
+(global-activity-watch-mode 1)
+
+(org-clock-today-mode 1)
+
+(setq lsp-headerline-breadcrumb-enable t
+      lsp-headerline-breadcrumb-segments '(project file symbols)
+      lsp-headerline-breadcrumb-icons-enable t
+      ;; lsp-ui-doc-delay 5
+      ;; lsp-ui-doc-use-childframe nil
+      company-box-doc-enable nil)
+
+(setq lsp-go-use-gofumpt t)
+
+(setq doom-modeline-persp-name t)
+
+(after! dap-mode
+  (setq dap-python-debugger 'debugpy))
+
+(map! ("C-c C-SPC"
+       :desc "Switch perspective" #'+workspace/cycle))
+
+;; (setq max-specpdl-size 13000) TODO is this needed?
+
+(setq doom-themes-treemacs-enable-variable-pitch nil)
+
+;; (add-hook! +dap-running-session-mode
+;;   (set-window-buffer nil (current-buffer)))
+
+(map! :leader
+      (:prefix "m"
+       :desc "Debug with dap-mode hydra" "d" #'dap-hydra))
+
+;; (setq +format-on-save-enabled-modes
+;;       '(not emacs-lisp-mode  ; elisp's mechanisms are good enough
+;;         sql-mode         ; sqlformat is currently broken
+;;         tex-mode         ; latexindent is broken
+;;         latex-mode
+;;         python-mode))
+
+(map! :leader
+      (:prefix "o"
+       :desc "Open org-agenda" "a" #'org-agenda))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! evil-surround
+  :after evil
+  :hook ((org-mode . (lambda () (push '(?~ . ("~" . "~")) evil-surround-pairs-alist)))
+         (org-mode . (lambda () (push '(?m . ("\(" . "\)")) evil-surround-pairs-alist)))
+         (org-mode . (lambda () (push '(?M . ("\\[" . "\\]")) evil-surround-pairs-alist))))
+  :config
+  (global-evil-surround-mode 1)) ;; globally enable evil-surround
+#+end_src
+
+
+*** Windows
+
+Hydra for changing split window size.
+
+#+begin_src emacs-lisp
+(defhydra doom-window-resize-hydra (:hint nil)
+  "
+             _k_ increase height
+_h_ decrease width    _l_ increase width
+             _j_ decrease height
+"
+  ("h" evil-window-decrease-width)
+  ("j" evil-window-increase-height)
+  ("k" evil-window-decrease-height)
+  ("l" evil-window-increase-width)
+  ("q" nil))
+
+(map!
+    (:leader
+     :prefix "w"
+     :desc "Hydra resize" :n "#" #'doom-window-resize-hydra/body))
+#+end_src
+
+
+** Roam
+
+#+call: confpkg("!Pkg org-roam", after="org-roam")
+
+
+#+begin_src emacs-lisp
+(use-package! org-roam
+  :init
+  (map! :leader
+        :prefix "n"
+        :desc "org-roam" "l" #'org-roam-buffer-toggle
+        :desc "org-roam-node-insert" "i" #'org-roam-node-insert
+        :desc "org-roam-node-find" "f" #'org-roam-node-find
+        :desc "org-roam-ref-find" "r" #'org-roam-ref-find
+        :desc "org-roam-show-graph" "g" #'org-roam-show-graph
+        :desc "jethro/org-capture-slipbox" "<tab>" #'jethro/org-capture-slipbox
+        :desc "org-roam-capture" "c" #'org-roam-capture)
+  (setq org-roam-directory (file-truename "~/org/notes")
+        org-roam-dailies-directory "journals/"
+        org-roam-database-connector 'sqlite-builtin)
+  :config
+  (org-roam-db-autosync-mode)
+  (setq org-roam-capture-templates
+         '(("n" "notes" plain "\n%?"
+            :target
+            (file+head "pages/${slug}.org"
+                              "#+title: ${title}\n")
+           :immediate-finish t
+           :unnarrowed t)
+          ;; ("b" "bibliographic note" plain "\n%?"
+          ;;  :if-new
+          ;;  (file+head "reference/${slug}.org" "#+title: ${title}\n")
+          ;;  :immediate-finish t
+          ;;  :unnarrowed t)))
+        ("b" "literature note" plain "\n%?"
+         :target
+         (file+head
+          "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/references/${citar-citekey}.org"
+          "#+title: ${note-title}.\n#+created: %U\n\n")
+         :immediate-finish t
+         :unnarrowed t)))
+
+  (defun jethro/tag-new-node-as-draft ()
+    (org-roam-tag-add '("draft")))
+
+  (add-hook 'org-roam-capture-new-node-hook #'jethro/tag-new-node-as-draft)
+
+  (cl-defmethod org-roam-node-type ((node org-roam-node))
+    "Return the TYPE of NODE."
+    (condition-case nil
+        (file-name-nondirectory
+         (directory-file-name
+          (file-name-directory
+           (file-relative-name (org-roam-node-file node) org-roam-directory))))
+      (error "")))
+
+  (setq org-roam-node-display-template
+        (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag))))
+#+end_src
+
+***** Modeline file name
+
+All those numbers! It's messy. Let's adjust this in a similar way that I have in
+the [[*Window title][Window title]].
+
+#+begin_src emacs-lisp
+(defadvice! doom-modeline--buffer-file-name-roam-aware-a (orig-fun)
+  :around #'doom-modeline-buffer-file-name ; takes no args
+  (if (s-contains-p org-roam-directory (or buffer-file-name ""))
+      (replace-regexp-in-string
+       "\\(?:^\\|.*/\\)\\([0-9]\\{4\\}\\)\\([0-9]\\{2\\}\\)\\([0-9]\\{2\\}\\)[0-9]*-"
+       "🢔(\\1-\\2-\\3) "
+       (subst-char-in-string ?_ ?  buffer-file-name))
+    (funcall orig-fun)))
+#+end_src
+
+***** Graph view
+
+#+call: confpkg("!Pkg org-roam-ui")
+
+Org-roam is nice by itself, but there are so /extra/ nice packages which integrate
+with it.
+
+#+begin_src emacs-lisp :noweb-ref none :tangle packages.el
+(package! org-roam-ui :recipe (:host github :repo "org-roam/org-roam-ui" :files ("*.el" "out")) :pin "5ac74960231db0bf7783c2ba7a19a60f582e91ab")
+(package! websocket :pin "82b370602fa0158670b1c6c769f223159affce9b") ; dependency of `org-roam-ui'
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! websocket
+  :after org-roam)
+
+(use-package! org-roam-ui
+  :after org-roam
+  :commands org-roam-ui-open
+  :hook (org-roam . org-roam-ui-mode)
+  :config
+  (require 'org-roam) ; in case autoloaded
+  (defun org-roam-ui-open ()
+    "Ensure the server is active, then open the roam graph."
+    (interactive)
+    (unless org-roam-ui-mode (org-roam-ui-mode 1))
+    (browse-url-xdg-open (format "http://localhost:%d" org-roam-ui-port))))
+#+end_src
+
+
 ** Type Break
 
 # #+call: confpkg("!Pkg type-break")
