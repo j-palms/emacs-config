@@ -1505,7 +1505,7 @@ doom                         ; what makes DOOM look the way it does
 doom-dashboard               ; a nifty splash screen for Emacs
 doom-quit                    ; DOOM quit-message prompts when you quit Emacs
 ;; (emoji +unicode)          ; 🙂
-fill-column                ; a `fill-column' indicator
+;; fill-column                ; a `fill-column' indicator
 hl-todo                      ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
 hydra                      ; quick documentation for related commands
 ;;indent-guides              ; highlighted indent columns, notoriously slow
@@ -2433,6 +2433,1661 @@ string. Note that this does not currently expand nested noweb references.
 #+end_src
 
 There we go, that's all it takes! This can be used via the form =<<grab("block-name")>>=.
+
+* Packages
+** Loading instructions
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle no
+:END:
+
+This is where you install packages, by declaring them with the ~package!~ macro in
+=packages.el=, then running ~doom refresh~ on the command line.
+This file shouldn't be byte compiled.
+#+begin_src emacs-lisp :tangle "packages.el" :comments no
+;; -*- no-byte-compile: t; -*-
+#+end_src
+
+You'll then need to restart Emacs for your changes to take effect! Or at least,
+run =M-x doom/reload=.
+
+*Warning*: Don't disable core packages listed in =~/.config/emacs/core/packages.el=.
+Doom requires these, and disabling them may have terrible side effects.
+
+*** Packages in MELPA/ELPA/emacsmirror
+
+To install ~some-package~ from MELPA, ELPA or emacsmirror:
+#+begin_src emacs-lisp
+(package! some-package)
+#+end_src
+
+*** Packages from git repositories
+
+To install a package directly from a particular repo, you'll need to specify
+a ~:recipe~. You'll find documentation on what ~:recipe~ accepts [[https://github.com/raxod502/straight.el#the-recipe-format][here]]:
+#+begin_src emacs-lisp
+(package! another-package
+  :recipe (:host github :repo "username/repo"))
+#+end_src
+
+If the package you are trying to install does not contain a ~PACKAGENAME.el~
+file, or is located in a subdirectory of the repo, you'll need to specify
+~:files~ in the ~:recipe~:
+#+begin_src emacs-lisp
+(package! this-package
+  :recipe (:host github :repo "username/repo"
+           :files ("some-file.el" "src/lisp/*.el")))
+#+end_src
+
+*** Disabling built-in packages
+
+If you'd like to disable a package included with Doom, for whatever reason,
+you can do so here with the ~:disable~ property:
+#+begin_src emacs-lisp
+(package! builtin-package :disable t)
+#+end_src
+You can override the recipe of a built in package without having to specify
+all the properties for ~:recipe~. These will inherit the rest of its recipe
+from Doom or MELPA/ELPA/Emacsmirror:
+#+begin_src emacs-lisp
+(package! builtin-package :recipe (:nonrecursive t))
+(package! builtin-package-2 :recipe (:repo "myfork/package"))
+#+end_src
+
+Specify a ~:branch~ to install a package from a particular branch or tag.
+#+begin_src emacs-lisp
+(package! builtin-package :recipe (:branch "develop"))
+#+end_src
+
+** Convenience
+*** Avy
+
+#+call: confpkg("!Pkg avy")
+
+#+begin_quote
+From the =:config default= module.
+#+end_quote
+
+
+What a wonderful way to jump to buffer positions, and it uses the QWERTY
+home-row for jumping. Very convenient ... except I'm using Colemak.
+
+#+name: avy-colemak-setup
+#+begin_src emacs-lisp :noweb-ref none
+(after! avy
+  ;; home row priorities: 8 6 4 5 - - 1 2 3 7
+  (setq avy-keys '(?n ?e ?i ?s ?t ?r ?i ?a)))
+#+end_src
+
+Now let's just have this included when an ErgoDox is found via =dmesg=.
+
+#+name: avy-detect-colemak
+#+begin_src emacs-lisp :noweb no-export :noweb-ref none :noweb-prefix no
+(if (= 0 (call-process "sh" nil nil nil "-c" "dmesg | grep -q 'ErgoDox'"))
+    (pp '<<avy-colemak-setup>>)
+  ";; Avy: Colemak layout not detected (ErgoDox not mentioned in dmesg).")
+#+end_src
+
+#+begin_src emacs-lisp :noweb no-export
+<<avy-detect-colemak()>>
+#+end_src
+
+*** Rotate (window management)
+
+The =rotate= package just adds the ability to rotate window layouts, but that
+sounds nice to me.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! rotate :pin "4e9ac3ff800880bd9b705794ef0f7c99d72900a6")
+#+end_src
+
+*** Emacs Everywhere
+
+#+call: confpkg("!Pkg emacs-everywhere")
+
+The name says it all. It's loaded and set up (a bit) by =:app everywhere=, however
+as I develop this I want the unpinned version I have as a submodule.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! emacs-everywhere :recipe (:local-repo "lisp/emacs-everywhere"))
+(unpin! emacs-everywhere)
+#+end_src
+
+Additionally, I'm going to make some personal choices that aren't made in the
+Doom module.
+
+#+begin_src emacs-lisp
+(use-package! emacs-everywhere
+  :if (daemonp)
+  :config
+  (require 'spell-fu)
+  (setq emacs-everywhere-major-mode-function #'org-mode
+        emacs-everywhere-frame-name-format "Edit ∷ %s — %s")
+  (defadvice! emacs-everywhere-raise-frame ()
+    :after #'emacs-everywhere-set-frame-name
+    (setq emacs-everywhere-frame-name (format emacs-everywhere-frame-name-format
+                                (emacs-everywhere-app-class emacs-everywhere-current-app)
+                                (truncate-string-to-width
+                                 (emacs-everywhere-app-title emacs-everywhere-current-app)
+                                 45 nil nil "…")))
+    ;; need to wait till frame refresh happen before really set
+    (run-with-timer 0.1 nil #'emacs-everywhere-raise-frame-1))
+  (defun emacs-everywhere-raise-frame-1 ()
+    (call-process "wmctrl" nil nil nil "-a" emacs-everywhere-frame-name)))
+#+end_src
+
+*** Which-key
+
+#+call: confpkg("!Pkg which-key")
+
+#+begin_quote
+From the =:core packages= module.
+#+end_quote
+
+Let's make this popup a bit faster
+#+begin_src emacs-lisp
+(setq which-key-idle-delay 0.5) ;; I need the help, I really do
+#+end_src
+
+I also think that having =evil-= appear in so many popups is a bit too verbose,
+let's change that, and do a few other similar tweaks while we're at it.
+#+begin_src emacs-lisp
+(setq which-key-allow-multiple-replacements t)
+(after! which-key
+  (pushnew!
+   which-key-replacement-alist
+   '(("" . "\\`+?evil[-:]?\\(?:a-\\)?\\(.*\\)") . (nil . "◂\\1"))
+   '(("\\`g s" . "\\`evilem--?motion-\\(.*\\)") . (nil . "◃\\1"))
+   ))
+#+end_src
+
+#+attr_html: :class invertible :alt Whichkey triggered on an evil motion
+[[https://tecosaur.com/lfs/emacs-config/screenshots/whichkey-evil.png]]
+
+** Tools
+*** Abbrev
+
+#+call: confpkg("Multi-mode abbrev")
+
+Thanks to [[https://emacs.stackexchange.com/questions/45462/use-a-single-abbrev-table-for-multiple-modes/45476#45476][use a single abbrev-table for multiple modes? - Emacs Stack Exchange]] I
+have the following.
+
+#+begin_src emacs-lisp :tangle no
+(add-hook 'doom-first-buffer-hook
+          (defun +abbrev-file-name ()
+            (setq-default abbrev-mode t)
+            (setq abbrev-file-name (expand-file-name "abbrev.el" doom-private-dir))))
+#+end_src
+
+*** Very large files
+
+#+call: confpkg("!Pkg VLF")
+
+The /very large files/ mode loads large files in chunks, allowing one to open
+ridiculously large files.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! vlf :recipe (:host github :repo "emacs-straight/vlf" :files ("*.el"))
+  :pin "cacdb359f8c37c6e7e4c7937462b632d22462130")
+#+end_src
+
+To make VLF available without delaying startup, we'll just load it in quiet moments.
+
+#+begin_src emacs-lisp :noweb no-export :noweb-prefix no
+(use-package! vlf-setup
+  :defer-incrementally vlf-tune vlf-base vlf-write
+  vlf-search vlf-occur vlf-follow vlf-ediff vlf
+  :commands vlf vlf-mode
+  :init
+  <<vlf-largefile-prompt>>
+  :config
+  (advice-remove 'abort-if-file-too-large #'ad-Advice-abort-if-file-too-large)
+  <<vlf-linenum-offset>>
+  <<vlf-search-chunking>>)
+#+end_src
+
+Now, there are one or two tweaks worth applying to VLF. For starters, it goes to
+the liberty of advising ~abort-if-file-too-large~, and in doing so removes the
+option of opening files literally. I think that's a bit much, so we can remove
+the advice and instead override ~files--ask-user-about-large-file~ (the more
+appropriate function, I think) as a simpler approach, just sacrificing the
+original behaviour with src_elisp{(setq vlf-application 'always)} (which I can't
+imagine using anyway).
+
+#+name: vlf-largefile-prompt
+#+begin_src emacs-lisp :noweb-ref none
+(defadvice! +files--ask-about-large-file-vlf (size op-type filename offer-raw)
+  "Like `files--ask-user-about-large-file', but with support for `vlf'."
+  :override #'files--ask-user-about-large-file
+  (if (eq vlf-application 'dont-ask)
+      (progn (vlf filename) (error ""))
+    (let ((prompt (format "File %s is large (%s), really %s?"
+                          (file-name-nondirectory filename)
+                          (funcall byte-count-to-string-function size) op-type)))
+      (if (not offer-raw)
+          (if (y-or-n-p prompt) nil 'abort)
+        (let ((choice
+               (car
+                (read-multiple-choice
+                 prompt '((?y "yes")
+                          (?n "no")
+                          (?l "literally")
+                          (?v "vlf"))
+                 (files--ask-user-about-large-file-help-text
+                  op-type (funcall byte-count-to-string-function size))))))
+          (cond ((eq choice ?y) nil)
+                ((eq choice ?l) 'raw)
+                ((eq choice ?v)
+                 (vlf filename)
+                 (error ""))
+                (t 'abort)))))))
+#+end_src
+
+As you go from one chunk fetched by VLF to the next, the displayed line number
+of the first line /in each chunk/ is unchanged. I think it's reasonable to hope
+for an /overall/ line number, and by tracking chunk's cumulative line numbers we
+can implement this behaviour fairly easily.
+
+#+name: vlf-linenum-offset
+#+begin_src emacs-lisp :noweb-ref none
+(defvar-local +vlf-cumulative-linenum '((0 . 0))
+  "An alist keeping track of the cumulative line number.")
+
+(defun +vlf-update-linum ()
+  "Update the line number offset."
+  (let ((linenum-offset (alist-get vlf-start-pos +vlf-cumulative-linenum)))
+    (setq display-line-numbers-offset (or linenum-offset 0))
+    (when (and linenum-offset (not (assq vlf-end-pos +vlf-cumulative-linenum)))
+      (push (cons vlf-end-pos (+ linenum-offset
+                                 (count-lines (point-min) (point-max))))
+            +vlf-cumulative-linenum))))
+
+(add-hook 'vlf-after-chunk-update-hook #'+vlf-update-linum)
+
+;; Since this only works with absolute line numbers, let's make sure we use them.
+(add-hook! 'vlf-mode-hook (setq-local display-line-numbers t))
+#+end_src
+
+The other thing that doesn't work too well with VLF is searching with anything
+other than =M-x occur=. This is because trying to go to the next match at the end
+of a chunk usually wraps the point to the beginning of the chunk, instead of
+moving to the next chunk.
+
+#+name: vlf-search-chunking
+#+begin_src emacs-lisp :noweb-ref none
+(defun +vlf-next-chunk-or-start ()
+  (if (= vlf-file-size vlf-end-pos)
+      (vlf-jump-to-chunk 1)
+    (vlf-next-batch 1))
+  (goto-char (point-min)))
+
+(defun +vlf-last-chunk-or-end ()
+  (if (= 0 vlf-start-pos)
+      (vlf-end-of-file)
+    (vlf-prev-batch 1))
+  (goto-char (point-max)))
+
+(defun +vlf-isearch-wrap ()
+  (if isearch-forward
+      (+vlf-next-chunk-or-start)
+    (+vlf-last-chunk-or-end)))
+
+(add-hook! 'vlf-mode-hook (setq-local isearch-wrap-function #'+vlf-isearch-wrap))
+#+end_src
+
+Unfortunately, since evil-search doesn't have an analogue to
+~isearch-wrap-function~, we can't easily add support to it.
+
+*** Eros
+
+#+call: confpkg("!Pkg Eros")
+
+#+begin_quote
+From the =:tools eval= module.
+#+end_quote
+
+This package enables the very nice inline evaluation with =gr= and =gR=. The prefix
+could be slightly nicer though.
+#+begin_src emacs-lisp
+(setq eros-eval-result-prefix "⟹ ") ; default =>
+#+end_src
+
+*** EVIL
+
+#+call: confpkg("!Pkg evil")
+
+#+begin_quote
+From the =:editor evil= module.
+#+end_quote
+
+When I want to make a substitution, I want it to be global more often than not
+--- so let's make that the default.
+
+Now, EVIL cares a fair bit about keeping compatibility with Vim's default
+behaviour. I don't. There are some particular settings that I'd rather be
+something else, so let's change them.
+
+#+begin_src emacs-lisp
+(after! evil
+  (setq evil-ex-substitute-global t     ; I like my s/../.. to by global by default
+        evil-move-cursor-back nil       ; Don't move the block cursor when toggling insert mode
+        evil-kill-on-visual-paste nil)) ; Don't put overwritten text in the kill ring
+#+end_src
+
+I don't use ~evil-escape-mode~, so I may as well turn it off, I've heard it
+contributes a typing delay. I'm not sure it's much, but it is an extra
+~pre-command-hook~ that I don't benefit from, so...
+It seems that there's a dedicated package for this, so instead of just disabling
+the mode on startup, let's prevent installation of the package.
+
+#+begin_src emacs-lisp :tangle packages.el :noweb-ref none
+(package! evil-escape :disable t)
+#+end_src
+
+*** Consult
+
+#+call: confpkg("!Pkg Consult")
+
+#+begin_quote
+From the =:completion vertico= module.
+#+end_quote
+
+Since we're using [[Marginalia]] too, the separation between buffers and files is
+already clear, and there's no need for a different face.
+
+#+begin_src emacs-lisp
+(after! consult
+  (set-face-attribute 'consult-file nil :inherit 'consult-buffer)
+  (setf (plist-get (alist-get 'perl consult-async-split-styles-alist) :initial) ";"))
+#+end_src
+
+*** Magit
+
+#+call: confpkg("!Pkg Magit")
+
+#+begin_quote
+From the =:tools magit= module.
+#+end_quote
+
+[[xkcd:1597]]
+
+Magit is great as-is, thanks for making such a lovely package [[https://github.com/tarsius][Jonas]]!
+
+There's still a room for a little tweaking though...
+
+#+begin_src emacs-lisp :noweb no-export :noweb-prefix no
+<<magit-toplevel>>
+(after! magit
+  <<magit-tweaks>>)
+#+end_src
+
+**** Easier forge remotes
+:PROPERTIES:
+:header-args:emacs-lisp: :noweb-ref magit-tweaks
+:END:
+
+When creating a new project, I often want the remote to be to my personal gitea
+instance. Let's make that a bit more streamlined by introducing a quick-entry
+"default forge" option.
+
+#+begin_src emacs-lisp
+(defvar +magit-default-forge-remote "gitea@git.tecosaur.net:tec/%s.git"
+  "Format string that fills out to a remote from the repo name.
+Set to nil to disable this functionality.")
+#+end_src
+
+While we're at it, when creating a remote with the same name as my github
+username in a project where an https github remote already exists, let's make
+the pre-filled remote url use ssh.
+
+#+begin_src emacs-lisp
+(defadvice! +magit-remote-add--streamline-forge-a (args)
+  :filter-args #'magit-remote-add
+  (interactive
+   (or (and +magit-default-forge-remote
+            (not (magit-list-remotes))
+            (eq (read-char-choice
+                 (format "Setup %s remote? [y/n]: "
+                         (replace-regexp-in-string
+                          "\\`\\(?:[^@]+@\\|https://\\)\\([^:/]+\\)[:/].*\\'" "\\1"
+                          +magit-default-forge-remote))
+                 '(?y ?n))
+                ?y)
+            (let* ((default-name
+                     (subst-char-in-string ?\s ?-
+                                           (file-name-nondirectory
+                                            (directory-file-name (doom-project-root)))))
+                   (name (read-string "Name: " default-name)))
+              (list "origin" (format +magit-default-forge-remote name)
+                    (transient-args 'magit-remote))))
+       (let ((origin (magit-get "remote.origin.url"))
+             (remote (magit-read-string-ns "Remote name"))
+             (gh-user (magit-get "github.user")))
+         (when (and (equal remote gh-user)
+                    (string-match "\\`https://github\\.com/\\([^/]+\\)/\\([^/]+\\)\\.git\\'"
+                                  origin)
+                    (not (string= (match-string 1 origin) gh-user)))
+           (setq origin (replace-regexp-in-string
+                         "\\`https://github\\.com/" "git@github.com:"
+                         origin)))
+         (list remote
+               (magit-read-url
+                "Remote url"
+                (and origin
+                     (string-match "\\([^:/]+\\)/[^/]+\\(\\.git\\)?\\'" origin)
+                     (replace-match remote t t origin 1)))
+               (transient-args 'magit-remote)))))
+  args)
+#+end_src
+
+**** Commit message templates
+:PROPERTIES:
+:header-args:emacs-lisp: :noweb-ref magit-tweaks
+:END:
+
+One little thing I want to add is some per-project commit message templates.
+
+#+begin_src emacs-lisp :noweb-ref magit-toplevel
+(defvar +magit-project-commit-templates-alist nil
+  "Alist of toplevel dirs and template hf strings/functions.")
+#+end_src
+
+#+begin_src emacs-lisp
+(defun +magit-fill-in-commit-template ()
+  "Insert template from `+magit-fill-in-commit-template' if applicable."
+  (when-let ((template (and (save-excursion (goto-char (point-min)) (string-match-p "\\`\\s-*$" (thing-at-point 'line)))
+                            (cdr (assoc (file-name-base (directory-file-name (magit-toplevel)))
+                                        +magit-project-commit-templates-alist)))))
+    (goto-char (point-min))
+    (insert (if (stringp template) template (funcall template)))
+    (goto-char (point-min))
+    (end-of-line)))
+(add-hook 'git-commit-setup-hook #'+magit-fill-in-commit-template 90)
+#+end_src
+
+This is particularly useful when creating commits for Org, as they need to
+follow [[https://orgmode.org/worg/org-contribute.html#commit-messages][a certain format]] and sometimes I forget elements (oops!).
+#+begin_src emacs-lisp
+(defun +org-commit-message-template ()
+  "Create a skeleton for an Org commit message based on the staged diff."
+  (let (change-data last-file file-changes temp-point)
+    (with-temp-buffer
+      (apply #'call-process magit-git-executable
+             nil t nil
+             (append
+              magit-git-global-arguments
+              (list "diff" "--cached")))
+      (goto-char (point-min))
+      (while (re-search-forward "^@@\\|^\\+\\+\\+ b/" nil t)
+        (if (looking-back "^\\+\\+\\+ b/" (line-beginning-position))
+            (progn
+              (push (list last-file file-changes) change-data)
+              (setq last-file (buffer-substring-no-properties (point) (line-end-position))
+                    file-changes nil))
+          (setq temp-point (line-beginning-position))
+          (re-search-forward "^\\+\\|^-" nil t)
+          (end-of-line)
+          (cond
+           ((string-match-p "\\.el$" last-file)
+            (when (re-search-backward "^\\(?:[+-]? *\\|@@[ +-\\d,]+@@ \\)(\\(?:cl-\\)?\\(?:defun\\|defvar\\|defmacro\\|defcustom\\)" temp-point t)
+              (re-search-forward "\\(?:cl-\\)?\\(?:defun\\|defvar\\|defmacro\\|defcustom\\) " nil t)
+              (add-to-list 'file-changes (buffer-substring-no-properties (point) (forward-symbol 1)))))
+           ((string-match-p "\\.org$" last-file)
+            (when (re-search-backward "^[+-]\\*+ \\|^@@[ +-\\d,]+@@ \\*+ " temp-point t)
+              (re-search-forward "@@ \\*+ " nil t)
+              (add-to-list 'file-changes (buffer-substring-no-properties (point) (line-end-position)))))))))
+    (push (list last-file file-changes) change-data)
+    (setq change-data (delete '(nil nil) change-data))
+    (concat
+     (if (= 1 (length change-data))
+         (replace-regexp-in-string "^.*/\\|.[a-z]+$" "" (caar change-data))
+       "?")
+     ": \n\n"
+     (mapconcat
+      (lambda (file-changes)
+        (if (cadr file-changes)
+            (format "* %s (%s): "
+                    (car file-changes)
+                    (mapconcat #'identity (cadr file-changes) ", "))
+          (format "* %s: " (car file-changes))))
+      change-data
+      "\n\n"))))
+
+(add-to-list '+magit-project-commit-templates-alist (cons "org" #'+org-commit-message-template))
+#+end_src
+
+This relies on two small entries in the git config files which improves the hunk
+heading line selection for elisp and Org files.
+
+#+begin_src gitconfig
+[diff "lisp"]
+  xfuncname = "^(((;;;+ )|\\(|([ \t]+\\(((cl-|el-patch-)?def(un|var|macro|method|custom)|gb/))).*)$"
+
+[diff "org"]
+  xfuncname = "^(\\*+ +.*)$"
+#+end_src
+
+**** Magit delta
+
+[[https://github.com/dandavison/delta/][Delta]] is a git diff syntax highlighter written in rust. The author also wrote a
+package to hook this into the magit diff view (which don't get any syntax
+highlighting by default). This requires the ~delta~ binary. It's packaged on some
+distributions, but most reliably installed through Rust's package manager cargo.
+
+#+begin_src shell :eval no :tangle (if (or (not (executable-find "cargo")) (executable-find "delta")) "no" "setup.sh")
+cargo install git-delta
+#+end_src
+
+Now we can make use of the package for this.
+#+begin_src emacs-lisp :tangle packages.el :noweb-ref none
+;; (package! magit-delta :recipe (:host github :repo "dandavison/magit-delta") :pin "5fc7dbddcfacfe46d3fd876172ad02a9ab6ac616")
+#+end_src
+
+All that's left is to hook it into magit
+#+begin_src emacs-lisp :noweb-ref none
+;; (magit-delta-mode +1)
+#+end_src
+Unfortunately this currently seems to mess things up, which is something I'll
+want to look into later.
+
+*** Smerge
+
+#+call: confpkg("!Pkg Smerge")
+
+For repeated operations, a hydra would be helpful. But I prefer transient.
+#+begin_src emacs-lisp
+(defun smerge-repeatedly ()
+  "Perform smerge actions again and again"
+  (interactive)
+  (smerge-mode 1)
+  (smerge-transient))
+(after! transient
+  (transient-define-prefix smerge-transient ()
+    [["Move"
+      ("n" "next" (lambda () (interactive) (ignore-errors (smerge-next)) (smerge-repeatedly)))
+      ("p" "previous" (lambda () (interactive) (ignore-errors (smerge-prev)) (smerge-repeatedly)))]
+     ["Keep"
+      ("b" "base" (lambda () (interactive) (ignore-errors (smerge-keep-base)) (smerge-repeatedly)))
+      ("u" "upper" (lambda () (interactive) (ignore-errors (smerge-keep-upper)) (smerge-repeatedly)))
+      ("l" "lower" (lambda () (interactive) (ignore-errors (smerge-keep-lower)) (smerge-repeatedly)))
+      ("a" "all" (lambda () (interactive) (ignore-errors (smerge-keep-all)) (smerge-repeatedly)))
+      ("RET" "current" (lambda () (interactive) (ignore-errors (smerge-keep-current)) (smerge-repeatedly)))]
+     ["Diff"
+      ("<" "upper/base" (lambda () (interactive) (ignore-errors (smerge-diff-base-upper)) (smerge-repeatedly)))
+      ("=" "upper/lower" (lambda () (interactive) (ignore-errors (smerge-diff-upper-lower)) (smerge-repeatedly)))
+      (">" "base/lower" (lambda () (interactive) (ignore-errors (smerge-diff-base-lower)) (smerge-repeatedly)))
+      ("R" "refine" (lambda () (interactive) (ignore-errors (smerge-refine)) (smerge-repeatedly)))
+      ("E" "ediff" (lambda () (interactive) (ignore-errors (smerge-ediff)) (smerge-repeatedly)))]
+     ["Other"
+      ("c" "combine" (lambda () (interactive) (ignore-errors (smerge-combine-with-next)) (smerge-repeatedly)))
+      ("r" "resolve" (lambda () (interactive) (ignore-errors (smerge-resolve)) (smerge-repeatedly)))
+      ("k" "kill current" (lambda () (interactive) (ignore-errors (smerge-kill-current)) (smerge-repeatedly)))
+      ("q" "quit" (lambda () (interactive) (smerge-auto-leave)))]]))
+#+end_src
+
+*** Company
+
+#+call: confpkg("!Pkg Company")
+
+#+begin_quote
+From the =:completion company= module.
+#+end_quote
+
+It's nice to have completions almost all the time, in my opinion. Key strokes
+are just waiting to be saved!
+
+#+begin_src emacs-lisp
+(after! company
+  (setq company-idle-delay 0.5
+        company-minimum-prefix-length 2)
+  (setq company-show-numbers t)
+  (add-hook 'evil-normal-state-entry-hook #'company-abort)) ;; make aborting less annoying.
+#+end_src
+
+Now, the improvements from ~precedent~ are mostly from remembering history, so
+let's improve that memory.
+
+#+begin_src emacs-lisp
+(setq-default history-length 1000)
+(setq-default prescient-history-length 1000)
+#+end_src
+
+**** Plain Text
+
+~Ispell~ is nice, let's have it in ~text~, ~markdown~, and ~GFM~.
+#+begin_src emacs-lisp
+(set-company-backend!
+  '(text-mode
+    markdown-mode
+    gfm-mode)
+  '(:seperate
+    company-ispell
+    company-files
+    company-yasnippet))
+#+end_src
+We then configure the dictionary we're using in [[*Ispell][Ispell]].
+
+**** ESS
+
+~company-dabbrev-code~ is nice. Let's have it.
+#+begin_src emacs-lisp
+(set-company-backend! 'ess-r-mode '(company-R-args company-R-objects company-dabbrev-code :separate))
+#+end_src
+
+*** Projectile
+
+#+call: confpkg("!Pkg Projectile")
+
+#+begin_quote
+From the =:core packages= module.
+#+end_quote
+
+Looking at documentation via =SPC h f= and =SPC h v= and looking at the source can
+add package src directories to projectile. This isn't desirable in my opinion.
+
+#+begin_src emacs-lisp
+(setq projectile-ignored-projects
+      (list "~/" "/tmp" (expand-file-name "straight/repos" doom-local-dir)))
+(defun projectile-ignored-project-function (filepath)
+  "Return t if FILEPATH is within any of `projectile-ignored-projects'"
+  (or (mapcar (lambda (p) (s-starts-with-p p filepath)) projectile-ignored-projects)))
+#+end_src
+
+*** Ispell
+**** Downloading dictionaries
+
+Let's get a nice big dictionary from [[http://app.aspell.net/create][SCOWL Custom List/Dictionary Creator]] with
+the following configuration
+- size :: 80 (huge)
+- spellings :: British(-ise) and Australian
+- spelling variants level :: 0
+- diacritics :: keep
+- extra lists :: hacker, roman numerals
+
+***** Hunspell
+
+#+begin_src shell :tangle (if (file-exists-p "/usr/share/myspell/en-custom.dic") "no" "setup.sh")
+cd /tmp
+curl -o "hunspell-en-custom.zip" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=hunspell'
+unzip "hunspell-en-custom.zip"
+
+sudo chown root:root en-custom.*
+sudo mv en-custom.{aff,dic} /usr/share/myspell/
+#+end_src
+
+***** Aspell
+
+#+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
+cd /tmp
+curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
+tar -xjf "aspell6-en-custom.tar.bz2"
+
+cd aspell6-en-custom
+./configure && make && sudo make install
+#+end_src
+
+**** Configuration
+
+#+call: confpkg("!Pkg Ispell")
+
+#+begin_src emacs-lisp
+(setq ispell-dictionary "en-custom")
+#+end_src
+
+Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
+~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
+~ispell-alternate-dictionary~, which at the moment maps to a plaintext version of
+the above.
+
+It seems reasonable to want to keep an eye on my personal dict, let's have it
+nearby (also means that if I change the 'main' dictionary I keep my addition).
+
+#+begin_src emacs-lisp
+(setq ispell-personal-dictionary
+      (expand-file-name "misc/ispell_personal" doom-private-dir))
+#+end_src
+
+*** TRAMP
+
+#+call: confpkg("TRAMP")
+
+Another lovely Emacs feature, TRAMP stands for /Transparent Remote Access,
+Multiple Protocol/. In brief, it's a lovely way to wander around outside your
+local filesystem.
+
+**** Prompt recognition
+
+Unfortunately, when connecting to remote machines Tramp can be a wee pit picky
+with the prompt format. Let's try to get Bash, and be a bit more permissive with
+prompt recognition.
+
+#+begin_src emacs-lisp
+(after! tramp
+  (setenv "SHELL" "/bin/bash")
+  (setq tramp-shell-prompt-pattern "\\(?:^\\|\n\\|\x0d\\)[^]#$%>\n]*#?[]#$%>] *\\(\e\\[[0-9;]*[a-zA-Z] *\\)*")) ;; default + 
+#+end_src
+
+**** Troubleshooting
+
+In case the remote shell is misbehaving, here are some things to try
+
+***** Zsh
+
+There are some escape code you don't want, let's make it behave more considerately.
+#+begin_src shell :eval no :tangle no
+if [[ "$TERM" == "dumb" ]]; then
+    unset zle_bracketed_paste
+    unset zle
+    PS1='$ '
+    return
+fi
+#+end_src
+
+**** Guix
+
+[[https://guix.gnu.org/][Guix]] puts some binaries that TRAMP looks for in unexpected locations.
+That's no problem though, we just need to help TRAMP find them.
+
+#+begin_src emacs-lisp
+(after! tramp
+  (appendq! tramp-remote-path
+            '("~/.guix-profile/bin" "~/.guix-profile/sbin"
+              "/run/current-system/profile/bin"
+              "/run/current-system/profile/sbin")))
+#+end_src
+
+*** Auto activating snippets
+
+#+call: confpkg("!Pkg AAS")
+
+Sometimes pressing =TAB= is just too much.
+#+begin_src emacs-lisp :tangle packages.el
+(package! aas :recipe (:host github :repo "ymarco/auto-activating-snippets")
+  :pin "e92b5cffa4e87c221c24f3e72ae33959e1ec2b68")
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! aas
+  :commands aas-mode)
+#+end_src
+
+*** Screenshot
+
+#+call: confpkg("!Pkg Screenshot")
+
+This makes it a breeze to take lovely screenshots.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! screenshot :recipe (:local-repo "lisp/screenshot"))
+#+end_src
+
+#+attr_html: :class invertible :alt Example screenshot.el screenshot
+[[https://tecosaur.com/lfs/emacs-config/screenshots/screenshot.png]]
+
+Some light configuring is all we need, so we can make use of the [[https://github.com/Calinou/0x0][0x0]] wrapper
+file uploading script (which I've renamed to ~upload~).
+
+#+begin_src emacs-lisp
+(use-package! screenshot
+  :defer t
+  :config (setq screenshot-upload-fn "upload %s 2>/dev/null"))
+#+end_src
+
+*** Etrace
+
+#+call: confpkg("!Pkg etrace")
+
+The /Emacs Lisp Profiler/ (ELP) does a nice job recording information, but it
+isn't the best for looking at results. =etrace= converts ELP's results to the
+"Chromium Catapult Trace Event Format". This means that the output of =etrace= can
+be loaded in something like the [[https://www.speedscope.app/][speedscope]] webapp for easier profile
+investigation.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! etrace :recipe (:host github :repo "aspiers/etrace")
+  :pin "2291ccf2f2ccc80a6aac4664e8ede736ceb672b7")
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! etrace
+  :after elp)
+#+end_src
+
+*** YASnippet
+
+#+call: confpkg("!Pkg YASnippet")
+
+#+begin_quote
+From the =:editor snippets= module.
+#+end_quote
+
+Nested snippets are good, so let's enable that.
+#+begin_src emacs-lisp
+(setq yas-triggers-in-field t)
+#+end_src
+
+*** String inflection
+
+#+call: confpkg("!Pkg String Inflection")
+
+For when you want to change the case pattern for a symbol.
+#+begin_src emacs-lisp :tangle packages.el
+(package! string-inflection :pin "50ad54970b3cc79b6b83979bde9889ad9a9e1a9c")
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! string-inflection
+  :commands (string-inflection-all-cycle
+             string-inflection-toggle
+             string-inflection-camelcase
+             string-inflection-lower-camelcase
+             string-inflection-kebab-case
+             string-inflection-underscore
+             string-inflection-capital-underscore
+             string-inflection-upcase)
+  :init
+  (map! :leader :prefix ("c~" . "naming convention")
+        :desc "cycle" "~" #'string-inflection-all-cycle
+        :desc "toggle" "t" #'string-inflection-toggle
+        :desc "CamelCase" "c" #'string-inflection-camelcase
+        :desc "downCase" "d" #'string-inflection-lower-camelcase
+        :desc "kebab-case" "k" #'string-inflection-kebab-case
+        :desc "under_score" "_" #'string-inflection-underscore
+        :desc "Upper_Score" "u" #'string-inflection-capital-underscore
+        :desc "UP_CASE" "U" #'string-inflection-upcase)
+  (after! evil
+    (evil-define-operator evil-operator-string-inflection (beg end _type)
+      "Define a new evil operator that cycles symbol casing."
+      :move-point nil
+      (interactive "<R>")
+      (string-inflection-all-cycle)
+      (setq evil-repeat-info '([?g ?~])))
+    (define-key evil-normal-state-map (kbd "g~") 'evil-operator-string-inflection)))
+#+end_src
+
+*** Smart parentheses
+
+#+call: confpkg("!Pkg SmartParens")
+
+#+begin_quote
+From the =:core packages= module.
+#+end_quote
+
+#+begin_src emacs-lisp
+(sp-local-pair
+ '(org-mode)
+ "<<" ">>"
+ :actions '(insert))
+#+end_src
+
+** #Visuals
+# *** Info colours
+
+# #+call: confpkg("!Pkg Info colors")
+
+# This makes manual pages nicer to look at by adding variable pitch fontification
+# and colouring 🙂.
+
+# #+attr_html: :class invertible :style width:80% :alt Example info-colours page.
+# [[https://tecosaur.com/lfs/emacs-config/screenshots/info-colours.png]]
+
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! info-colors :pin "2e237c301ba62f0e0286a27c1abe48c4c8441143")
+# #+end_src
+
+# To use this we'll just hook it into =Info=.
+
+# #+begin_src emacs-lisp
+# (use-package! info-colors
+#   :commands (info-colors-fontify-node))
+
+# (add-hook 'Info-selection-hook 'info-colors-fontify-node)
+# #+end_src
+
+# #+attr_html: :class invertible :alt Example colourised info page
+# [[https://tecosaur.com/lfs/emacs-config/screenshots/info-coloured.png]]
+
+# *** Modus themes
+
+# Proteolas did a lovely job with the Modus themes, so much so that they were
+# welcomed into Emacs 28. However, he is also rather attentive with updates, and
+# so I'd like to make sure we have a recent version.
+
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! modus-themes :pin "18dd2457d233859ad4d102d797d6744525177ac4")
+# #+end_src
+
+# *** Spacemacs themes
+
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! spacemacs-theme :pin "1ec73d68b0f120f92538d9a329a3a46e32f74510")
+# #+end_src
+
+# *** Theme magic
+
+# #+call: confpkg("!Pkg Theme magic")
+
+# With all our fancy Emacs themes, my terminal is missing out!
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! theme-magic :pin "844c4311bd26ebafd4b6a1d72ddcc65d87f074e3")
+# #+end_src
+
+# This operates using =pywal=, which is present in some repositories, but most
+# reliably installed with =pip=.
+# #+begin_src shell :eval no :tangle (if (executable-find "wal") "no" "setup.sh")
+# sudo python3 -m pip install pywal
+# #+end_src
+
+# Theme magic takes a look at a number of faces, the saturation levels, and colour
+# differences to try to cleverly pick eight colours to use. However, it uses the
+# same colours for the light variants, and doesn't always make the best picks.
+# Since we're using =doom-themes=, our life is a little easier and we can use the
+# colour utilities from Doom themes to easily grab sensible colours and generate
+# lightened versions --- let's do that.
+
+# #+begin_src emacs-lisp
+# (use-package! theme-magic
+#   :commands theme-magic-from-emacs
+#   :config
+#   (defadvice! theme-magic--auto-extract-16-doom-colors ()
+#     :override #'theme-magic--auto-extract-16-colors
+#     (list
+#      (face-attribute 'default :background)
+#      (doom-color 'error)
+#      (doom-color 'success)
+#      (doom-color 'type)
+#      (doom-color 'keywords)
+#      (doom-color 'constants)
+#      (doom-color 'functions)
+#      (face-attribute 'default :foreground)
+#      (face-attribute 'shadow :foreground)
+#      (doom-blend 'base8 'error 0.1)
+#      (doom-blend 'base8 'success 0.1)
+#      (doom-blend 'base8 'type 0.1)
+#      (doom-blend 'base8 'keywords 0.1)
+#      (doom-blend 'base8 'constants 0.1)
+#      (doom-blend 'base8 'functions 0.1)
+#      (face-attribute 'default :foreground))))
+# #+end_src
+
+# *** Simple comment markup
+
+# #+call: confpkg("!Pkg simple-comment-markup")
+
+# I find that every now and then I sprinkle a little markup in code comments. Of
+# course, this doesn't get fortified as it's ultimately meaningless ... but it
+# would be nice if it was, just slightly. Surprisingly, I couldn't find a package
+# for this, so I made one.
+
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! simple-comment-markup :recipe (:local-repo "lisp/simple-comment-markup"))
+# #+end_src
+
+# Let's use both basic Org markup and Markdown code backticks, to cover most
+# situations decently.
+
+# #+begin_src emacs-lisp
+# (use-package! simple-comment-markup
+#   :hook (prog-mode . simple-comment-markup-mode)
+#   :config
+#   (setq simple-comment-markup-set '(org markdown-code)))
+# #+end_src
+
+# *** Doom modeline
+
+# #+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
+
+# #+begin_quote
+# From the =:ui modeline= module.
+# #+end_quote
+
+# **** Modified buffer colour
+
+# The modeline is very nice and pretty, however I have a few niggles with the
+# defaults. For starters, by default ~red~ text is used to indicate an unsaved file.
+# This makes me feel like something's gone /wrong/, so let's tone that down to
+# orange.
+
+# #+begin_src emacs-lisp
+# (custom-set-faces!
+#   '(doom-modeline-buffer-modified :foreground "orange"))
+# #+end_src
+
+# **** Height
+
+# The default size (=25=) makes for a rather narrow mode line. To me, the modeline
+# feels a bit comfier if we give it a bit more space. I find =45= adds roughly a
+# third of the line height as padding above and below.
+
+# #+begin_src emacs-lisp
+# (setq doom-modeline-height 45)
+# #+end_src
+
+# **** File encoding
+
+# While we're modifying the modeline, when we have the default file encoding (=LF
+# UTF-8=), it really isn't worth noting in the modeline. So, why not conditionally
+# hide it?
+
+# #+begin_src emacs-lisp
+# (defun doom-modeline-conditional-buffer-encoding ()
+#   "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
+#   (setq-local doom-modeline-buffer-encoding
+#               (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
+#                                  '(coding-category-undecided coding-category-utf-8))
+#                            (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
+#                 t)))
+
+# (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
+# #+end_src
+
+# **** Time
+
+# Moving onto the modeline segments, there's a calendar icon showed next to the
+# current time, which I'm not a fan of. Let's replace that by redefining the
+# segment. Instead of the calendar, it would be much nicer to have an updating
+# analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
+
+# First, we'll need a way to produce svg clocks on-demand.
+
+# #+begin_src emacs-lisp
+# (defvar micro-clock-hour-hand-ratio 0.45
+#   "Length of the hour hand as a proportion of the radius.")
+# (defvar micro-clock-minute-hand-ratio 0.7
+#   "Length of the minute hand as a proportion of the radius.")
+
+# (defun micro-clock-svg (hour minute radius color)
+#   "Construct an SVG clock showing the time HOUR:MINUTE.
+# The clock will be of the specified RADIUS and COLOR."
+#   (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+#                    micro-clock-hour-hand-ratio))
+#         (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
+#                    micro-clock-hour-hand-ratio))
+#         (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
+#                      micro-clock-minute-hand-ratio))
+#         (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
+#                      micro-clock-minute-hand-ratio))
+#         (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
+#     (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
+#     (svg-circle svg radius radius 1 :fill color :stroke "none")
+#     (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
+#               :stroke-width 2)
+#     (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
+#               :stroke-width 1.5)
+#     svg))
+# #+end_src
+
+# With that out the way, we need to figure out how to integrate this into the
+# modeline. For the most part this was fairly easy, the tricky part was getting
+# the alignment right. I tried using the =(raise FACTOR)= display property, but that
+# doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
+# descriptors]] though, I came across the =:ascent= property, which looked rather
+# promising. By setting =:ascent center= the image is centred relative to the text,
+# which is exactly what we need. With that sorted, we just add some caching and
+# the obvious customisations and we've got modeline-appropriate clock generation!
+
+# #+begin_src emacs-lisp
+# (require 'svg)
+
+# (defvar +doom-modeline-micro-clock-minute-resolution 1
+#   "The clock will be updated every this many minutes, truncating.")
+# (defvar +doom-modeline-micro-clock-inverse-size 4.8
+#   "The size of the clock, as an inverse proportion to the mode line height.")
+
+# (defvar +doom-modeline-micro-clock--cache nil)
+
+# (defvar +doom-modeline-clock-text-format "%c")
+
+# (defun +doom-modeline--clock-text (&optional _window _object _pos)
+#   (format-time-string +doom-modeline-clock-text-format))
+
+# (defun +doom-modeline-micro-clock ()
+#   "Return a string containing an current analogue clock."
+#   (cdr
+#    (if (equal (truncate (float-time)
+#                         (* +doom-modeline-micro-clock-minute-resolution 60))
+#               (car +doom-modeline-micro-clock--cache))
+#        +doom-modeline-micro-clock--cache
+#      (setq +doom-modeline-micro-clock--cache
+#            (cons (truncate (float-time)
+#                            (* +doom-modeline-micro-clock-minute-resolution 60))
+#                  (with-temp-buffer
+#                    (svg-insert-image
+#                     (micro-clock-svg
+#                      (string-to-number (format-time-string "%-I")) ; hour
+#                      (* (truncate (string-to-number (format-time-string "%-M"))
+#                                   +doom-modeline-micro-clock-minute-resolution)
+#                         +doom-modeline-micro-clock-minute-resolution) ; minute
+#                      (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
+#                      "currentColor"))
+#                    (propertize
+#                     " "
+#                     'display
+#                     (append (get-text-property 0 'display (buffer-string))
+#                             '(:ascent center))
+#                     'face 'doom-modeline-time
+#                     'help-echo #'+doom-modeline--clock-text)))))))
+# #+end_src
+
+# With clock generation sorted out, all that's to be done is replacing the =time=
+# modeline segment with our design.
+
+# #+begin_src emacs-lisp
+# (doom-modeline-def-segment time
+#   (when (and doom-modeline-time
+#              (bound-and-true-p display-time-mode)
+#              (not doom-modeline--limited-width-p))
+#     (concat
+#      doom-modeline-spc
+#      (when doom-modeline-time-icon
+#        (concat
+#         (+doom-modeline-micro-clock)
+#         (and (or doom-modeline-icon doom-modeline-unicode-fallback)
+#              doom-modeline-spc)))
+#      (propertize display-time-string
+#                  'face (doom-modeline-face 'doom-modeline-time)))))
+# #+end_src
+
+# **** PDF modeline
+
+# I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
+# however the response was basically "put your preferences in your personal
+# config, the current default is sensible" --- so here we are.
+
+# First up I'm going to want a segment for just the buffer file name, and a PDF
+# icon. Then we'll redefine two functions used to generate the modeline.
+
+# #+begin_src emacs-lisp
+# (doom-modeline-def-segment buffer-name
+#   "Display the current buffer's name, without any other information."
+#   (concat
+#    doom-modeline-spc
+#    (doom-modeline--buffer-name)))
+
+# (doom-modeline-def-segment pdf-icon
+#   "PDF icon from nerd-icons."
+#   (concat
+#    doom-modeline-spc
+#    (doom-modeline-icon sucicon "nf-seti-pdf" nil nil
+#                        :face (if (doom-modeline--active)
+#                                  'nerd-icons-red
+#                                'mode-line-inactive)
+#                        :v-adjust 0.02)))
+
+# (defun doom-modeline-update-pdf-pages ()
+#   "Update PDF pages."
+#   (setq doom-modeline--pdf-pages
+#         (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
+#               (total-page-str (number-to-string (pdf-cache-number-of-pages))))
+#           (concat
+#            (propertize
+#             (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
+#                     " P" current-page-str)
+#             'face 'mode-line)
+#            (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
+
+# (doom-modeline-def-segment pdf-pages
+#   "Display PDF pages."
+#   (if (doom-modeline--active) doom-modeline--pdf-pages
+#     (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
+
+# (doom-modeline-def-modeline 'pdf
+#   '(bar window-number pdf-pages pdf-icon buffer-name)
+#   '(misc-info matches major-mode process vcs))
+# #+end_src
+
+# *** Keycast
+
+# #+call: confpkg("!Pkg Keycast")
+
+# For some reason, I find myself demoing Emacs every now and then. Showing what
+# keyboard stuff I'm doing on-screen seems helpful. While [[https://gitlab.com/screenkey/screenkey][screenkey]] does exist,
+# having something that doesn't cover up screen content is nice.
+
+# #+attr_html: :class invertible :alt Screenshot of Keycast-mode in action
+# [[https://tecosaur.com/lfs/emacs-config/screenshots/keycast.png]]
+
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! keycast :pin "72d9add8ba16e0cae8cfcff7fc050fa75e493b4e")
+# #+end_src
+
+# Let's just make sure this is lazy-loaded appropriately.
+# #+begin_src emacs-lisp
+# (use-package! keycast
+#   :commands keycast-mode
+#   :config
+#   (define-minor-mode keycast-mode
+#     "Show current command and its key binding in the mode line."
+#     :global t
+#     (if keycast-mode
+#         (progn
+#           (add-hook 'pre-command-hook 'keycast--update t)
+#           (add-to-list 'global-mode-string '("" mode-line-keycast " ")))
+#       (remove-hook 'pre-command-hook 'keycast--update)
+#       (setq global-mode-string (remove '("" mode-line-keycast " ") global-mode-string))))
+#   (custom-set-faces!
+#     '(keycast-command :inherit doom-modeline-debug
+#                       :height 0.9)
+#     '(keycast-key :inherit custom-modified
+#                   :height 1.1
+#                   :weight bold)))
+# #+end_src
+
+# *** Screencast
+
+# #+call: confpkg("!Pkg Screencast")
+
+# In a similar manner to [[Keycast]], [[https://gitlab.com/ambrevar/emacs-gif-screencast][gif-screencast]] may come in handy.
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! gif-screencast :pin "adec408e6adab2e8e057fe0ad828749f473bfb83")
+# #+end_src
+
+# We can lazy load this using the start/stop commands.
+
+# I initially installed ~scrot~ for this, since it was the default capture program.
+# However it raised ~glib error: Saving to file ... failed~ each time it was run.
+# Google didn't reveal any easy fixed, so I switched to [[https://github.com/naelstrof/maim][maim]]. We now need to pass
+# it the window ID. This doesn't change throughout the lifetime of an emacs
+# instance, so as long as a single window is used ~xdotool getactivewindow~ will
+# give a satisfactory result.
+
+# It seems that when new colours appear, that tends to make ~gifsicle~ introduce
+# artefacts. To avoid this we pre-populate the colour map using the current doom
+# theme.
+# #+begin_src emacs-lisp
+# (use-package! gif-screencast
+#   :commands gif-screencast-mode
+#   :config
+#   (map! :map gif-screencast-mode-map
+#         :g "<f8>" #'gif-screencast-toggle-pause
+#         :g "<f9>" #'gif-screencast-stop)
+#   (setq gif-screencast-program "maim"
+#         gif-screencast-args `("--quality" "3" "-i" ,(string-trim-right
+#                                                      (shell-command-to-string
+#                                                       "xdotool getactivewindow")))
+#         gif-screencast-optimize-args '("--batch" "--optimize=3" "--usecolormap=/tmp/doom-color-theme"))
+#   (defun gif-screencast-write-colormap ()
+#     (f-write-text
+#      (replace-regexp-in-string
+#       "\n+" "\n"
+#       (mapconcat (lambda (c) (if (listp (cdr c))
+#                                  (cadr c))) doom-themes--colors "\n"))
+#      'utf-8
+#      "/tmp/doom-color-theme" ))
+#   (gif-screencast-write-colormap)
+#   (add-hook 'doom-load-theme-hook #'gif-screencast-write-colormap))
+# #+end_src
+
+# *** Mixed pitch
+
+# #+call: confpkg("!Pkg mixed pitch")
+
+# #+begin_quote
+# From the =:ui zen= module.
+# #+end_quote
+
+# We'd like to use mixed pitch in certain modes. If we simply add a hook, when
+# directly opening a file with (a new) Emacs =mixed-pitch-mode= runs before UI
+# initialisation, which is problematic. To resolve this, we create a hook that
+# runs after UI initialisation and both
+# + conditionally enables =mixed-pitch-mode=
+# + sets up the mixed pitch hooks
+
+# #+begin_src emacs-lisp
+# (defvar mixed-pitch-modes '(org-mode LaTeX-mode markdown-mode gfm-mode Info-mode)
+#   "Modes that `mixed-pitch-mode' should be enabled in, but only after UI initialisation.")
+# (defun init-mixed-pitch-h ()
+#   "Hook `mixed-pitch-mode' into each mode in `mixed-pitch-modes'.
+# Also immediately enables `mixed-pitch-modes' if currently in one of the modes."
+#   (when (memq major-mode mixed-pitch-modes)
+#     (mixed-pitch-mode 1))
+#   (dolist (hook mixed-pitch-modes)
+#     (add-hook (intern (concat (symbol-name hook) "-hook")) #'mixed-pitch-mode)))
+# (add-hook 'doom-init-ui-hook #'init-mixed-pitch-h)
+# #+end_src
+
+# As mixed pitch uses the variable =mixed-pitch-face=, we can create a new function
+# to apply mixed pitch with a serif face instead of the default (see the
+# subsequent face definition). This was created for writeroom mode.
+
+# #+begin_src emacs-lisp
+# (autoload #'mixed-pitch-serif-mode "mixed-pitch"
+#   "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
+
+# (setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
+
+# (after! mixed-pitch
+#   (setq mixed-pitch-set-height t)
+#   (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
+#   (defun mixed-pitch-serif-mode (&optional arg)
+#     "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
+#     (interactive)
+#     (let ((mixed-pitch-face 'variable-pitch-serif))
+#       (mixed-pitch-mode (or arg 'toggle)))))
+# #+end_src
+
+# Now, as Harfbuzz is currently used in Emacs, we'll be missing out on the
+# following Alegreya ligatures:
+# #+begin_center
+# ff /ff/ ffi /ffi/ ffj /ffj/ ffl /ffl/
+# fft /fft/ fi /fi/ fj /fj/ ft /ft/
+# Th /Th/
+# #+end_center
+
+# Thankfully, it isn't to hard to add these to the ~composition-function-table~.
+# #+begin_src emacs-lisp
+# (set-char-table-range composition-function-table ?f '(["\\(?:ff?[fijlt]\\)" 0 font-shape-gstring]))
+# (set-char-table-range composition-function-table ?T '(["\\(?:Th\\)" 0 font-shape-gstring]))
+# #+end_src
+
+# **** Variable pitch serif font
+
+# #+call: confpkg()
+
+# It would be nice if we were able to make use of a serif version of the
+# =variable-pitch= face. Since this doesn't already exist, let's create it.
+
+# #+begin_src emacs-lisp
+# (defface variable-pitch-serif
+#     '((t (:family "serif")))
+#     "A variable-pitch face with serifs."
+#     :group 'basic-faces)
+# #+end_src
+
+# For ease of use, let's also set up an easy way of setting the ~:font~ attribute.
+
+# #+begin_src emacs-lisp
+# (defcustom variable-pitch-serif-font (font-spec :family "serif")
+#   "The font face used for `variable-pitch-serif'."
+#   :group 'basic-faces
+#   :set (lambda (symbol value)
+#          (set-face-attribute 'variable-pitch-serif nil :font value)
+#          (set-default-toplevel-value symbol value)))
+# #+end_src
+
+# *** Marginalia
+
+# #+call: confpkg("!Pkg Marginalia")
+
+# #+begin_quote
+# Part of the =:completion vertico= module.
+# #+end_quote
+
+# Marginalia is nice, but the file metadata annotations are a little too plain.
+# Specifically, I have these gripes
+# + File attributes would be nicer if coloured
+# + I don't care about the user/group information if the user/group is me
+# + When a file time is recent, a relative age (e.g. =2h ago=) is more useful than
+#   the date
+# + An indication of file fatness would be nice
+
+# Thanks to the ~marginalia-annotator-registry~, we don't have to advise, we can
+# just add a new =file= annotator.
+
+# Another small thing is the face used for docstrings. At the moment it's =(italic
+# shadow)=, but I don't like that.
+
+# #+begin_src emacs-lisp
+# (after! marginalia
+#   (setq marginalia-censor-variables nil)
+
+#   (defadvice! +marginalia--anotate-local-file-colorful (cand)
+#     "Just a more colourful version of `marginalia--anotate-local-file'."
+#     :override #'marginalia--annotate-local-file
+#     (when-let (attrs (file-attributes (substitute-in-file-name
+#                                        (marginalia--full-candidate cand))
+#                                       'integer))
+#       (marginalia--fields
+#        ((marginalia--file-owner attrs)
+#         :width 12 :face 'marginalia-file-owner)
+#        ((marginalia--file-modes attrs))
+#        ((+marginalia-file-size-colorful (file-attribute-size attrs))
+#         :width 7)
+#        ((+marginalia--time-colorful (file-attribute-modification-time attrs))
+#         :width 12))))
+
+#   (defun +marginalia--time-colorful (time)
+#     (let* ((seconds (float-time (time-subtract (current-time) time)))
+#            (color (doom-blend
+#                    (face-attribute 'marginalia-date :foreground nil t)
+#                    (face-attribute 'marginalia-documentation :foreground nil t)
+#                    (/ 1.0 (log (+ 3 (/ (+ 1 seconds) 345600.0)))))))
+#       ;; 1 - log(3 + 1/(days + 1)) % grey
+#       (propertize (marginalia--time time) 'face (list :foreground color))))
+
+#   (defun +marginalia-file-size-colorful (size)
+#     (let* ((size-index (/ (log10 (+ 1 size)) 7.0))
+#            (color (if (< size-index 10000000) ; 10m
+#                       (doom-blend 'orange 'green size-index)
+#                     (doom-blend 'red 'orange (- size-index 1)))))
+#       (propertize (file-size-human-readable size) 'face (list :foreground color)))))
+# #+end_src
+
+# *** Centaur Tabs
+
+# #+call: confpkg("!Pkg Centaur Tabs")
+
+# #+begin_quote
+# From the =:ui tabs= module.
+# #+end_quote
+
+# We want to make the tabs a nice, comfy size (~36~), with icons. The modifier
+# marker is nice, but the particular default Unicode one causes a lag spike, so
+# let's just switch to an ~o~, which still looks decent but doesn't cause any
+# issues.
+# An 'active-bar' is nice, so let's have one of those. If we have it ~under~ needs us to
+# turn on ~x-underline-at-decent~ though. For some reason this didn't seem to work
+# inside the src_elisp{(after! ... )} block ¯\_(ツ)_/¯.
+# Then let's change the font to a sans serif, but the default one doesn't fit too
+# well somehow, so let's switch to 'P22 Underground Book'; it looks much nicer.
+
+# #+begin_src emacs-lisp
+# (after! centaur-tabs
+#   (centaur-tabs-mode -1)
+#   (setq centaur-tabs-height 36
+#         centaur-tabs-set-icons t
+#         centaur-tabs-modified-marker "o"
+#         centaur-tabs-close-button "×"
+#         centaur-tabs-set-bar 'above
+#         centaur-tabs-gray-out-icons 'buffer)
+#   (centaur-tabs-change-fonts "P22 Underground Book" 160))
+# ;; (setq x-underline-at-descent-line t)
+# #+end_src
+
+# *** Nerd Icons
+
+# #+call: confpkg("!Pkg Nerd Icons")
+
+# #+begin_quote
+# From the =:core packages= module.
+# #+end_quote
+
+# =nerd-icons= does a generally great job giving file names icons. One minor
+# niggle I have is that when /I/ open a =.m= file, it's much more likely to be Matlab
+# than Objective-C. As such, it'll be switching the icon associated with =.m=.
+
+# #+begin_src emacs-lisp
+# (after! nerd-icons
+#   (setcdr (assoc "m" nerd-icons-extension-icon-alist)
+#           (cdr (assoc "matlab" nerd-icons-extension-icon-alist))))
+# #+end_src
+
+# *** Prettier page breaks
+
+# #+call: confpkg("!Pkg page break lines")
+
+# In some files, =^L= appears as a page break character. This isn't that visually
+# appealing, and Steve Purcell has been nice enough to make a package to display
+# these as horizontal rules.
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! page-break-lines :recipe (:host github :repo "purcell/page-break-lines")
+#   :pin "79eca86e0634ac68af862e15c8a236c37f446dcd")
+# #+end_src
+
+# #+begin_src emacs-lisp
+# (use-package! page-break-lines
+#   :commands page-break-lines-mode
+#   :init
+#   (autoload 'turn-on-page-break-lines-mode "page-break-lines")
+#   :config
+#   (setq page-break-lines-max-width fill-column)
+#   (map! :prefix "g"
+#         :desc "Prev page break" :nv "[" #'backward-page
+#         :desc "Next page break" :nv "]" #'forward-page))
+# #+end_src
+
+# *** Writeroom
+
+# #+call: confpkg("Writeroom")
+
+# #+begin_quote
+# From the =:ui zen= module.
+# #+end_quote
+
+# For starters, I think Doom is a bit over-zealous when zooming in
+# #+begin_src emacs-lisp
+# (setq +zen-text-scale 0.8)
+# #+end_src
+
+# Then, when using Org it would be nice to make a number of other aesthetic
+# tweaks. Namely:
+# + Use a serifed variable-pitch font
+# + Hiding headline leading stars
+# + Using fleurons as headline bullets
+# + Hiding line numbers
+# + Removing outline indentation
+# + Centring the text
+
+# #+begin_src emacs-lisp
+# (defvar +zen-serif-p t
+#   "Whether to use a serifed font with `mixed-pitch-mode'.")
+# (defvar +zen-org-starhide t
+#   "The value `org-modern-hide-stars' is set to.")
+
+# (after! writeroom-mode
+#   (defvar-local +zen--original-org-indent-mode-p nil)
+#   (defvar-local +zen--original-mixed-pitch-mode-p nil)
+#   (defun +zen-enable-mixed-pitch-mode-h ()
+#     "Enable `mixed-pitch-mode' when in `+zen-mixed-pitch-modes'."
+#     (when (apply #'derived-mode-p +zen-mixed-pitch-modes)
+#       (if writeroom-mode
+#           (progn
+#             (setq +zen--original-mixed-pitch-mode-p mixed-pitch-mode)
+#             (funcall (if +zen-serif-p #'mixed-pitch-serif-mode #'mixed-pitch-mode) 1))
+#         (funcall #'mixed-pitch-mode (if +zen--original-mixed-pitch-mode-p 1 -1)))))
+#   (defun +zen-prose-org-h ()
+#     "Reformat the current Org buffer appearance for prose."
+#     (when (eq major-mode 'org-mode)
+#       (setq display-line-numbers nil
+#             visual-fill-column-width 60
+#             org-adapt-indentation nil)
+#       (when (featurep 'org-modern)
+#         (setq-local org-modern-star '("🙘" "🙙" "🙚" "🙛")
+#                     ;; org-modern-star '("🙐" "🙑" "🙒" "🙓" "🙔" "🙕" "🙖" "🙗")
+#                     org-modern-hide-stars +zen-org-starhide)
+#         (org-modern-mode -1)
+#         (org-modern-mode 1))
+#       (setq
+#        +zen--original-org-indent-mode-p org-indent-mode)
+#       (org-indent-mode -1)))
+#   (defun +zen-nonprose-org-h ()
+#     "Reverse the effect of `+zen-prose-org'."
+#     (when (eq major-mode 'org-mode)
+#       (when (bound-and-true-p org-modern-mode)
+#         (org-modern-mode -1)
+#         (org-modern-mode 1))
+#       (when +zen--original-org-indent-mode-p (org-indent-mode 1))))
+#   (pushnew! writeroom--local-variables
+#             'display-line-numbers
+#             'visual-fill-column-width
+#             'org-adapt-indentation
+#             'org-modern-mode
+#             'org-modern-star
+#             'org-modern-hide-stars)
+#   (add-hook 'writeroom-mode-enable-hook #'+zen-prose-org-h)
+#   (add-hook 'writeroom-mode-disable-hook #'+zen-nonprose-org-h))
+# #+end_src
+
+# #+attr_html: :class invertible :alt Writeroom applied to an Org file
+# [[https://tecosaur.com/lfs/emacs-config/screenshots/writeroom-and-org.png]]
+
+# *** Treemacs
+
+# #+call: confpkg("!Pkg treemacs")
+
+# #+begin_quote
+# From the =:ui treemacs= module.
+# #+end_quote
+
+# Quite often there are superfluous files I'm not that interested in. There's no
+# good reason for them to take up space. Let's add a mechanism to ignore them.
+# #+begin_src emacs-lisp
+# (after! treemacs
+#   (defvar treemacs-file-ignore-extensions '()
+#     "File extension which `treemacs-ignore-filter' will ensure are ignored")
+#   (defvar treemacs-file-ignore-globs '()
+#     "Globs which will are transformed to `treemacs-file-ignore-regexps' which `treemacs-ignore-filter' will ensure are ignored")
+#   (defvar treemacs-file-ignore-regexps '()
+#     "RegExps to be tested to ignore files, generated from `treeemacs-file-ignore-globs'")
+#   (defun treemacs-file-ignore-generate-regexps ()
+#     "Generate `treemacs-file-ignore-regexps' from `treemacs-file-ignore-globs'"
+#     (setq treemacs-file-ignore-regexps (mapcar 'dired-glob-regexp treemacs-file-ignore-globs)))
+#   (if (equal treemacs-file-ignore-globs '()) nil (treemacs-file-ignore-generate-regexps))
+#   (defun treemacs-ignore-filter (file full-path)
+#     "Ignore files specified by `treemacs-file-ignore-extensions', and `treemacs-file-ignore-regexps'"
+#     (or (member (file-name-extension file) treemacs-file-ignore-extensions)
+#         (let ((ignore-file nil))
+#           (dolist (regexp treemacs-file-ignore-regexps ignore-file)
+#             (setq ignore-file (or ignore-file (if (string-match-p regexp full-path) t nil)))))))
+#   (add-to-list 'treemacs-ignored-file-predicates #'treemacs-ignore-filter))
+# #+end_src
+
+# Now, we just identify the files in question.
+# #+begin_src emacs-lisp
+# (setq treemacs-file-ignore-extensions
+#       '(;; LaTeX
+#         "aux"
+#         "ptc"
+#         "fdb_latexmk"
+#         "fls"
+#         "synctex.gz"
+#         "toc"
+#         ;; LaTeX - glossary
+#         "glg"
+#         "glo"
+#         "gls"
+#         "glsdefs"
+#         "ist"
+#         "acn"
+#         "acr"
+#         "alg"
+#         ;; LaTeX - pgfplots
+#         "mw"
+#         ;; LaTeX - pdfx
+#         "pdfa.xmpi"
+#         ))
+# (setq treemacs-file-ignore-globs
+#       '(;; LaTeX
+#         "*/_minted-*"
+#         ;; AucTeX
+#         "*/.auctex-auto"
+#         "*/_region_.log"
+#         "*/_region_.tex"))
+# #+end_src
+
+** File types
+*** Systemd
+
+#+call: confpkg("!Pkg Systemd")
+
+For editing systemd unit files
+#+begin_src emacs-lisp :tangle packages.el
+(package! systemd :pin "b6ae63a236605b1c5e1069f7d3afe06ae32a7bae")
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package! systemd
+  :defer t)
+#+end_src
 
 * Custom Workflow
 ** Type Break
