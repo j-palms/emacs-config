@@ -9754,9 +9754,11 @@ which is perfect for our needs.
 #+begin_src emacs-lisp
 (add-to-list 'magic-mode-alist (cons "\\`GIMP Palette\n" #'gimp-palette-mode))
 #+end_src
+
 * Custom Workflow
+
 ** General
-*** Dump
+#+call: confpkg("General Custom Settings")
 
 #+begin_src emacs-lisp
 (setq display-time-format "%H:%M")
@@ -9815,7 +9817,6 @@ which is perfect for our needs.
   (global-evil-surround-mode 1)) ;; globally enable evil-surround
 #+end_src
 
-
 *** Windows
 
 Hydra for changing split window size.
@@ -9823,27 +9824,25 @@ Hydra for changing split window size.
 #+begin_src emacs-lisp
 (defhydra doom-window-resize-hydra (:hint nil)
   "
-             _k_ increase height
-_h_ decrease width    _l_ increase width
-             _j_ decrease height
+             _u_ increase height
+_n_ decrease width    _i_ increase width
+             _e_ decrease height
 "
-  ("h" evil-window-decrease-width)
-  ("j" evil-window-increase-height)
-  ("k" evil-window-decrease-height)
-  ("l" evil-window-increase-width)
+  ("n" evil-window-decrease-width)
+  ("u" evil-window-increase-height)
+  ("e" evil-window-decrease-height)
+  ("i" evil-window-increase-width)
   ("q" nil))
 
 (map!
     (:leader
      :prefix "w"
-     :desc "Hydra resize" :n "#" #'doom-window-resize-hydra/body))
+     :desc "Hydra resize" :n "@" #'doom-window-resize-hydra/body))
 #+end_src
-
 
 ** Roam
 
-#+call: confpkg("!Pkg org-roam", after="org-roam")
-
+#+call: confpkg("!Pkg org-roam")
 
 #+begin_src emacs-lisp
 (use-package! org-roam
@@ -9945,7 +9944,6 @@ with it.
     (browse-url-xdg-open (format "http://localhost:%d" org-roam-ui-port))))
 #+end_src
 
-
 ** Type Break
 
 # #+call: confpkg("!Pkg type-break")
@@ -9997,7 +9995,7 @@ with it.
 
 ** Org pomodoro
 
-#+call: confpkg("!Pkg org-pomodoro", after="org")
+#+call: confpkg("!Pkg org-pomodoro")
 
 #+begin_src emacs-lisp
 (use-package! org-pomodoro
@@ -10037,15 +10035,7 @@ with it.
 
 ** org-noter
 
-#+call: confpkg("!Pkg org-noter", after="org")
-
-# Here I'm using my forked version of the package. There I merged the
-# org-roam-integration branch.
-
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! org-noter :recipe (:host github :repo "org-noter/org-noter"))
-# (unpin! org-noter)
-# #+end_src
+#+call: confpkg("!Pkg org-noter")
 
 #+begin_src emacs-lisp
 (use-package! org-noter
@@ -10072,12 +10062,14 @@ with it.
 ** activity watch mode
 
 #+call: confpkg("!Pkg activity-watch-mode")
+
 #+begin_src emacs-lisp :tangle packages.el
 (package! activity-watch-mode)
 #+end_src
 
 ** org-clock-convenience
-#+call: confpkg("!Pkg org-clock-convenience", after="org")
+
+#+call: confpkg("!Pkg org-clock-convenience")
 
 #+begin_src emacs-lisp :tangle packages.el
 (package! org-clock-convenience)
@@ -10095,18 +10087,21 @@ with it.
 #+end_src
 
 ** org-clock-today
-#+call: confpkg("!Pkg org-clock-today", after="org")
+
+#+call: confpkg("!Pkg org-clock-today")
 
 #+begin_src emacs-lisp :tangle packages.el
 (package! org-clock-today)
 #+end_src
 
 ** GTD
-#+call: confpkg("!Pkg org-gtd", after="org")
+
+#+call: confpkg("!Pkg org-gtd")
 
 #+begin_src emacs-lisp :tangle packages.el
 (package! org-gtd)
 #+end_src
+
 
 #+begin_src emacs-lisp
 (use-package! org-gtd
