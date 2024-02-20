@@ -1568,6 +1568,10 @@ vterm                        ; the best terminal emulation in Emacs
   +childframe
   +flymake)
 ;; (:if (executable-find "aspell") spell) ; tasing you for misspelling mispelling
+(spell
+  +flyspell
+  +hunspell
+  +everywhere)
 grammar                      ; tasing grammar mistake every you make
 #+end_src
 
@@ -2963,27 +2967,57 @@ let's improve that memory.
 (setq-default prescient-history-length 1000)
 #+end_src
 
-**** Plain Text
+**** Company-wordfreq
 
-~Ispell~ is nice, let's have it in ~text~, ~markdown~, and ~GFM~.
-#+begin_src emacs-lisp
-(set-company-backend!
-  '(text-mode
-    markdown-mode
-    gfm-mode)
-  '(:seperate
-    company-ispell
-    company-files
-    company-yasnippet))
+#+call: confpkg("!Pkg company-wordfreq")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! company-wordfreq)
 #+end_src
+
+# #+begin_src emacs-lisp
+# (add-hook 'text-mode-hook (lambda ()
+#                             (setq-local company-backends '(company-wordfreq))
+#                             (setq-local company-transformers nil)))
+# #+end_src
+
+
+#+begin_src emacs-lisp
+(defun set-company-backend-company-wordfreq ()
+  (setq-local company-backends '(company-wordfreq))
+  (setq-local company-transformers nil))
+#+end_src
+
+
+#+begin_src emacs-lisp
+(add-hook! 'text-mode-hook #'set-company-backend-company-wordfreq)
+(add-hook! 'org-mode-hook #'set-company-backend-company-wordfreq)
+#+end_src
+
+**** #Plain Text
+
+
+# ~Ispell~ is nice, let's have it in ~text~, ~markdown~, and ~GFM~.
+# #+begin_src emacs-lisp
+# (set-company-backend!
+#   '(text-mode
+#     markdown-mode
+#     gfm-mode)
+#   '(:seperate
+#     company-ispell
+#     company-files
+#     company-yasnippet))
+# #+end_src
+
+
 We then configure the dictionary we're using in [[*Ispell][Ispell]].
 
-**** ESS
+**** #ESS
 
-~company-dabbrev-code~ is nice. Let's have it.
-#+begin_src emacs-lisp
-(set-company-backend! 'ess-r-mode '(company-R-args company-R-objects company-dabbrev-code :separate))
-#+end_src
+# ~company-dabbrev-code~ is nice. Let's have it.
+# #+begin_src emacs-lisp
+# (set-company-backend! 'ess-r-mode '(company-R-args company-R-objects company-dabbrev-code :separate))
+# #+end_src
 
 *** Projectile
 
@@ -3026,37 +3060,53 @@ sudo chown root:root en-custom.*
 sudo mv en-custom.{aff,dic} /usr/share/myspell/
 #+end_src
 
-***** Aspell
+***** #Aspell
 
-#+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
-cd /tmp
-curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
-tar -xjf "aspell6-en-custom.tar.bz2"
+# #+begin_src shell :tangle (if (file-expand-wildcards "/usr/lib64/aspell*/en-custom.multi") "no" "setup.sh")
+# cd /tmp
+# curl -o "aspell6-en-custom.tar.bz2" 'http://app.aspell.net/create?max_size=80&spelling=GBs&spelling=AU&max_variant=0&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell'
+# tar -xjf "aspell6-en-custom.tar.bz2"
 
-cd aspell6-en-custom
-./configure && make && sudo make install
-#+end_src
+# cd aspell6-en-custom
+# ./configure && make && sudo make install
+# #+end_src
 
 **** Configuration
 
 #+call: confpkg("!Pkg Ispell")
 
+# #+begin_src emacs-lisp
+# (setq ispell-dictionary "en-custom")
+# #+end_src
+
 #+begin_src emacs-lisp
-(setq ispell-dictionary "en-custom")
+(after! ispell
+    ;; Configure `LANG`, otherwise ispell.el cannot find a 'default
+    ;; dictionary' even though multiple dictionaries will be configured
+    ;; in next line.
+    (setenv "LANG" "en_US.UTF-8")
+    ;; Configure German and English.
+    (setq ispell-dictionary "de_DE,en_US")
+    ;; ispell-set-spellchecker-params has to be called
+    ;; before ispell-hunspell-add-multi-dic will work
+    (ispell-set-spellchecker-params)
+    (ispell-hunspell-add-multi-dic "de_DE,en_US")
+    ;; For saving words to the personal dictionary, don't infer it from
+    ;; the locale, otherwise it would save to ~/.hunspell_de_DE.
+    (setq ispell-personal-dictionary
+      (expand-file-name "misc/ispell_personal" doom-private-dir))
+    ;; The personal dictionary file has to exist, otherwise hunspell will
+    ;; silently not use it.
+    (unless (file-exists-p ispell-personal-dictionary)
+      (write-region "" nil ispell-personal-dictionary nil 0)))
 #+end_src
+
 
 Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
 ~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
 ~ispell-alternate-dictionary~, which at the moment maps to a plaintext version of
 the above.
 
-It seems reasonable to want to keep an eye on my personal dict, let's have it
-nearby (also means that if I change the 'main' dictionary I keep my addition).
-
-#+begin_src emacs-lisp
-(setq ispell-personal-dictionary
-      (expand-file-name "misc/ispell_personal" doom-private-dir))
-#+end_src
 
 *** TRAMP
 
