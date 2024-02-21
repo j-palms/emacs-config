@@ -10175,19 +10175,19 @@ with it.
         :desc "Organize this item" "C-c c" #'org-gtd-organize))
 #+end_src
 
-** Flycheck
+# ** Flycheck
 
-#+call: confpkg("!Pkg flycheck")
+# #+call: confpkg("!Pkg flycheck")
 
-#+begin_src emacs-lisp :tangle packages.el
-(package! flycheck-golangci-lint :recipe (:host github :repo "weijiangan/flycheck-golangci-lint"))
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el
+# (package! flycheck-golangci-lint :recipe (:host github :repo "weijiangan/flycheck-golangci-lint"))
+# #+end_src
 
-#+begin_src emacs-lisp
-(use-package! flycheck-golangci-lint
-  :ensure t
-  :hook (go-mode . flycheck-golangci-lint-setup))
-#+end_src
+# #+begin_src emacs-lisp
+# (use-package! flycheck-golangci-lint
+#   :ensure t
+#   :hook (go-mode . flycheck-golangci-lint-setup))
+# #+end_src
 
 ** Lsp-mode
 
