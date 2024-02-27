@@ -5302,14 +5302,14 @@ correct package statement needed.
     (buffer-string)))
 #+end_src
 
-#+begin_src emacs-lisp :tangle packages.el :noweb no-export
-<<org-pkg-statement()>>
-(unpin! org) ; there be bugs
-(package! org-contrib
-  :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
-           :files ("lisp/*.el"))
-  :pin "6422b265f1150204f024e33d54f2dcfd8323005c")
-#+end_src
+# #+begin_src emacs-lisp :tangle packages.el :noweb no-export
+# <<org-pkg-statement()>>
+# (unpin! org) ; there be bugs
+# (package! org-contrib
+#   :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
+#            :files ("lisp/*.el"))
+#   :pin "6422b265f1150204f024e33d54f2dcfd8323005c")
+# #+end_src
 
 **** Visuals
 ***** Org Modern
@@ -6856,9 +6856,9 @@ and out of the LaTeX fragments.
 
 Thankfully, all we need to do to make this happen is use ~org-latex-preview-auto-mode~.
 
-#+begin_src emacs-lisp
-(add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
-#+end_src
+# #+begin_src emacs-lisp
+# (add-hook 'org-mode-hook #'org-latex-preview-auto-mode)
+# #+end_src
 
 ***** Prettier rendering
 
