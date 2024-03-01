@@ -1518,8 +1518,8 @@ ophints                      ; highlight the region an operation acts on
 (popup                       ; tame sudden yet inevitable temporary windows
  +all                        ; catch all popups that start with an asterix
  +defaults)                  ; default popup rules
-(tabs                      ; an tab bar for Emacs
- +centaur-tabs)           ; ... with prettier tabs
+;; (tabs                      ; an tab bar for Emacs
+;;  +centaur-tabs)           ; ... with prettier tabs
 (treemacs +lsp)                    ; a project drawer, like neotree but cooler
 ;;unicode                    ; extended unicode support for various languages
 (vc-gutter +pretty)          ; vcs diff in the fringe
@@ -3588,37 +3588,6 @@ shadow)=, but I don't like that.
                       (doom-blend 'orange 'green size-index)
                     (doom-blend 'red 'orange (- size-index 1)))))
       (propertize (file-size-human-readable size) 'face (list :foreground color)))))
-#+end_src
-
-*** Centaur Tabs
-
-#+call: confpkg("!Pkg Centaur Tabs")
-
-#+begin_quote
-From the =:ui tabs= module.
-#+end_quote
-
-We want to make the tabs a nice, comfy size (~36~), with icons. The modifier
-marker is nice, but the particular default Unicode one causes a lag spike, so
-let's just switch to an ~o~, which still looks decent but doesn't cause any
-issues.
-An 'active-bar' is nice, so let's have one of those. If we have it ~under~ needs us to
-turn on ~x-underline-at-decent~ though. For some reason this didn't seem to work
-inside the src_elisp{(after! ... )} block ¯\_(ツ)_/¯.
-Then let's change the font to a sans serif, but the default one doesn't fit too
-well somehow, so let's switch to 'P22 Underground Book'; it looks much nicer.
-
-#+begin_src emacs-lisp
-(after! centaur-tabs
-  (centaur-tabs-mode -1)
-  (setq centaur-tabs-height 36
-        centaur-tabs-set-icons t
-        centaur-tabs-modified-marker "o"
-        centaur-tabs-close-button "×"
-        centaur-tabs-set-bar 'above
-        centaur-tabs-gray-out-icons 'buffer)
-  (centaur-tabs-change-fonts "P22 Underground Book" 160))
-;; (setq x-underline-at-descent-line t)
 #+end_src
 
 *** Prettier page breaks
