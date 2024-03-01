@@ -3284,7 +3284,7 @@ From the =:core packages= module.
  :actions '(insert))
 #+end_src
 
-** #Visuals
+** Visuals
 # *** Info colours
 
 # #+call: confpkg("!Pkg Info colors")
@@ -3397,290 +3397,53 @@ From the =:core packages= module.
 #   (setq simple-comment-markup-set '(org markdown-code)))
 # #+end_src
 
-# *** Doom modeline
+*** Doom modeline
 
-# #+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
+#+call: confpkg("!Pkg Doom modeline", after="doom-modeline")
 
-# #+begin_quote
-# From the =:ui modeline= module.
-# #+end_quote
+#+begin_quote
+From the =:ui modeline= module.
+#+end_quote
 
-# **** Modified buffer colour
+**** Modified buffer colour
 
-# The modeline is very nice and pretty, however I have a few niggles with the
-# defaults. For starters, by default ~red~ text is used to indicate an unsaved file.
-# This makes me feel like something's gone /wrong/, so let's tone that down to
-# orange.
+The modeline is very nice and pretty, however I have a few niggles with the
+defaults. For starters, by default ~red~ text is used to indicate an unsaved file.
+This makes me feel like something's gone /wrong/, so let's tone that down to
+orange.
 
-# #+begin_src emacs-lisp
-# (custom-set-faces!
-#   '(doom-modeline-buffer-modified :foreground "orange"))
-# #+end_src
+#+begin_src emacs-lisp
+(custom-set-faces!
+  '(doom-modeline-buffer-modified :foreground "orange"))
+#+end_src
 
-# **** Height
+**** Height
 
-# The default size (=25=) makes for a rather narrow mode line. To me, the modeline
-# feels a bit comfier if we give it a bit more space. I find =45= adds roughly a
-# third of the line height as padding above and below.
+The default size (=25=) makes for a rather narrow mode line. To me, the modeline
+feels a bit comfier if we give it a bit more space. I find =45= adds roughly a
+third of the line height as padding above and below.
 
-# #+begin_src emacs-lisp
-# (setq doom-modeline-height 45)
-# #+end_src
+#+begin_src emacs-lisp
+(setq doom-modeline-height 45)
+#+end_src
 
-# **** File encoding
+**** File encoding
 
-# While we're modifying the modeline, when we have the default file encoding (=LF
-# UTF-8=), it really isn't worth noting in the modeline. So, why not conditionally
-# hide it?
+While we're modifying the modeline, when we have the default file encoding (=LF
+UTF-8=), it really isn't worth noting in the modeline. So, why not conditionally
+hide it?
 
-# #+begin_src emacs-lisp
-# (defun doom-modeline-conditional-buffer-encoding ()
-#   "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
-#   (setq-local doom-modeline-buffer-encoding
-#               (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
-#                                  '(coding-category-undecided coding-category-utf-8))
-#                            (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
-#                 t)))
+#+begin_src emacs-lisp
+(defun doom-modeline-conditional-buffer-encoding ()
+  "We expect the encoding to be LF UTF-8, so only show the modeline when this is not the case"
+  (setq-local doom-modeline-buffer-encoding
+              (unless (and (memq (plist-get (coding-system-plist buffer-file-coding-system) :category)
+                                 '(coding-category-undecided coding-category-utf-8))
+                           (not (memq (coding-system-eol-type buffer-file-coding-system) '(1 2))))
+                t)))
 
-# (add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
-# #+end_src
-
-# **** Time
-
-# Moving onto the modeline segments, there's a calendar icon showed next to the
-# current time, which I'm not a fan of. Let's replace that by redefining the
-# segment. Instead of the calendar, it would be much nicer to have an updating
-# analog clock, so let's use that idea as an excuse to try out the Emacs svg library.
-
-# First, we'll need a way to produce svg clocks on-demand.
-
-# #+begin_src emacs-lisp
-# (defvar micro-clock-hour-hand-ratio 0.45
-#   "Length of the hour hand as a proportion of the radius.")
-# (defvar micro-clock-minute-hand-ratio 0.7
-#   "Length of the minute hand as a proportion of the radius.")
-
-# (defun micro-clock-svg (hour minute radius color)
-#   "Construct an SVG clock showing the time HOUR:MINUTE.
-# The clock will be of the specified RADIUS and COLOR."
-#   (let ((hour-x (* radius (sin (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-#                    micro-clock-hour-hand-ratio))
-#         (hour-y (* radius (cos (* (- 6 hour (/ minute 60.0)) (/ float-pi 6)))
-#                    micro-clock-hour-hand-ratio))
-#         (minute-x (* radius (sin (* (- 30 minute) (/ float-pi 30)))
-#                      micro-clock-minute-hand-ratio))
-#         (minute-y (* radius (cos (* (- 30 minute) (/ float-pi 30)))
-#                      micro-clock-minute-hand-ratio))
-#         (svg (svg-create (* 2 radius) (* 2 radius) :stroke color)))
-#     (svg-circle svg radius radius (1- radius) :fill "none" :stroke-width 2)
-#     (svg-circle svg radius radius 1 :fill color :stroke "none")
-#     (svg-line svg radius radius (+ radius hour-x) (+ radius hour-y)
-#               :stroke-width 2)
-#     (svg-line svg radius radius (+ radius minute-x) (+ radius minute-y)
-#               :stroke-width 1.5)
-#     svg))
-# #+end_src
-
-# With that out the way, we need to figure out how to integrate this into the
-# modeline. For the most part this was fairly easy, the tricky part was getting
-# the alignment right. I tried using the =(raise FACTOR)= display property, but that
-# doesn't appear to combine with images. Looking at the documentation on [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Image-Descriptors.html][image
-# descriptors]] though, I came across the =:ascent= property, which looked rather
-# promising. By setting =:ascent center= the image is centred relative to the text,
-# which is exactly what we need. With that sorted, we just add some caching and
-# the obvious customisations and we've got modeline-appropriate clock generation!
-
-# #+begin_src emacs-lisp
-# (require 'svg)
-
-# (defvar +doom-modeline-micro-clock-minute-resolution 1
-#   "The clock will be updated every this many minutes, truncating.")
-# (defvar +doom-modeline-micro-clock-inverse-size 4.8
-#   "The size of the clock, as an inverse proportion to the mode line height.")
-
-# (defvar +doom-modeline-micro-clock--cache nil)
-
-# (defvar +doom-modeline-clock-text-format "%c")
-
-# (defun +doom-modeline--clock-text (&optional _window _object _pos)
-#   (format-time-string +doom-modeline-clock-text-format))
-
-# (defun +doom-modeline-micro-clock ()
-#   "Return a string containing an current analogue clock."
-#   (cdr
-#    (if (equal (truncate (float-time)
-#                         (* +doom-modeline-micro-clock-minute-resolution 60))
-#               (car +doom-modeline-micro-clock--cache))
-#        +doom-modeline-micro-clock--cache
-#      (setq +doom-modeline-micro-clock--cache
-#            (cons (truncate (float-time)
-#                            (* +doom-modeline-micro-clock-minute-resolution 60))
-#                  (with-temp-buffer
-#                    (svg-insert-image
-#                     (micro-clock-svg
-#                      (string-to-number (format-time-string "%-I")) ; hour
-#                      (* (truncate (string-to-number (format-time-string "%-M"))
-#                                   +doom-modeline-micro-clock-minute-resolution)
-#                         +doom-modeline-micro-clock-minute-resolution) ; minute
-#                      (/ doom-modeline-height +doom-modeline-micro-clock-inverse-size) ; radius
-#                      "currentColor"))
-#                    (propertize
-#                     " "
-#                     'display
-#                     (append (get-text-property 0 'display (buffer-string))
-#                             '(:ascent center))
-#                     'face 'doom-modeline-time
-#                     'help-echo #'+doom-modeline--clock-text)))))))
-# #+end_src
-
-# With clock generation sorted out, all that's to be done is replacing the =time=
-# modeline segment with our design.
-
-# #+begin_src emacs-lisp
-# (doom-modeline-def-segment time
-#   (when (and doom-modeline-time
-#              (bound-and-true-p display-time-mode)
-#              (not doom-modeline--limited-width-p))
-#     (concat
-#      doom-modeline-spc
-#      (when doom-modeline-time-icon
-#        (concat
-#         (+doom-modeline-micro-clock)
-#         (and (or doom-modeline-icon doom-modeline-unicode-fallback)
-#              doom-modeline-spc)))
-#      (propertize display-time-string
-#                  'face (doom-modeline-face 'doom-modeline-time)))))
-# #+end_src
-
-# **** PDF modeline
-
-# I think the PDF modeline could do with tweaking. I raised [[https://github.com/seagle0128/doom-modeline/pull/425][an issue]] on this,
-# however the response was basically "put your preferences in your personal
-# config, the current default is sensible" --- so here we are.
-
-# First up I'm going to want a segment for just the buffer file name, and a PDF
-# icon. Then we'll redefine two functions used to generate the modeline.
-
-# #+begin_src emacs-lisp
-# (doom-modeline-def-segment buffer-name
-#   "Display the current buffer's name, without any other information."
-#   (concat
-#    doom-modeline-spc
-#    (doom-modeline--buffer-name)))
-
-# (doom-modeline-def-segment pdf-icon
-#   "PDF icon from nerd-icons."
-#   (concat
-#    doom-modeline-spc
-#    (doom-modeline-icon sucicon "nf-seti-pdf" nil nil
-#                        :face (if (doom-modeline--active)
-#                                  'nerd-icons-red
-#                                'mode-line-inactive)
-#                        :v-adjust 0.02)))
-
-# (defun doom-modeline-update-pdf-pages ()
-#   "Update PDF pages."
-#   (setq doom-modeline--pdf-pages
-#         (let ((current-page-str (number-to-string (eval `(pdf-view-current-page))))
-#               (total-page-str (number-to-string (pdf-cache-number-of-pages))))
-#           (concat
-#            (propertize
-#             (concat (make-string (- (length total-page-str) (length current-page-str)) ? )
-#                     " P" current-page-str)
-#             'face 'mode-line)
-#            (propertize (concat "/" total-page-str) 'face 'doom-modeline-buffer-minor-mode)))))
-
-# (doom-modeline-def-segment pdf-pages
-#   "Display PDF pages."
-#   (if (doom-modeline--active) doom-modeline--pdf-pages
-#     (propertize doom-modeline--pdf-pages 'face 'mode-line-inactive)))
-
-# (doom-modeline-def-modeline 'pdf
-#   '(bar window-number pdf-pages pdf-icon buffer-name)
-#   '(misc-info matches major-mode process vcs))
-# #+end_src
-
-# *** Keycast
-
-# #+call: confpkg("!Pkg Keycast")
-
-# For some reason, I find myself demoing Emacs every now and then. Showing what
-# keyboard stuff I'm doing on-screen seems helpful. While [[https://gitlab.com/screenkey/screenkey][screenkey]] does exist,
-# having something that doesn't cover up screen content is nice.
-
-# #+attr_html: :class invertible :alt Screenshot of Keycast-mode in action
-# [[https://tecosaur.com/lfs/emacs-config/screenshots/keycast.png]]
-
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! keycast :pin "72d9add8ba16e0cae8cfcff7fc050fa75e493b4e")
-# #+end_src
-
-# Let's just make sure this is lazy-loaded appropriately.
-# #+begin_src emacs-lisp
-# (use-package! keycast
-#   :commands keycast-mode
-#   :config
-#   (define-minor-mode keycast-mode
-#     "Show current command and its key binding in the mode line."
-#     :global t
-#     (if keycast-mode
-#         (progn
-#           (add-hook 'pre-command-hook 'keycast--update t)
-#           (add-to-list 'global-mode-string '("" mode-line-keycast " ")))
-#       (remove-hook 'pre-command-hook 'keycast--update)
-#       (setq global-mode-string (remove '("" mode-line-keycast " ") global-mode-string))))
-#   (custom-set-faces!
-#     '(keycast-command :inherit doom-modeline-debug
-#                       :height 0.9)
-#     '(keycast-key :inherit custom-modified
-#                   :height 1.1
-#                   :weight bold)))
-# #+end_src
-
-# *** Screencast
-
-# #+call: confpkg("!Pkg Screencast")
-
-# In a similar manner to [[Keycast]], [[https://gitlab.com/ambrevar/emacs-gif-screencast][gif-screencast]] may come in handy.
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! gif-screencast :pin "adec408e6adab2e8e057fe0ad828749f473bfb83")
-# #+end_src
-
-# We can lazy load this using the start/stop commands.
-
-# I initially installed ~scrot~ for this, since it was the default capture program.
-# However it raised ~glib error: Saving to file ... failed~ each time it was run.
-# Google didn't reveal any easy fixed, so I switched to [[https://github.com/naelstrof/maim][maim]]. We now need to pass
-# it the window ID. This doesn't change throughout the lifetime of an emacs
-# instance, so as long as a single window is used ~xdotool getactivewindow~ will
-# give a satisfactory result.
-
-# It seems that when new colours appear, that tends to make ~gifsicle~ introduce
-# artefacts. To avoid this we pre-populate the colour map using the current doom
-# theme.
-# #+begin_src emacs-lisp
-# (use-package! gif-screencast
-#   :commands gif-screencast-mode
-#   :config
-#   (map! :map gif-screencast-mode-map
-#         :g "<f8>" #'gif-screencast-toggle-pause
-#         :g "<f9>" #'gif-screencast-stop)
-#   (setq gif-screencast-program "maim"
-#         gif-screencast-args `("--quality" "3" "-i" ,(string-trim-right
-#                                                      (shell-command-to-string
-#                                                       "xdotool getactivewindow")))
-#         gif-screencast-optimize-args '("--batch" "--optimize=3" "--usecolormap=/tmp/doom-color-theme"))
-#   (defun gif-screencast-write-colormap ()
-#     (f-write-text
-#      (replace-regexp-in-string
-#       "\n+" "\n"
-#       (mapconcat (lambda (c) (if (listp (cdr c))
-#                                  (cadr c))) doom-themes--colors "\n"))
-#      'utf-8
-#      "/tmp/doom-color-theme" ))
-#   (gif-screencast-write-colormap)
-#   (add-hook 'doom-load-theme-hook #'gif-screencast-write-colormap))
-# #+end_src
+(add-hook 'after-change-major-mode-hook #'doom-modeline-conditional-buffer-encoding)
+#+end_src
 
 *** Mixed pitch
 
