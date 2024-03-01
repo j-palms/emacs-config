@@ -9331,7 +9331,8 @@ current Emacs theme, I was enraptured. The result is the pseudo-class ~chameleon
 which I have implemented in the package =ox-chameleon=.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! ox-chameleon :recipe (:local-repo "lisp/ox-chameleon"))
+(package! ox-chameleon :recipe (:repo "https://code.tecosaur.net/tec/ox-chameleon.git" :branch "elken/master"))
+;; (package! ox-chameleon :recipe (:local-repo "lisp/ox-chameleon"))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -10871,7 +10872,6 @@ with it.
 #+begin_src emacs-lisp :tangle packages.el
 (package! org-gtd)
 #+end_src
-
 
 #+begin_src emacs-lisp
 (use-package! org-gtd
