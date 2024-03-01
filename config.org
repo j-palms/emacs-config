@@ -3858,23 +3858,8 @@ well somehow, so let's switch to 'P22 Underground Book'; it looks much nicer.
 ;; (setq x-underline-at-descent-line t)
 #+end_src
 
-# *** Nerd Icons
 
-# #+call: confpkg("!Pkg Nerd Icons")
 
-# #+begin_quote
-# From the =:core packages= module.
-# #+end_quote
-
-# =nerd-icons= does a generally great job giving file names icons. One minor
-# niggle I have is that when /I/ open a =.m= file, it's much more likely to be Matlab
-# than Objective-C. As such, it'll be switching the icon associated with =.m=.
-
-# #+begin_src emacs-lisp
-# (after! nerd-icons
-#   (setcdr (assoc "m" nerd-icons-extension-icon-alist)
-#           (cdr (assoc "matlab" nerd-icons-extension-icon-alist))))
-# #+end_src
 
 # # *** Prettier page breaks
 
