@@ -5038,14 +5038,15 @@ Fontifying =org-mode= buffers to be as pretty as possible is of paramount import
 and Minad's lovely =org-modern= goes a long way in this regard.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
+(package! org-modern)
+;;(package! org-modern :pin "7d037569bc4a05f40262ea110c4cda05c69b5c52")
 #+end_src
 
 ...with a touch of configuration...
 
 #+begin_src emacs-lisp
 (use-package! org-modern
-  :hook (org-mode . org-modern-mode)
+  :hook (org-mode . global-org-modern-mode)
   :config
   (setq org-modern-star '("◉" "○" "✸" "✿" "✤" "✜" "◆" "▶")
         org-modern-table-vertical 1
@@ -5055,23 +5056,20 @@ and Minad's lovely =org-modern= goes a long way in this regard.
                           (42 . "•"))
         org-modern-todo-faces
         '(("TODO" :inverse-video t :inherit org-todo)
-          ("PROJ" :inverse-video t :inherit +org-todo-project)
-          ("STRT" :inverse-video t :inherit +org-todo-active)
-          ("[-]"  :inverse-video t :inherit +org-todo-active)
+          ("NEXT" :inverse-video t :inherit +org-todo-active)
           ("HOLD" :inverse-video t :inherit +org-todo-onhold)
           ("WAIT" :inverse-video t :inherit +org-todo-onhold)
-          ("[?]"  :inverse-video t :inherit +org-todo-onhold)
-          ("KILL" :inverse-video t :inherit +org-todo-cancel)
-          ("NO"   :inverse-video t :inherit +org-todo-cancel))
-        org-modern-footnote
-        (cons nil (cadr org-script-display))
-        org-modern-block-fringe nil
-        org-modern-block-name
-        '((t . t)
-          ("src" "»" "«")
-          ("example" "»–" "–«")
-          ("quote" "❝" "❞")
-          ("export" "⏩" "⏪"))
+          ("CNCL" :inverse-video t :inherit +org-todo-cancel))
+        ;; DEPRECATED in up to date version
+        ;; org-modern-footnote
+        ;; (cons nil (cadr org-script-display))
+        ;; org-modern-block-fringe nil
+        ;; org-modern-block-name
+        ;; '((t . t)
+        ;;   ("src" "»" "«")
+        ;;   ("example" "»–" "–«")
+        ;;   ("quote" "❝" "❞")
+        ;;   ("export" "⏩" "⏪"))
         org-modern-progress nil
         org-modern-priority nil
         org-modern-horizontal-rule (make-string 36 ?─)
@@ -5113,8 +5111,8 @@ and Minad's lovely =org-modern= goes a long way in this regard.
           ("name" . "⁍")
           ("header" . "›")
           ("caption" . "☰")
-          ("results" . "🠶")))
-  (custom-set-faces! '(org-modern-statistics :inherit org-checkbox-statistics-todo)))
+          ("results" . "🠶"))))
+  ;;(custom-set-faces! '(org-modern-statistics :inherit org-checkbox-statistics-todo)))
 #+end_src
 
 Since =org-modern='s tag face supplants Org's tag face, we need to adjust the
@@ -5398,6 +5396,12 @@ default.
         (:comments . "link")))
 #+end_src
 
+#+begin_src emacs-lisp
+  (setq org-todo-keywords '
+    ((sequence "TODO(t)" "NEXT(n)" "WAIT(w@/!)" "HOLD(h)"
+               "|"
+               "DONE(d/!)" "CNCL(c@/!)")))
+#+end_src
 By default, ~visual-line-mode~ is turned =on=, and ~auto-fill-mode~ =off= by a hook.
 However this messes with tables in Org-mode, and other plaintext files (e.g.
 markdown, \LaTeX) so I'll turn it off for this, and manually enable it for more
