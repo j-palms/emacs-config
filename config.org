@@ -4964,69 +4964,12 @@ Then adding a regex for it to =~/.config/git/config=
 *** Packages
 **** Org itself
 
-There are actually three possible package statements I may want to use for Org.
-
-If I'm on a machine where I can push changes, I want to be able to develop Org.
-I can check this by checking the content of the SSH key =~/.ssh/id_ed25519.pub=.
-1. If this key exists and there isn't a repo at
-   =$doom-user-dir/lisp/org= with the right remote, we should
-   install it as such.
-2. If the key exists and repo are both set up, the package should just be ignored.
-3. If the key does not exist, the Org's ~HEAD~ should just be used
-
-To account for this situation properly, we need a short script to determine the
-correct package statement needed.
-
-#+name: org-pkg-statement
-#+begin_src emacs-lisp :noweb-ref none
-(or (require 'doom (expand-file-name "lisp/doom.el"
-                                     (or (bound-and-true-p doom-emacs-dir)
-                                         user-emacs-directory)))
-    (setq doom-local-dir
-          (expand-file-name ".local/" (or (bound-and-true-p doom-emacs-dir)
-                                          user-emacs-directory))))
-(let ((dev-key-p (and (file-exists-p "~/.ssh/id_ed25519.pub")
-                      (= 0 (shell-command "cat ~/.ssh/id_ed25519.pub | grep -q AAAAC3NzaC1lZDI1NTE5AAAAIOZZqcJOLdN+QFHKyW8ST2zz750+8TdvO9IT5geXpQVt"))))
-      (recipe-common '(:files (:defaults "etc")
-                       :build t
-                       :pre-build
-                       (with-temp-file "org-version.el"
-                         (require 'lisp-mnt)
-                         (let ((version ;; (lm-version "lisp/org.el")
-                                (with-temp-buffer
-                                  (insert-file-contents "lisp/org.el")
-                                  (lm-header "version")))
-                               (git-version (string-trim
-                                             (with-temp-buffer
-                                               (call-process "git" nil t nil
-                                                             "rev-parse" "--short" "HEAD")
-                                               (buffer-string)))))
-                           (insert (format "(defun org-release () \"The release version of Org.\" %S)\n"
-                                           version)
-                                   (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n"
-                                           git-version)
-                                   "(provide 'org-version)\n"))))))
-  (with-temp-buffer
-    (insert
-     (pp `(package! org
-            :recipe (,@(if dev-key-p
-                           (list :host nil :repo "tec@git.savannah.gnu.org:/srv/git/emacs/org-mode.git" :local-repo "lisp/org"
-                                 :fork (list :host nil :repo "gitea@git.tecosaur.net:tec/org-mode.git" :branch "dev" :remote "tecosaur"))
-                         (list :host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror"
-                               :fork (list :host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")))
-                     ,@recipe-common)
-            :pin nil)))
-    (untabify (point-min) (point-max))
-    (buffer-string)))
-#+end_src
+Here im using TEC's  ~org-latex-preview-auto-mode~ development branch.
+But since recently this breaks ~org-capture~. So I deactivate it for now..
 
 # #+begin_src emacs-lisp :tangle packages.el :noweb no-export
-# <<org-pkg-statement()>>
+# (package! org :recipe (:host nil :repo "https://code.tecosaur.net/tec/org-mode.git" :branch "dev"))
 # (unpin! org) ; there be bugs
-# (package! org-contrib
-#   :recipe (:host nil :repo "https://git.sr.ht/~bzg/org-contrib"
-#            :files ("lisp/*.el"))
-#   :pin "6422b265f1150204f024e33d54f2dcfd8323005c")
 # #+end_src
 
 **** Visuals
@@ -5055,11 +4998,12 @@ and Minad's lovely =org-modern= goes a long way in this regard.
                           (45 . "–")
                           (42 . "•"))
         org-modern-todo-faces
-        '(("TODO" :inverse-video t :inherit org-todo)
-          ("NEXT" :inverse-video t :inherit +org-todo-active)
-          ("HOLD" :inverse-video t :inherit +org-todo-onhold)
-          ("WAIT" :inverse-video t :inherit +org-todo-onhold)
-          ("CNCL" :inverse-video t :inherit +org-todo-cancel))
+        '(("TODO" :inverse-video nil :inherit org-todo)
+          ("NEXT" :inverse-video nil :inherit +org-todo-active)
+          ("HOLD" :inverse-video nil :inherit +org-todo-onhold)
+          ("WAIT" :inverse-video nil :inherit +org-todo-onhold)
+          ("CNCL" :inverse-video nil :inherit +org-todo-cancel)
+          ("DONE" :inverse-video nil :inherit +org-todo-done))
         ;; DEPRECATED in up to date version
         ;; org-modern-footnote
         ;; (cons nil (cadr org-script-display))
@@ -9196,51 +9140,51 @@ Now, there are some symbols that aren't included in =inputenc=, but we should be
 able to handle anyway. For them we define a table of LaTeX translations
 
 #+name: latex-non-ascii-char-substitutions
-| Character | LaTeX  |
-|-----------+--------|
-| ɑ         | \(\alpha\)  |
-| β         | \(\beta\)  |
-| γ         | \(\gamma\)  |
-| δ         | \(\delta\)  |
-| ε         | \(\epsilon\)  |
-| ϵ         | \(\varepsilon\)  |
-| ζ         | \(\zeta\)  |
-| η         | \(\eta\)  |
-| θ         | \(\theta\)  |
-| ϑ         | \(\vartheta\)  |
-| ι         | \(\iota\)  |
-| κ         | \(\kappa\)  |
-| λ         | \(\lambda\)  |
-| μ         | \(\mu\)  |
-| ν         | \(\nu\)  |
-| ξ         | \(\xi\)  |
-| π         | \(\pi\)  |
-| ϖ         | \(\varpi\)  |
-| ρ         | \(\rho\)  |
-| ϱ         | \(\varrho\)  |
-| σ         | \(\sigma\)  |
-| ς         | \(\varsigma\)  |
-| τ         | \(\tau\)  |
-| υ         | \(\upsilon\)  |
-| ϕ         | \(\phi\) |
-| φ         | \(\varphi\)  |
-| ψ         | \(\psi\)  |
-| ω         | \(\omega\)  |
-| Γ         | \(\Gamma\)  |
-| Δ         | \(\Delta\)  |
-| Θ         | \(\Theta\)  |
-| Λ         | \(\Lambda\)  |
-| Ξ         | \(\Xi\)  |
-| Π         | \(\Pi\)  |
-| Σ         | \(\Sigma\)  |
-| Υ         | \(\Upsilon\)  |
-| Φ         | \(\Phi\)  |
-| Ψ         | \(\Psi\)  |
-| Ω         | \(\Omega\)  |
-| א        | \(\aleph\)  |
-| ב         | \(\beth\)  |
-| ד         | \(\daleth\)  |
-| ג         | \(\gimel\)  |
+| Character | LaTeX       |
+|-----------+-------------|
+| ɑ         | \(\alpha\)       |
+| β         | \(\beta\)       |
+| γ         | \(\gamma\)       |
+| δ         | \(\delta\)       |
+| ε         | \(\epsilon\)       |
+| ϵ         | \(\varepsilon\)       |
+| ζ         | \(\zeta\)       |
+| η         | \(\eta\)       |
+| θ         | \(\theta\)       |
+| ϑ         | \(\vartheta\)       |
+| ι         | \(\iota\)       |
+| κ         | \(\kappa\)       |
+| λ         | \(\lambda\)       |
+| μ         | \(\mu\)       |
+| ν         | \(\nu\)       |
+| ξ         | \(\xi\)       |
+| π         | \(\pi\)       |
+| ϖ         | \(\varpi\)       |
+| ρ         | \(\rho\)       |
+| ϱ         | \(\varrho\) |
+| σ         | \(\sigma\)       |
+| ς         | \(\varsigma\)       |
+| τ         | \(\tau\)       |
+| υ         | \(\upsilon\)       |
+| ϕ         | \(\phi\)      |
+| φ         | \(\varphi\)       |
+| ψ         | \(\psi\)       |
+| ω         | \(\omega\)       |
+| Γ         | \(\Gamma\)       |
+| Δ         | \(\Delta\)       |
+| Θ         | \(\Theta\)       |
+| Λ         | \(\Lambda\)       |
+| Ξ         | \(\Xi\)       |
+| Π         | \(\Pi\)       |
+| Σ         | \(\Sigma\)       |
+| Υ         | \(\Upsilon\)       |
+| Φ         | \(\Phi\)       |
+| Ψ         | \(\Psi\)       |
+| Ω         | \(\Omega\)       |
+| א        | \(\aleph\)       |
+| ב         | \(\beth\)       |
+| ד         | \(\daleth\) |
+| ג         | \(\gimel\)       |
 
 #+name: gen-latex-non-ascii-char-substitutions
 #+begin_src emacs-lisp :noweb-ref none :var latex-non-ascii-char-substitutions=latex-non-ascii-char-substitutions
@@ -10869,81 +10813,81 @@ with it.
 (package! org-clock-today)
 #+end_src
 
-** GTD
+# ** GTD
 
-#+call: confpkg("!Pkg org-gtd")
-
-#+begin_src emacs-lisp :tangle packages.el
-(package! org-gtd)
-#+end_src
-
-#+begin_src emacs-lisp
-(use-package! org-gtd
-  :after org
-  :init
-  (setq org-gtd-update-ack "3.0.0")
-  :config
-  (org-edna-mode)
-  (setq org-edna-use-inheritance t
-        org-gtd-engage-prefix-width 16
-        org-gtd-directory "~/org/gtd"
-        org-gtd-organize-hooks '(org-set-tags-command))
-
-  (map! :prefix ("C-c d" . "org-gtd")
-        :desc "Capture"        "c"  #'org-gtd-capture
-        :desc "Engage"         "e"  #'org-gtd-engage
-        :desc "Process inbox"  "p"  #'org-gtd-process-inbox
-        :desc "Show all next"  "n"  #'org-gtd-show-all-next
-        :desc "Stuck projects" "s"  #'org-gtd-review-stuck-projects)
-  (map! :map org-gtd-clarify-map
-        :desc "Organize this item" "C-c c" #'org-gtd-organize))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun my-agenda ()
-  (interactive)
-  (with-org-gtd-context
-      (let (( org-agenda-custom-commands
-             '(("g" "Get Things Done (GTD)"
-                ((agenda ""
-                         ((org-agenda-skip-function
-                           '(org-agenda-skip-entry-if 'deadline))
-                          (org-deadline-warning-days 0)))
-                 (todo "NEXT"
-                       ((org-agenda-skip-function
-                         '(org-agenda-skip-entry-if 'deadline))
-                        ;;(org-agenda-prefix-format "  %i %-12:c [%e] ")
-                        (org-agenda-overriding-header "\nTasks\n")))
-                 (agenda nil
-                         ((org-agenda-entry-types '(:deadline))
-                          (org-agenda-format-date "")
-                          (org-deadline-warning-days 7)
-                          (org-agenda-skip-function
-                           '(org-agenda-skip-entry-if 'notregexp "\\* NEXT"))
-                          (org-agenda-overriding-header "\nDeadlines")))
-                 (tags-todo "inbox"
-                            ((org-agenda-prefix-format "  %?-12t% s")
-                             (org-agenda-overriding-header "\nInbox\n")))
-                 (tags "CLOSED>=\"<today>\""
-                       ((org-agenda-overriding-header "\nCompleted today\n"))))))))
-        (org-agenda nil "g"))))
-#+end_src
-
-
-
-# ** Flycheck
-
-# #+call: confpkg("!Pkg flycheck")
+# #+call: confpkg("!Pkg org-gtd")
 
 # #+begin_src emacs-lisp :tangle packages.el
-# (package! flycheck-golangci-lint :recipe (:host github :repo "weijiangan/flycheck-golangci-lint"))
+# (package! org-gtd)
 # #+end_src
 
 # #+begin_src emacs-lisp
-# (use-package! flycheck-golangci-lint
-#   :ensure t
-#   :hook (go-mode . flycheck-golangci-lint-setup))
+# (use-package! org-gtd
+#   :after org
+#   :init
+#   (setq org-gtd-update-ack "3.0.0")
+#   :config
+#   (org-edna-mode)
+#   (setq org-edna-use-inheritance t
+#         org-gtd-engage-prefix-width 16
+#         org-gtd-directory "~/org/gtd"
+#         org-gtd-organize-hooks '(org-set-tags-command))
+
+#   (map! :prefix ("C-c d" . "org-gtd")
+#         :desc "Capture"        "c"  #'org-gtd-capture
+#         :desc "Engage"         "e"  #'org-gtd-engage
+#         :desc "Process inbox"  "p"  #'org-gtd-process-inbox
+#         :desc "Show all next"  "n"  #'org-gtd-show-all-next
+#         :desc "Stuck projects" "s"  #'org-gtd-review-stuck-projects)
+#   (map! :map org-gtd-clarify-map
+#         :desc "Organize this item" "C-c c" #'org-gtd-organize))
 # #+end_src
+
+# #+begin_src emacs-lisp
+# (defun my-agenda ()
+#   (interactive)
+#   (with-org-gtd-context
+#       (let (( org-agenda-custom-commands
+#              '(("g" "Get Things Done (GTD)"
+#                 ((agenda ""
+#                          ((org-agenda-skip-function
+#                            '(org-agenda-skip-entry-if 'deadline))
+#                           (org-deadline-warning-days 0)))
+#                  (todo "NEXT"
+#                        ((org-agenda-skip-function
+#                          '(org-agenda-skip-entry-if 'deadline))
+#                         ;;(org-agenda-prefix-format "  %i %-12:c [%e] ")
+#                         (org-agenda-overriding-header "\nTasks\n")))
+#                  (agenda nil
+#                          ((org-agenda-entry-types '(:deadline))
+#                           (org-agenda-format-date "")
+#                           (org-deadline-warning-days 7)
+#                           (org-agenda-skip-function
+#                            '(org-agenda-skip-entry-if 'notregexp "\\* NEXT"))
+#                           (org-agenda-overriding-header "\nDeadlines")))
+#                  (tags-todo "inbox"
+#                             ((org-agenda-prefix-format "  %?-12t% s")
+#                              (org-agenda-overriding-header "\nInbox\n")))
+#                  (tags "CLOSED>=\"<today>\""
+#                        ((org-agenda-overriding-header "\nCompleted today\n"))))))))
+#         (org-agenda nil "g"))))
+# #+end_src
+
+
+
+# # ** Flycheck
+
+# # #+call: confpkg("!Pkg flycheck")
+
+# # #+begin_src emacs-lisp :tangle packages.el
+# # (package! flycheck-golangci-lint :recipe (:host github :repo "weijiangan/flycheck-golangci-lint"))
+# # #+end_src
+
+# # #+begin_src emacs-lisp
+# # (use-package! flycheck-golangci-lint
+# #   :ensure t
+# #   :hook (go-mode . flycheck-golangci-lint-setup))
+# # #+end_src
 
 ** Lsp-mode
 
