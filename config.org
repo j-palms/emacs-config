@@ -10813,65 +10813,65 @@ with it.
 (package! org-clock-today)
 #+end_src
 
-# ** GTD
+** GTD
 
-# #+call: confpkg("!Pkg org-gtd")
+#+call: confpkg("!Pkg org-gtd")
 
-# #+begin_src emacs-lisp :tangle packages.el
-# (package! org-gtd)
-# #+end_src
+#+begin_src emacs-lisp :tangle packages.el
+(package! org-gtd)
+#+end_src
 
-# #+begin_src emacs-lisp
-# (use-package! org-gtd
-#   :after org
-#   :init
-#   (setq org-gtd-update-ack "3.0.0")
-#   :config
-#   (org-edna-mode)
-#   (setq org-edna-use-inheritance t
-#         org-gtd-engage-prefix-width 16
-#         org-gtd-directory "~/org/gtd"
-#         org-gtd-organize-hooks '(org-set-tags-command))
+#+begin_src emacs-lisp
+(use-package! org-gtd
+  :after org
+  :init
+  (setq org-gtd-update-ack "3.0.0")
+  :config
+  (org-edna-mode)
+  (setq org-edna-use-inheritance t
+        org-gtd-engage-prefix-width 16
+        org-gtd-directory "~/org/gtd"
+        org-gtd-organize-hooks '(org-set-tags-command))
 
-#   (map! :prefix ("C-c d" . "org-gtd")
-#         :desc "Capture"        "c"  #'org-gtd-capture
-#         :desc "Engage"         "e"  #'org-gtd-engage
-#         :desc "Process inbox"  "p"  #'org-gtd-process-inbox
-#         :desc "Show all next"  "n"  #'org-gtd-show-all-next
-#         :desc "Stuck projects" "s"  #'org-gtd-review-stuck-projects)
-#   (map! :map org-gtd-clarify-map
-#         :desc "Organize this item" "C-c c" #'org-gtd-organize))
-# #+end_src
+  (map! :prefix ("C-c d" . "org-gtd")
+        :desc "Capture"        "c"  #'org-gtd-capture
+        :desc "Engage"         "e"  #'org-gtd-engage
+        :desc "Process inbox"  "p"  #'org-gtd-process-inbox
+        :desc "Show all next"  "n"  #'org-gtd-show-all-next
+        :desc "Stuck projects" "s"  #'org-gtd-review-stuck-projects)
+  (map! :map org-gtd-clarify-map
+        :desc "Organize this item" "C-c c" #'org-gtd-organize))
+#+end_src
 
-# #+begin_src emacs-lisp
-# (defun my-agenda ()
-#   (interactive)
-#   (with-org-gtd-context
-#       (let (( org-agenda-custom-commands
-#              '(("g" "Get Things Done (GTD)"
-#                 ((agenda ""
-#                          ((org-agenda-skip-function
-#                            '(org-agenda-skip-entry-if 'deadline))
-#                           (org-deadline-warning-days 0)))
-#                  (todo "NEXT"
-#                        ((org-agenda-skip-function
-#                          '(org-agenda-skip-entry-if 'deadline))
-#                         ;;(org-agenda-prefix-format "  %i %-12:c [%e] ")
-#                         (org-agenda-overriding-header "\nTasks\n")))
-#                  (agenda nil
-#                          ((org-agenda-entry-types '(:deadline))
-#                           (org-agenda-format-date "")
-#                           (org-deadline-warning-days 7)
-#                           (org-agenda-skip-function
-#                            '(org-agenda-skip-entry-if 'notregexp "\\* NEXT"))
-#                           (org-agenda-overriding-header "\nDeadlines")))
-#                  (tags-todo "inbox"
-#                             ((org-agenda-prefix-format "  %?-12t% s")
-#                              (org-agenda-overriding-header "\nInbox\n")))
-#                  (tags "CLOSED>=\"<today>\""
-#                        ((org-agenda-overriding-header "\nCompleted today\n"))))))))
-#         (org-agenda nil "g"))))
-# #+end_src
+#+begin_src emacs-lisp
+(defun my-agenda ()
+  (interactive)
+  (with-org-gtd-context
+      (let (( org-agenda-custom-commands
+             '(("g" "Get Things Done (GTD)"
+                ((agenda ""
+                         ((org-agenda-skip-function
+                           '(org-agenda-skip-entry-if 'deadline))
+                          (org-deadline-warning-days 0)))
+                 (todo "NEXT"
+                       ((org-agenda-skip-function
+                         '(org-agenda-skip-entry-if 'deadline))
+                        ;;(org-agenda-prefix-format "  %i %-12:c [%e] ")
+                        (org-agenda-overriding-header "\nTasks\n")))
+                 (agenda nil
+                         ((org-agenda-entry-types '(:deadline))
+                          (org-agenda-format-date "")
+                          (org-deadline-warning-days 7)
+                          (org-agenda-skip-function
+                           '(org-agenda-skip-entry-if 'notregexp "\\* NEXT"))
+                          (org-agenda-overriding-header "\nDeadlines")))
+                 (tags-todo "inbox"
+                            ((org-agenda-prefix-format "  %?-12t% s")
+                             (org-agenda-overriding-header "\nInbox\n")))
+                 (tags "CLOSED>=\"<today>\""
+                       ((org-agenda-overriding-header "\nCompleted today\n"))))))))
+        (org-agenda nil "g"))))
+#+end_src
 
 
 
