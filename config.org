@@ -10524,6 +10524,9 @@ which is perfect for our needs.
 (map! :leader
       (:prefix "o"
        :desc "Open org-agenda" "a" #'org-agenda))
+
+(map! :prefix ("C-c o" . "org-agenda")
+      :desc "Save all org buffers" "s" #'org-save-all-org-buffers)
 #+end_src
 
 #+begin_src emacs-lisp
