@@ -10527,6 +10527,8 @@ which is perfect for our needs.
 #+begin_src emacs-lisp
 (setq display-time-format "%H:%M")
 
+(setq vterm-shell "/bin/zsh")
+
 (global-activity-watch-mode 1)
 
 (org-clock-today-mode 1)
