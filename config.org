@@ -10632,10 +10632,10 @@ _n_ decrease width    _i_ increase width
          :immediate-finish t
          :unnarrowed t)))
 
-  (defun jethro/tag-new-node-as-draft ()
-    (org-roam-tag-add '("draft")))
+  ;; (defun jethro/tag-new-node-as-draft ()
+    ;; (org-roam-tag-add '("draft")))
 
-  (add-hook 'org-roam-capture-new-node-hook #'jethro/tag-new-node-as-draft)
+  ;; (add-hook 'org-roam-capture-new-node-hook #'jethro/tag-new-node-as-draft)
 
   (cl-defmethod org-roam-node-type ((node org-roam-node))
     "Return the TYPE of NODE."
