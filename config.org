@@ -10541,6 +10541,7 @@ which is perfect for our needs.
       company-box-doc-enable nil)
 
 (setq lsp-go-use-gofumpt t)
+;; (setq lsp-modeline-code-action-fallback-icon 'display (nerd-icons-mdicon "nf-md-lightbulb_on_10" :face 'nerd-icons-dyellow))
 
 (setq doom-modeline-persp-name t)
 
