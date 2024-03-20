@@ -1781,7 +1781,7 @@ aspects are nice, but on others I prefer Fira.
       doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size 26)
       ;;doom-variable-pitch-font (font-spec :family "Metropolis" :size 28 :weight 'light)
       ;;doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 28 :weight 'light)
-      doom-unicode-font (font-spec :family "JuliaMono")
+      doom-unicode-font (font-spec :family "JuliaMono Nerd Font")
       ;; doom-emoji-font (font-spec :family "Twitter Color Emoji") ; Just used by me
       doom-serif-font (font-spec :family "IBM Plex Mono" :size 22 :weight 'light))
 #+end_src
