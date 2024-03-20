@@ -10637,24 +10637,24 @@ _n_ decrease width    _i_ increase width
   :config
   (org-roam-db-autosync-mode)
   (setq org-roam-capture-templates
-         '(("n" "notes" plain "\n%?"
+         '(("p" "private note" plain "\n%?"
             :target
-            (file+head "pages/${slug}.org"
-                              "#+title: ${title}\n")
-           :immediate-finish t
-           :unnarrowed t)
-          ;; ("b" "bibliographic note" plain "\n%?"
-          ;;  :if-new
-          ;;  (file+head "reference/${slug}.org" "#+title: ${title}\n")
-          ;;  :immediate-finish t
-          ;;  :unnarrowed t)))
-        ("l" "literature note" plain "\n%?"
-         :target
-         (file+head
-          "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/references/${citar-citekey}.org"
-          "#+title: ${note-title}.\n#+created: %U\n\n")
-         :immediate-finish t
-         :unnarrowed t)))
+            (file+head "private/${slug}.org"
+                       "#+title: ${title}\n#+created: %U\n\n")
+            :immediate-finish t
+            :unnarrowed t)
+           ("w" "work note" plain "\n%?"
+            :target
+            (file+head "work/${slug}.org"
+                       "#+title: ${title}\n#+created: %U\n\n")
+            :immediate-finish t
+            :unnarrowed t)
+           ("r" "reference note" plain "\n%?"
+            :target
+            (file+head "reference/${citar-citekey}.org"
+                       "#+title: ${note-title}\n#+created: %U\n\n")
+            :immediate-finish t
+            :unnarrowed t)))
 
   ;; (defun jethro/tag-new-node-as-draft ()
     ;; (org-roam-tag-add '("draft")))
@@ -10982,7 +10982,7 @@ allowing the user to interactively choose entries or specify on-the-fly new ones
   :after (citar org-roam)
   :config
   (citar-org-roam-mode)
-  (setq citar-org-roam-capture-template-key "l"))
+  (setq citar-org-roam-capture-template-key "r"))
 #+end_src
 
 ** activity watch mode
