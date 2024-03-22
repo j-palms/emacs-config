@@ -1777,8 +1777,9 @@ aspects are nice, but on others I prefer Fira.
 (setq
       ;;doom-font (font-spec :family "JetBrainsMono NF" :size 20)
       ;;doom-big-font (font-spec :family "JetBrainsMono NF" :size 36)
-      doom-font (font-spec :family "FiraCode Nerd Font" :size 20)
-      doom-big-font (font-spec :family "FiraCode Nerd Font" :size 36)
+      ;; doom-font (font-spec :family "FiraCode Nerd Font" :size 20)
+      doom-font (font-spec :family "Iosevka Nerd Font" :size 22)
+      doom-big-font (font-spec :family "Iosevka Nerd Font" :size 36)
       ;;doom-variable-pitch-font (font-spec :family "Avenir Next LT Pro" :size 28)
       ;;doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 28 :weight 'light)
       ;;doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 24)
@@ -1787,7 +1788,7 @@ aspects are nice, but on others I prefer Fira.
       ;;doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 28 :weight 'light)
       doom-unicode-font (font-spec :family "JuliaMono Nerd Font")
       ;; doom-emoji-font (font-spec :family "Twitter Color Emoji") ; Just used by me
-      doom-serif-font (font-spec :family "IBM Plex Mono" :size 22 :weight 'light))
+      doom-serif-font (font-spec :family "IBM Plex Serif" :size 22 :weight 'light))
 #+end_src
 
 #+attr_html: :class invertible :alt Screenshot of the fonts within Emacs.
@@ -1796,78 +1797,6 @@ aspects are nice, but on others I prefer Fira.
 In addition to these fonts, Merriweather is used with =nov.el=, and Alegreya as a
 serifed proportional font used by =mixed-pitch-mode= for =writeroom-mode= with Org
 files.
-
-***** Checking the system
-
-Because we care about how things look let's add a check to make sure we're told
-if the system doesn't have any of those fonts. We can obtain a list of installed
-fonts with either ~(font-family-list)~ or with the ~fc-list~ command.
-
-#+name: detect-missing-fonts
-#+begin_src emacs-lisp :noweb-ref none
-(setq required-fonts '("JetBrains ?Mono.*" "Overpass" "JuliaMono" "IBM Plex Mono"
-                       "Merriweather" "Alegreya"))
-
-(setq available-fonts
-      (delete-dups
-       (or (font-family-list)
-           (and (executable-find "fc-list")
-                (with-temp-buffer
-                  (call-process "fc-list" nil t nil ":" "family")
-                  (split-string (buffer-string) "[,\n]"))))))
-
-(setq missing-fonts
-      (delq nil (mapcar
-                 (lambda (font)
-                   (unless (delq nil (mapcar (lambda (f)
-                                               (string-match-p (format "^%s$" font) f))
-                                             available-fonts))
-                     font))
-                 required-fonts)))
-#+end_src
-
-We can then use this to create a =doctor= check.
-
-#+begin_src emacs-lisp :noweb yes :noweb-ref doctor
-(let (required-fonts available-fonts missing-fonts)
-  <<detect-missing-fonts>>
-  (if available-fonts
-      (dolist (font missing-fonts)
-        (warn! (format "Missing font: %s." font)))
-    (warn! "Unable to check for missing fonts, is fc-list installed?")))
-#+end_src
-
-Furthermore, when fonts /are/ missing, it could be good to check the state of
-affairs on statup.
-
-#+name: warn-missing-fonts
-#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref none
-<<detect-missing-fonts>>
-
-(if missing-fonts
-    (pp-to-string
-     `(unless noninteractive
-        (add-hook! 'doom-init-ui-hook
-          (run-at-time nil nil
-                       (lambda ()
-                         (let (required-fonts available-fonts missing-fonts)
-                           <<detect-missing-fonts>>
-                           (message "%s missing the following fonts: %s"
-                                    (propertize "Warning!" 'face '(bold warning))
-                                    (mapconcat (lambda (font)
-                                                 (propertize font 'face 'font-lock-variable-name-face))
-                                               ',missing-fonts
-                                               ", ")))
-                         (sleep-for 0.5))))))
-  ";; No missing fonts detected")
-#+end_src
-
-#+begin_src emacs-lisp :noweb no-export
-<<warn-missing-fonts()>>
-#+end_src
-
-This way whenever fonts are missing, after Doom's UI has initialised, a warning
-listing the missing fonts should appear for at least half a second.
 
 **** Theme
 
