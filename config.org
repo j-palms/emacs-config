@@ -10707,7 +10707,6 @@ with it.
 
 #+call: confpkg("!Pkg org-roam-filter-entries")
 
-
 #+begin_src emacs-lisp
 
 (require 'org-roam)
@@ -10786,10 +10785,10 @@ allowing the user to interactively choose entries or specify on-the-fly new ones
   (interactive "P")
   (let ((numeric-arg (prefix-numeric-value arg)))
     (cond
-     ((null arg) (org-roam-node-find))
-     ((= numeric-arg 1) (custom/org-roam-node-find))
-     ((= numeric-arg 2) (custom/org-roam-node-find-only))
-     ((= numeric-arg 3) (custom/org-roam-node-find-entry))
+     ((null arg) (custom/org-roam-node-find))
+     ((= numeric-arg 1) (custom/org-roam-node-find-only))
+     ((= numeric-arg 2) (custom/org-roam-node-find-entry))
+     ((= numeric-arg 3) (org-roam-node-find))
      (t (custom/org-roam-node-find)))))
 ;;  ---
 
