@@ -10518,6 +10518,40 @@ which is perfect for our needs.
   (global-evil-surround-mode 1)) ;; globally enable evil-surround
 #+end_src
 
+*** Private <-> Work - Environment
+
+I'm using different environments for work & private use.
+# The variable ~work-environment~ is considered at the appropriate places for adjusting the settings for the environment that is currently in use.
+I changed the behaviour. Now I have to put the relevant settings right here.
+
+#+begin_src emacs-lisp
+(defun custom/work-environment ()
+  (interactive)
+  (setq org-gtd-directory "~/org/gtd/work")
+  (setq org-roam-filter-by-entries '("private"))
+  (setq work-environment t))
+
+(defun custom/private-environment ()
+  (interactive)
+  (setq org-gtd-directory "~/org/gtd/private")
+  (setq org-roam-filter-by-entries '("work"))
+  (setq work-environment nil))
+
+(defun custom/toggle-environment ()
+  (interactive)
+  (if work-environment
+      (custom/private-environment)
+    (custom/work-environment)))
+
+(map! :leader
+      (:prefix "e"
+       :desc "Toggle private <-> work environment" "t"  #'custom/toggle-environment
+       :desc "Set private environment"             "p"  #'custom/private-environment
+       :desc "Set work environment"                "w"  #'custom/work-environment))
+
+(custom/work-environment)
+#+end_src
+
 *** Windows
 
 Hydra for changing split window size.
@@ -10975,25 +11009,27 @@ allowing the user to interactively choose entries or specify on-the-fly new ones
   (org-edna-mode)
   (setq org-edna-use-inheritance t
         org-gtd-engage-prefix-width 16
-        org-gtd-directory "~/org/gtd"
         org-gtd-organize-hooks '(org-set-tags-command))
-
   (map! :prefix ("C-c d" . "org-gtd")
         :desc "Capture"        "c"  #'org-gtd-capture
         :desc "Engage"         "e"  #'org-gtd-engage
         :desc "Process inbox"  "p"  #'org-gtd-process-inbox
         :desc "Show all next"  "n"  #'org-gtd-show-all-next
-        :desc "Stuck projects" "s"  #'org-gtd-review-stuck-projects
-        :desc "Toggle personal - work environment." "d"  #'org-gtd-toggle-dir)
+        :desc "Stuck projects" "s"  #'org-gtd-review-stuck-projects)
   (map! :map org-gtd-clarify-map
         :desc "Organize this item" "C-c c" #'org-gtd-organize))
-
-(defun org-gtd-toggle-dir ()
-  (interactive)
-  (if (equal org-gtd-directory "~/org/gtd/work")
-      (setq org-gtd-directory "~/org/gtd/private")
-      (setq org-gtd-directory "~/org/gtd/work")))
 #+end_src
+
+Some tries for environment changes..
+# #+begin_src emacs-lisp :tangle yes
+# ;; (defun set-org-gtd-environment (is-work-environment)
+#  ;;   (if is-work-environment
+#  ;;       (setq org-gtd-directory "~/org/gtd/work")
+#  ;;     (setq org-gtd-directory "~/org/gtd/private")))
+#
+#  ;; (set-org-gtd-environment work-environment)
+#  ;; (add-variable-watcher work-environment (lambda (symbol newval op where) ((set-org-gtd-environment newval))))
+# #+end_src
 
 #+begin_src emacs-lisp
 (defun my-agenda ()
