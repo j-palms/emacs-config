@@ -5322,14 +5322,18 @@ default.
                "|"
                "DONE(d/!)" "CNCL(c@/!)")))
 #+end_src
-By default, ~visual-line-mode~ is turned =on=, and ~auto-fill-mode~ =off= by a hook.
-However this messes with tables in Org-mode, and other plaintext files (e.g.
-markdown, \LaTeX) so I'll turn it off for this, and manually enable it for more
-specific modes as desired.
-#+begin_src emacs-lisp
-(remove-hook 'text-mode-hook #'visual-line-mode)
-(add-hook 'text-mode-hook #'auto-fill-mode)
-#+end_src
+
+CUSTOM:  revert to default behaviour:
+- ~visual-line-mode~ =on=
+- ~auto-fill-mode~ =off=
+# By default, ~visual-line-mode~ is turned =on=, and ~auto-fill-mode~ =off= by a hook.
+# However this messes with tables in Org-mode, and other plaintext files (e.g.
+# markdown, \LaTeX) so I'll turn it off for this, and manually enable it for more
+# specific modes as desired.
+# #+begin_src emacs-lisp
+# (remove-hook 'text-mode-hook #'visual-line-mode)
+# (add-hook 'text-mode-hook #'auto-fill-mode)
+# #+end_src
 
 There also seem to be a few keybindings which use =hjkl=, but miss arrow key equivalents.
 #+begin_src emacs-lisp
@@ -10486,6 +10490,11 @@ which is perfect for our needs.
 
 (setq doom-themes-treemacs-enable-variable-pitch nil)
 
+(map! ("C-<up>"
+       :desc "Go to previous visible line" #'evil-previous-visual-line)
+      ("C-<down>"
+       :desc "Go to next visible line" #'evil-next-visual-line))
+
 ;; (add-hook! +dap-running-session-mode
 ;;   (set-window-buffer nil (current-buffer)))
 
@@ -10506,6 +10515,20 @@ which is perfect for our needs.
 
 (map! :prefix ("C-c o" . "org-agenda")
       :desc "Save all org buffers" "s" #'org-save-all-org-buffers)
+
+;; for phscroll
+(setq org-startup-truncated nil)
+(with-eval-after-load "org"
+  (require 'org-phscroll))
+
+;; Set word wrapping hooks for text and programming modes.
+(remove-hook 'prog-mode-hook #'visual-line-mode)
+(add-hook 'prog-mode-hook #'auto-fill-mode)
+
+;; Set max line length for go
+(add-hook 'go-mode-hook
+          (lambda ()
+            (set-fill-column 120)))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -11093,10 +11116,7 @@ Workaround:
 
 ** Corfu
 #+call: confpkg("!Pkg corfu")
-
-
-
-- Company-wordfreq
+(- Company-wordfreq)
 
 #+begin_src emacs-lisp
 (setq! cape-dict-file "~/.config/doom/misc/dict/en")
@@ -11110,4 +11130,12 @@ Workaround:
 (map! "C-c l" #'custom/toggle-cape-dict-en-ger)
 
 (add-hook 'text-mode-hook (lambda () (add-hook 'completion-at-point-functions #'cape-dict nil t)))
+#+end_src
+
+** phscroll
+
+#+call: confpkg("!Pkg phscroll")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! phscroll :recipe (:host github :repo "misohena/phscroll"))
 #+end_src
