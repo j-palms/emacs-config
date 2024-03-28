@@ -10851,28 +10851,39 @@ allowing the user to interactively choose entries or specify on-the-fly new ones
 #+call: confpkg("!Pkg org-pomodoro")
 
 #+begin_src emacs-lisp
+
 (use-package! org-pomodoro
   :after org
-  :bind (("<f12>" . org-pomodoro))
-  ;; :hook ((org-pomodoro-started . gopar/load-window-config-and-close-work-agenda)
-  ;;        (org-pomodoro-finished . gopar/save-window-config-and-show-work-agenda))
+  :hook ((org-pomodoro-started . custom/load-window-config-and-close-work-agenda)
+         (org-pomodoro-finished . custom/save-window-config-and-show-work-agenda))
   :config
-  (setq org-pomodoro-manual-break t
-        org-pomodoro-short-break-length 30
-        org-pomodoro-long-break-length 30
-        org-pomodoro-length 90)
+  (custom/pomodoro-long)
+  (map! :prefix ("C-c SPC" . "org-pomodoro")
+        :desc "Start"        "SPC"  #'org-pomodoro
+        :desc "Set to long"         "l"  #'custom/pomodoro-long
+        :desc "Set to mid"         "m"  #'custom/pomodoro-mid
+        :desc "Set to short"         "s"  #'custom/pomodoro-short)
+  (setq org-pomodoro-manual-break t)
   :init
-  (defun gopar/home-pomodoro ()
-    (interactive)
-    (setq org-pomodoro-length 25
-          org-pomodoro-short-break-length 5))
-
-  (defun gopar/work-pomodoro ()
+  (defun custom/pomodoro-long ()
     (interactive)
     (setq org-pomodoro-length 90
-          org-pomodoro-short-break-length 30))
+          org-pomodoro-short-break-length 30
+          org-pomodoro-long-break-length 45))
 
-  (defun gopar/save-window-config-and-show-work-agenda ()
+  (defun custom/pomodoro-mid ()
+    (interactive)
+    (setq org-pomodoro-length 60
+          org-pomodoro-short-break-length 15
+          org-pomodoro-long-break-length 30))
+
+  (defun custom/pomodoro-short ()
+    (interactive)
+    (setq org-pomodoro-length 25
+          org-pomodoro-short-break-length 5
+          org-pomodoro-long-break-length 15))
+
+  (defun custom/save-window-config-and-show-work-agenda ()
     (interactive)
     (window-configuration-to-register ?`)
     (delete-other-windows)
@@ -10880,7 +10891,7 @@ allowing the user to interactively choose entries or specify on-the-fly new ones
     ;; (org-agenda nil "n"))
     (org-gtd-engage))
 
-  (defun gopar/load-window-config-and-close-work-agenda ()
+  (defun custom/load-window-config-and-close-work-agenda ()
     (interactive)
     (org-save-all-org-buffers)
     (jump-to-register ?`)))
