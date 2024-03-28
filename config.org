@@ -1775,10 +1775,8 @@ aspects are nice, but on others I prefer Fira.
 
 #+begin_src emacs-lisp
 (setq
-      ;;doom-font (font-spec :family "JetBrainsMono NF" :size 20)
-      ;;doom-big-font (font-spec :family "JetBrainsMono NF" :size 36)
       ;; doom-font (font-spec :family "FiraCode Nerd Font" :size 20)
-      doom-font (font-spec :family "Iosevka Nerd Font" :size 22)
+      doom-font (font-spec :family "Iosevka Nerd Font" :size 24)
       doom-big-font (font-spec :family "Iosevka Nerd Font" :size 36)
       ;;doom-variable-pitch-font (font-spec :family "Avenir Next LT Pro" :size 28)
       ;;doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 28 :weight 'light)
