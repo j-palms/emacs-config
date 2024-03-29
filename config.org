@@ -2153,7 +2153,7 @@ splash screen to something more minimal I switched to just using the /E/.
 
 #+attr_latex: :width 0.2\linewidth
 #+attr_html: :style width:20% :alt Fancy Emacs "E"
-[[file:misc/splash-images/emacs-e-template.svg]]
+[[file:misc/splash-images/monkey_small.svg]]
 
 #+begin_src emacs-lisp
 (defvar fancy-splash-image-directory
@@ -2161,7 +2161,7 @@ splash screen to something more minimal I switched to just using the /E/.
   "Directory in which to look for splash image templates.")
 
 (defvar fancy-splash-image-template
-  (expand-file-name "emacs-e-template.svg" fancy-splash-image-directory)
+  (expand-file-name "monkey_small.svg" fancy-splash-image-directory)
   "Default template svg used for the splash image.
 Colours are substituted as per `fancy-splash-template-colours'.")
 #+end_src
@@ -2188,7 +2188,8 @@ replacement system.
     ("#ffff00" :face ansi-color-yellow)
     ("#0000ff" :face ansi-color-blue)
     ("#00ffff" :face ansi-color-cyan)
-    ("#fffffe" :face ansi-color-white))
+    ("#fffffe" :face ansi-color-white)
+    ("#000000" :face modus-themes-heading-2))
   "Alist of colour-replacement plists.
 Each plist is of the form (\"$placeholder\" :doom-color 'key :face 'face).
 If the current theme is a doom theme :doom-color will be used,
