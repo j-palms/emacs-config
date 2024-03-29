@@ -3605,6 +3605,17 @@ already clear, and there's no need for a different face.
   (setf (plist-get (alist-get 'perl consult-async-split-styles-alist) :initial) ";"))
 #+end_src
 
+*** MPRIS
+
+It's nice to be able to interact with MPRIS players. This would just be a
+dependency of =org-music= or =doom-modeline-media-player=, but I haven't made it
+available on any an elisp archives. Thankfully most Emacs package managers make
+using Git repository URLs pretty easy these days.
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! mpris :recipe (:local-repo "lisp/mpris"))
+#+end_src
+
 *** Smerge
 
 #+call: confpkg("!Pkg Smerge")
