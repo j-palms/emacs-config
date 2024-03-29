@@ -3691,8 +3691,6 @@ In the meantime, let's use it here.
 Jinx has some pretty lovely defaults out of the box, we'll just be making a few
 tweaks.
 
-TODO: Setup multi language checking.
-
 #+begin_src emacs-lisp
 (use-package! jinx
   :defer t
@@ -3700,7 +3698,7 @@ TODO: Setup multi language checking.
   (add-hook 'doom-init-ui-hook #'global-jinx-mode)
   :config
   ;; Use my custom dictionary
-  (setq jinx-languages "en-custom")
+  (setq jinx-languages "en_US de_DE")
   ;; Extra face(s) to ignore
   (push 'org-inline-src-block
         (alist-get 'org-mode jinx-exclude-faces))
