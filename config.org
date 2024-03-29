@@ -2025,8 +2025,8 @@ is a Gnome CLI tool but often present on KDE systems for GTK support.
 
 #+name: default-theme
 #+begin_src emacs-lisp :noweb-ref none
-(let ((light-theme 'doom-tomorrow-day)
-      (dark-theme 'doom-vibrant)
+(let ((light-theme 'modus-operandi-tinted)
+      (dark-theme 'modus-vivendi)
       (system-light-p
        (and
         (executable-find "gdbus")
@@ -4053,7 +4053,8 @@ welcomed into Emacs 28. However, he is also rather attentive with updates, and
 so I'd like to make sure we have a recent version.
 
 #+begin_src emacs-lisp :tangle packages.el
-(package! modus-themes :pin "accf6985ae8cb5d07cb9473263206d228f0512fa")
+(package! modus-themes)
+(unpin! modus-themes)
 #+end_src
 
 *** Spacemacs themes
