@@ -1834,17 +1834,14 @@ aspects are nice, but on others I prefer Fira.
 
 #+begin_src emacs-lisp
 (setq
-      ;; doom-font (font-spec :family "FiraCode Nerd Font" :size 20)
       doom-font (font-spec :family "Iosevka Nerd Font" :size 24)
       doom-big-font (font-spec :family "Iosevka Nerd Font" :size 36)
-      ;;doom-variable-pitch-font (font-spec :family "Avenir Next LT Pro" :size 28)
       ;;doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 28 :weight 'light)
       ;;doom-variable-pitch-font (font-spec :family "Source Sans 3" :size 24)
-      doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size 26)
-      ;;doom-variable-pitch-font (font-spec :family "Metropolis" :size 28 :weight 'light)
-      ;;doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 28 :weight 'light)
+      ;; doom-variable-pitch-font (font-spec :family "Overpass Nerd Font" :size 26)
+      doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 26)
       doom-unicode-font (font-spec :family "JuliaMono Nerd Font")
-      ;; doom-emoji-font (font-spec :family "Twitter Color Emoji") ; Just used by me
+      doom-emoji-font (font-spec :family "Noto Emoji") ; Just used by me
       doom-serif-font (font-spec :family "IBM Plex Serif" :size 22 :weight 'light))
 #+end_src
 
@@ -4393,7 +4390,10 @@ subsequent face definition). This was created for writeroom mode.
 (autoload #'mixed-pitch-serif-mode "mixed-pitch"
   "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch." t)
 
-(setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
+;; (setq! variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
+;; (setq! variable-pitch-serif-font (font-spec :family "Merriweather" :size 27))
+;; (setq! variable-pitch-serif-font (font-spec :family "Source Serif Pro" :size 27))
+(setq! variable-pitch-serif-font (font-spec :family "IBM Plex Serif" :size 27))
 
 (after! mixed-pitch
   (setq mixed-pitch-set-height t)
