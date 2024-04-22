@@ -12934,6 +12934,9 @@ which is perfect for our needs.
 (add-hook 'go-mode-hook
           (lambda ()
             (set-fill-column 120)))
+
+(require 'dired-quick-sort)
+(dired-quick-sort-setup)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -13542,4 +13545,11 @@ Workaround:
 
 #+begin_src emacs-lisp :tangle packages.el
 (package! phscroll :recipe (:host github :repo "misohena/phscroll"))
+#+end_src
+** Dired sort
+
+#+call: confpkg("!Pkg dired-sort")
+
+#+begin_src emacs-lisp :tangle packages.el
+(package! dired-quick-sort)
 #+end_src
