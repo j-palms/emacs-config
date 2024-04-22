@@ -12890,6 +12890,12 @@ which is perfect for our needs.
 (map! ("C-c C-SPC"
        :desc "Switch perspective" #'+workspace/cycle))
 
+(map! ("C-c e"
+       :desc "Go to next error" #'flymake-goto-next-error))
+(map! ("C-c n"
+       :desc "Go to prev error" #'flymake-goto-prev-error))
+
+
 ;; (setq max-specpdl-size 13000) TODO is this needed?
 
 (setq doom-themes-treemacs-enable-variable-pitch nil)
@@ -13535,7 +13541,7 @@ Workaround:
 
 (map! "C-c l" #'custom/toggle-cape-dict-en-ger)
 
-(add-hook 'text-mode-hook (lambda () (add-hook 'completion-at-point-functions #'cape-dict nil t)))
+;; (add-hook 'text-mode-hook (lambda () (add-hook 'completion-at-point-functions #'cape-dict nil t)))
 #+end_src
 
 ** phscroll
