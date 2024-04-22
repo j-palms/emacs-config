@@ -1633,7 +1633,6 @@ vterm                        ; the best terminal emulation in Emacs
 #+begin_src emacs-lisp
 (syntax                       ;tasing you for every semicolon you forget
   +flymake)
-syntax                       ; tasing you for every semicolon you forget
 ;; spell                     ; tasing you for misspelling mispelling
 grammar                      ; tasing grammar mistake every you make
 #+end_src
@@ -4247,8 +4246,8 @@ icon. Then we'll redefine two functions used to generate the modeline.
 (doom-modeline-def-segment pdf-icon
   "PDF icon from nerd-icons."
   (concat
-   (doom-modeline-icon sucicon "nf-seti-pdf" nil nil
    (doom-modeline-spc)
+   (doom-modeline-icon 'sucicon "nf-seti-pdf" nil nil
                        :face (if (doom-modeline--active)
                                  'nerd-icons-red
                                'mode-line-inactive)
@@ -5248,7 +5247,7 @@ module. Let's just try to patch on the main things I like the look of.
     "title face in elfeed show buffer"
     :group 'elfeed)
   (set-face-attribute 'elfeed-search-title-face nil
-                      :foreground 'nil
+                      :foreground 'unspecified
                       :weight 'light)
 
   (defadvice! +rss-elfeed-wrap-h-nicer ()
