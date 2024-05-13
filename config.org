@@ -12937,6 +12937,8 @@ which is perfect for our needs.
 
 (org-clock-today-mode 1)
 
+(pdf-tools-install)  ;; always use pdf-tools
+
 (setq lsp-headerline-breadcrumb-enable t
       lsp-headerline-breadcrumb-segments '(project file symbols)
       lsp-headerline-breadcrumb-icons-enable t)
