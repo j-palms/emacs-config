@@ -1949,8 +1949,8 @@ fonts with either ~(font-family-list)~ or with the ~fc-list~ command.
 
 #+name: detect-missing-fonts
 #+begin_src emacs-lisp :noweb-ref none
-(setq required-fonts '("JetBrains ?Mono.*" "Overpass" "JuliaMono" "IBM Plex Mono"
-                       "Merriweather" "Alegreya" "Twitter Color Emoji"))
+(setq required-fonts '("Iosevka Nerd Font" "Overpass" "JuliaMono Nerd Font" "IBM Plex Serif" "IBM Plex Sans"
+                       "Merriweather" "Alegreya" "Noto Emoji"))
 
 (setq available-fonts
       (delete-dups
